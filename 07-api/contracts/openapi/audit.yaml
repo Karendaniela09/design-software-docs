@@ -1,0 +1,234 @@
+openapi: 3.1.0
+info:
+  title: Audit Service API — Horarios SENA
+  version: 1.0.0
+  description: >-
+    API de **solo lectura** del event-store append-only `audit_record` (schema `audit`).
+    El servicio persiste eventos vía `audit-worker` (fan-out de todos los topics, solo
+    INSERT) y **no expone escritura externa**; este contrato cubre únicamente **consulta y
+    exportación** para la pantalla de auditoría, gated por RBAC (`MOD_AUDIT`). La extensión
+    `x-required-feature` declara el feature RBAC exigido por cada operación; el `scope_type`
+    del JWT (GLOBAL / TRAINING_CENTER) acota el filtro de datos. Paginación **por cursor**
+    (colección grande y continua). El detalle del evento viaja como JSON opaco (`payload`).
+    Nota: `audit_record` no lleva `correlation_id` físico; la correlación con logs se hace
+    por `event_id` y por el `trace_id` del envelope de error transversal.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: audit
+    description: Registros de auditoría (`audit_record`), solo lectura.
+
+paths:
+  # ---------------------------------------------------------------- audit-records
+  /audit-records:
+    get:
+      operationId: listAuditRecords
+      tags: [audit]
+      summary: Lista por cursor de registros de auditoría (filtros por índice).
+      description: >-
+        Consulta el log append-only. Los filtros están respaldados por los índices de
+        `audit_record` (event_type, source_service, actor_id, entity_id) y el rango
+        temporal por `received_at`. Ordena por `received_at` descendente.
+      x-required-feature: AUDIT_LOG_VIEW
+      parameters:
+        - $ref: '_shared.yaml#/components/parameters/cursor'
+        - $ref: '_shared.yaml#/components/parameters/limit'
+        - name: actor_id
+          in: query
+          required: false
+          description: UUID del actor que originó el evento (`SYSTEM_ACTOR_ID` para acciones del sistema).
+          schema: { type: string, format: uuid }
+        - name: source_service
+          in: query
+          required: false
+          description: Servicio emisor del evento (p. ej. `scheduling-service`).
+          schema: { type: string }
+        - name: event_type
+          in: query
+          required: false
+          description: Tipo de evento (p. ej. `SCHEDULE_PUBLISHED`).
+          schema: { type: string }
+        - name: entity_type
+          in: query
+          required: false
+          description: Tipo de entidad afectada (p. ej. `schedule`).
+          schema: { type: string }
+        - name: entity_id
+          in: query
+          required: false
+          description: UUID de la entidad afectada.
+          schema: { type: string, format: uuid }
+        - name: from
+          in: query
+          required: false
+          description: Inicio del rango de `received_at` (inclusive).
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          required: false
+          description: Fin del rango de `received_at` (exclusive).
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Página de registros de auditoría.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditRecordSummary' }
+                  pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '500': { $ref: '_shared.yaml#/components/responses/InternalServerError' }
+
+  /audit-records/{id}:
+    parameters:
+      - $ref: '#/components/parameters/AuditRecordId'
+    get:
+      operationId: getAuditRecord
+      tags: [audit]
+      summary: Obtiene un registro de auditoría con su payload completo.
+      x-required-feature: AUDIT_LOG_VIEW
+      responses:
+        '200':
+          description: Registro de auditoría.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditRecord' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '500': { $ref: '_shared.yaml#/components/responses/InternalServerError' }
+
+  # ---------------------------------------------------------------- export
+  /audit-records/export:
+    get:
+      operationId: exportAuditRecords
+      tags: [audit]
+      summary: Exporta registros de auditoría filtrados (CSV o JSON).
+      description: >-
+        Mismo conjunto de filtros que el listado; devuelve el resultado completo (sin
+        cursor) para descarga. Feature distinta a la de consulta.
+      x-required-feature: AUDIT_EXPORT
+      parameters:
+        - name: format
+          in: query
+          required: false
+          description: Formato de exportación.
+          schema: { type: string, enum: [csv, json], default: csv }
+        - name: actor_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - name: source_service
+          in: query
+          required: false
+          schema: { type: string }
+        - name: event_type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: entity_type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: entity_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Archivo de exportación.
+          content:
+            text/csv:
+              schema: { type: string }
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AuditRecord' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '500': { $ref: '_shared.yaml#/components/responses/InternalServerError' }
+
+  /health:
+    get:
+      operationId: health
+      tags: [health]
+      summary: Liveness probe del servicio.
+      security: []
+      responses:
+        '200':
+          description: Servicio vivo.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '_shared.yaml#/components/securitySchemes/bearerAuth'
+
+  parameters:
+    AuditRecordId:
+      name: id
+      in: path
+      required: true
+      description: UUID del registro de auditoría (`audit_record.id`).
+      schema: { type: string, format: uuid }
+
+  schemas:
+    AuditRecordSummary:
+      type: object
+      description: Columnas normalizadas de `audit_record` (sin el payload).
+      required: [id, event_id, event_type, source_service, received_at]
+      properties:
+        id: { type: string, format: uuid }
+        event_id: { type: string, format: uuid, description: Identificador único del evento (idempotencia). }
+        event_type: { type: string, example: SCHEDULE_PUBLISHED }
+        source_service: { type: string, example: scheduling-service }
+        actor_id:
+          type: [string, 'null']
+          format: uuid
+          description: UUID del actor; `SYSTEM_ACTOR_ID` para acciones del sistema, null si no aplica.
+        entity_type: { type: [string, 'null'], example: schedule }
+        entity_id: { type: [string, 'null'], format: uuid }
+        event_occurred_at:
+          type: [string, 'null']
+          format: date-time
+          description: Marca de tiempo en el servicio origen (puede diferir de `received_at`).
+        received_at:
+          type: string
+          format: date-time
+          description: Marca de tiempo de recepción/persistencia en audit-service (clave de partición y orden).
+    AuditRecord:
+      allOf:
+        - $ref: '#/components/schemas/AuditRecordSummary'
+        - type: object
+          required: [payload]
+          properties:
+            payload:
+              type: object
+              additionalProperties: true
+              description: Cuerpo del evento tal cual se persistió (JSON opaco, forma según `event_type`).
+
+
+
