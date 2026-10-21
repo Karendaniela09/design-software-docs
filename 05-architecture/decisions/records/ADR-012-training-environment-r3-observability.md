@@ -1,4 +1,4 @@
-# ADR-011: Observabilidad Integral en Training Environment — OpenTelemetry (W3C Trace Context), Métricas RED, Logs Estructurados Correlacionados e Instrumentación de PostgreSQL
+# ADR-012: Observabilidad Integral en Training Environment — OpenTelemetry (W3C Trace Context), Métricas RED, Logs Estructurados Correlacionados e Instrumentación de PostgreSQL
 
 **Estado:** ACCEPTED (2026-10-18)
 **Fecha:** 2026-10-18

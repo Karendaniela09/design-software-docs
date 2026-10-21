@@ -14,7 +14,7 @@
 | **Rúbrica oficial** | Acta 02, Numeral 10. |
 | **Pull Request Oficial** | [PR #19 en code-sena/design-software-training-environment-service](https://github.com/code-sena/design-software-training-environment-service/pull/19). |
 | **Rama técnica en el microservicio** | `feature/r3-observability`. |
-| **Decisión de Arquitectura Asociada** | [ADR-011: Observabilidad Integral en Training Environment](../../../05-architecture/decisions/records/ADR-011-training-environment-r3-observability.md). |
+| **Decisión de Arquitectura Asociada** | [ADR-012: Observabilidad Integral en Training Environment](../../../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md). |
 | **Fecha de ejecución** | 18 de octubre de 2026. |
 | **Versión del informe** | 2.0 — Revalidación QA: SDK oficial OpenTelemetry, trazabilidad MFE → API → PostgreSQL y métricas RED. |
 | **Resultado técnico** | **100% Exitoso / PASS**: Todos los criterios de la rúbrica implementados, bloqueadores de QA subsanados y validados con pruebas automatizadas. |
