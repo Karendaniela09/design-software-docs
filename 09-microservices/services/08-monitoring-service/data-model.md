@@ -273,7 +273,7 @@ La representación JSONB real de R6 es:
 
 EXPAND agrega `specific_actions_v2` nullable y no cambia la nulabilidad de la columna original. BACKFILL solo actualiza filas donde `specific_actions_v2 IS NULL`. Antes de CONTRACT, la precondición de Liquibase exige que todas las filas tengan el documento esperado y que `actions[0].text` sea equivalente a `specific_actions`; CONTRACT elimina la columna TEXT, renombra la v2 y establece `NOT NULL`. La operación se mantiene en un changelog separado y requiere autorización operativa.
 
-El rollback de BACKFILL reconstruye `specific_actions` desde `actions[0].text`; el rollback de EXPAND elimina la columna v2. El rollback de CONTRACT recrea TEXT en `specific_actions`, conserva la JSONB renombrada como `specific_actions_v2` y exige que la extracción produzca valores no nulos. No es seguro asumir pérdida cero si el documento contiene múltiples acciones, otra versión o una estructura futura. Véase [ADR-013](../../../05-architecture/decisions/records/ADR-013-monitoring-r6-text-jsonb-migration.md).
+El rollback de BACKFILL reconstruye `specific_actions` desde `actions[0].text`; el rollback de EXPAND elimina la columna v2. El rollback de CONTRACT recrea TEXT en `specific_actions`, conserva la JSONB renombrada como `specific_actions_v2` y debe dejarla nullable. No es seguro asumir pérdida cero si el documento contiene múltiples acciones, otra versión o una estructura futura. Las evidencias que muestran `specific_actions_v2 NOT NULL` después del rollback requieren reconciliación. Véase [ADR-013](../../../05-architecture/decisions/records/ADR-013-monitoring-r6-text-jsonb-migration.md).
 
 ---
 

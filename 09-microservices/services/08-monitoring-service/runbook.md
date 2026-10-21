@@ -114,6 +114,8 @@ WHERE specific_actions_v2 IS NULL
 
 El resultado esperado durante la transición es TEXT `NOT NULL`, JSONB nullable y cero filas inconsistentes después de BACKFILL. El riesgo principal son escrituras concurrentes de versiones antiguas entre BACKFILL y CONTRACT; repetir BACKFILL solo llena v2 nula y no corrige por sí mismo divergencias posteriores.
 
+Cuando existan escritores antiguos, detenerlos antes de CONTRACT y ejecutar el SQL operativo `01_ddl/04_alter/r6_sync_specific_actions_v2.sql` del commit DB validado. El script solo resincroniza documentos JSONB con `version: 1`, un único elemento `actions[0].text` de tipo string y texto TEXT no nulo; no sobrescribe documentos fuera de ese formato. Registrar los conteos `discrepancias_before` y `discrepancias_after`, y exigir cero después de la sincronización.
+
 ### CONTRACT
 
 CONTRACT usa `changelog/changelog-contract.yaml` y el changeset `r6-monitoring-contract-specific-actions-v2-993`, separado del changelog habitual. Sus precondiciones bloquean datos nulos, documentos con versión/forma no soportada y diferencias entre TEXT y JSONB.
@@ -128,7 +130,7 @@ El perfil evita que se incluya en un arranque convencional sin activación expl�
 
 ### ROLLBACK
 
-Considerar rollback ante una divergencia detectada antes de CONTRACT, un fallo de compatibilidad del servicio o una decisión operativa de restaurar la representación anterior. Los scripts disponibles son `r6_backfill_specific_actions_v2.rollback.sql`, `r6_expand_specific_actions_v2.rollback.sql` y `r6_contract_specific_actions_v2.rollback.sql` en `design-software-monitoring-db/05_rollbacks/01_ddl/04_alter/`.
+Considerar rollback ante una divergencia detectada antes de CONTRACT, un fallo de compatibilidad del servicio o una decisión operativa de restaurar la representación anterior. Los scripts disponibles son `r6_backfill_specific_actions_v2.rollback.sql`, `r6_expand_specific_actions_v2.rollback.sql` y `r6_contract_specific_actions_v2.rollback.sql` en `design-software-monitoring-db/05_rollbacks/01_ddl/04_alter/`. El resultado esperado del rollback CONTRACT es `specific_actions TEXT NOT NULL` y `specific_actions_v2 JSONB NULL`; cualquier evidencia con `JSONB NOT NULL` debe marcarse como histórica y reconciliarse antes de aprobar.
 
 Antes de ejecutarlo, identificar la fase real, respaldar el estado actual y verificar que cada documento JSONB use `version: 1`, un único elemento en `actions` y `actions[0].text` string. La reconstrucción TEXT no es segura para múltiples acciones, versiones futuras, documentos inválidos o información adicional fuera de `actions[0].text`; esos datos podrían perderse al volver a TEXT. Tras el rollback, comprobar columnas, nulabilidad, equivalencia extraída y operaciones HTTP.
 
@@ -140,6 +142,8 @@ Antes de ejecutarlo, identificar la fase real, respaldar el estado actual y veri
 - No exponer credenciales en comandos, logs o documentación.
 - No ejecutar rollback sin verificar la representación efectiva de los datos.
 - La exigencia R6 de rollback en DEV, QA, STAGING y PROD simulada permanece pendiente hasta conservar evidencia trazable por ambiente.
+- La identidad Liquibase de los changesets 991/992/993 debe coincidir con el historial aplicado; no editar `DATABASECHANGELOG` manualmente para ocultar diferencias.
+- El workflow de integración R6 debe reportar aprobadas, fallidas y omitidas por separado; un CI verde con pruebas omitidas no demuestra compatibilidad PostgreSQL/HTTP.
 
 ## Verificación de readiness
 

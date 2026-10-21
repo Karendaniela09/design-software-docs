@@ -294,6 +294,17 @@ La afirmación general del README de `monitoring-db` sobre verificaciones en cua
 
 ---
 
-**Estado de la decisión:** implementación R6 validada en entorno local aislado; pendiente de revisión arquitectónica, aprobación e integración de los Pull Requests.
+**Estado de la decisión:** cambios solicitados por QA; no aprobada todavía. La implementación R6 tiene commits locales de corrección en `design-software-monitoring-db` (`c9bac2e`) y `design-software-monitoring-service` (`90de34a`), pero requiere ejecutar las validaciones aisladas antes de solicitar aprobación.
+
+## Revisión QA del 20 de octubre de 2026
+
+La revisión QA identificó cuatro condiciones que deben resolverse antes de autorizar CONTRACT o declarar R6(d) cumplido:
+
+1. La identidad histórica de los changesets 991, 992 y 993 debe coincidir con `DATABASECHANGELOG`; el código de corrección alinea el autor con `codex`, pero `validate`, `status` y `update` deben ejecutarse sobre una copia aislada con historial previo.
+2. Las evidencias multiambiente muestran `specific_actions_v2 JSONB NOT NULL` después del rollback, mientras el SQL versionado espera `JSONB NULL`. La ejecución debe repetirse con el commit exacto y conservar comando, fecha, base, historial y huellas de datos.
+3. BACKFILL no corrige JSONB no nulo desactualizado por escritores antiguos. El commit DB incorpora `r6_sync_specific_actions_v2.sql`, un procedimiento operativo idempotente y limitado al formato `version: 1` con una única acción; debe ejecutarse con escritores antiguos detenidos y con cero divergencias antes de CONTRACT.
+4. El Service incorpora en `90de34a` un job CI con PostgreSQL efímero y reportes JUnit para separar las integraciones HTTP/SQL de las pruebas unitarias; la ejecución del workflow sigue pendiente.
+
+Las evidencias históricas se conservan y no se presentan como validación oficial de QA. La PROD simulada no equivale a producción real. No se autoriza CONTRACT sobre ambientes compartidos sin respaldo recuperable, autorización operativa y evidencia reproducible.
 
 La aceptación de este ADR no autoriza automáticamente la ejecución de CONTRACT sobre bases de datos compartidas o de producción.
