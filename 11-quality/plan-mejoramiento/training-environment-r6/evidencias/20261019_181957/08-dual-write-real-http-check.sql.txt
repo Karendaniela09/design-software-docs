@@ -1,0 +1,5 @@
+﻿DO
+       result
+--------------------
+ DUAL_API_WRITES_OK
+(1 row)
