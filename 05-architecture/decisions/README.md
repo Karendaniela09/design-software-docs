@@ -27,5 +27,7 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-003](./records/ADR-003-object-storage.md) | Estrategia de almacenamiento de objetos (MinIO/S3) | PROPOSED |
 | [ADR-004](./records/ADR-004-status-parametrization-and-audit-standard.md) | Parametrización de estados y estándar de auditoría | PROPOSED |
 | [ADR-011](./records/ADR-011-document-outbox-inbox-resilience.md) | Outbox transaccional e inbox idempotente para document-service | ACCEPTED |
+| [ADR-012](./records/ADR-012-actors-security-hardening.md) | Seguridad y control de acceso para actors-service (OAuth2 RS256, mTLS, RBAC) | ACCEPTED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
+
