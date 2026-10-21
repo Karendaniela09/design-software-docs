@@ -41,3 +41,5 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 - Umbral de cobertura exacto y su gate automatizado en CI: pendiente de cerrar junto con [ci-cd.md](../10-devops/ci-cd.md).
 - Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.
 
+- [R6 de Training Environment: pruebas de migración y rollback](../09-microservices/services/04-training-environment-service/evidence/r6-schema-evolution/README.md).
+- [QA R6 Training Environment DB](./qa-report-r6-training-environment-db.md).

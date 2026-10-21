@@ -46,3 +46,5 @@ cp 05-architecture/decisions/_template-adr.md \
 - [ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría](./records/ADR-014-audit-r5-contract-compatibility.md) — aceptada; decisión final de R5.
 - [ADR-015: Scheduling service security hardening and cryptographic JWT validation](./records/ADR-015-scheduling-security-hardening.md) — aceptada.
 - [ADR-016: Rendimiento reproducible de las consultas de Auditoría](./records/ADR-016-audit-r2-performance-data.md) — propuesta, pendiente de revisión arquitectónica.
+
+- [ADR-016: Evolución gradual del motivo de mantenimiento (Training Environment R6)](./records/ADR-016-training-environment-r6-schema-evolution.md) — propuesta, pendiente de revisión.

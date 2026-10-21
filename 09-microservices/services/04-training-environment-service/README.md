@@ -73,3 +73,9 @@ Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimie
 Usa DATABASE_URL y JWT/JWKS; expone reportes de utilización e implementa observabilidad integral conforme a [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md) (OpenTelemetry W3C, métricas RED en /metrics, logs JSON correlacionados y alertas Grafana).
 
 - **R3 observability technical report:** [qa-report-r3-training-enviroment-service.md](../../../11-quality/qa-report-r3-training-enviroment-service.md)
+## Evolución R6 de maintenance
+
+- [Informe técnico y pruebas de la migración](./r6-schema-evolution.md).
+- [ADR-016: compatibilidad de reason y reason_detail](../../../05-architecture/decisions/records/ADR-016-training-environment-r6-schema-evolution.md).
+- [QA report y evidencia final 4/4](../../../11-quality/qa-report-r6-training-environment-db.md).
+- [Implementación DB: PR #134](https://github.com/code-sena/design-software-training-environment-db/pull/134).
