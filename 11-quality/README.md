@@ -21,6 +21,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 |---------|-------------|--------|
 | [testing-strategy.md](./testing-strategy.md) | Estrategia de pruebas por nivel y tipo | 🟡 |
 | [code-review.md](./code-review.md) | Criterios y flujo para revisiones de código | 🟡 |
+| [qa-report-r4-security-scheduling.md](./qa-report-r4-security-scheduling.md) | Informe de auditoría de seguridad y verificación OWASP ASVS L1 para scheduling-service | 🟢 |
 
 ## Plantillas
 
@@ -35,4 +36,3 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 - Umbral de cobertura exacto y su gate automatizado en CI: pendiente de cerrar junto con [ci-cd.md](../10-devops/ci-cd.md).
 - Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.
 
-- [Plan de mejoramiento R3 de Monitoring](./plan-mejoramiento/README.md).

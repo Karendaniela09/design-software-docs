@@ -119,3 +119,11 @@ The service was audited against the applicable Level 1 requirements of the OWASP
 ## 4. Conclusion & Sign-Off
 
 The `design-software-scheduling-service` has been thoroughly verified against all security requirements of the Improvement Plan (Acta No. 02 - 2026). The service exhibits resilient defense-in-depth characteristics, passes 17 automated negative integration tests in CI without regression, and satisfies all applicable OWASP ASVS Level 1 requirements.
+
+---
+
+## 5. Related References
+
+- Architectural Decision: [ADR-015: Scheduling Service Security Hardening and Cryptographic JWT Validation](../05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md)
+- Microservice Security Model: [09-microservices/services/05-scheduling-service/security.md](../09-microservices/services/05-scheduling-service/security.md)
+- Operations Runbook: [09-microservices/services/05-scheduling-service/runbook.md](../09-microservices/services/05-scheduling-service/runbook.md)
