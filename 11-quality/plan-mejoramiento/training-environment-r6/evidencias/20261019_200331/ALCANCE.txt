@@ -1,0 +1,9 @@
+﻿Solo laboratorio local. No representa entornos oficiales compartidos.
+Infra Docker Compose:
+E:\Nueva carpeta\Context\design-software-docker-infra-develop\design-software-docker-infra-develop
+Origen DB R6 (solo lectura):
+E:\Nueva carpeta\training-env-db-r6
+En cada ambiente: baseline -> fixtures -> EXPAND/BACKFILL -> compatibilidad SQL -> rollback 2 changesets -> verificacion.
+No ejecuta CONTRACT. CONTRACT permanece opt-in y requiere validar backend v2.
+Prueba de trafico HTTP real v1/v2: evidencia separada, no ejecutada por este script.
+No usa el archivo .env original, no modifica SRD, no hace git commit ni push.
