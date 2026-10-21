@@ -39,6 +39,7 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-015](./records/ADR-015-scheduling-security-hardening.md) | Scheduling service security hardening and cryptographic JWT validation | ACCEPTED |
 | [ADR-016](./records/ADR-016-audit-r2-performance-data.md) | Rendimiento reproducible de las consultas de Auditoría | PROPOSED |
 | [ADR-017](./records/ADR-017-training-environment-r6-schema-evolution.md) | Evolución de maintenance.reason a reason_detail — Training Environment R6 | PROPOSED |
+| [ADR-018](./records/ADR-018-iam-session-revocation-r4.md) | Validación del estado de sesión y límites de revocación en IAM R4 | PROPOSED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
@@ -48,3 +49,4 @@ cp 05-architecture/decisions/_template-adr.md \
 - [ADR-015: Scheduling service security hardening and cryptographic JWT validation](./records/ADR-015-scheduling-security-hardening.md) — aceptada.
 - [ADR-016: Rendimiento reproducible de las consultas de Auditoría](./records/ADR-016-audit-r2-performance-data.md) — propuesta, pendiente de revisión arquitectónica.
 - [ADR-017: Evolución gradual del motivo de mantenimiento (Training Environment R6)](./records/ADR-017-training-environment-r6-schema-evolution.md) — propuesta, pendiente de revisión.
+- [ADR-018: Validación del estado de sesión en IAM R4](./records/ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
