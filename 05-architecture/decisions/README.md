@@ -36,9 +36,11 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-012](./records/ADR-012-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
 | [ADR-013](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) | Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring | PROPOSED |
 | [ADR-014](./records/ADR-014-audit-r5-contract-compatibility.md) | Compatibilidad ejecutable de contratos del dominio de Auditoría | ACCEPTED |
+| [ADR-015](./records/ADR-015-audit-r2-performance-data.md) | Rendimiento reproducible de las consultas de Auditoría | PROPOSED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
 - [ADR-012: Observabilidad de Training Environment para R3](./records/ADR-012-training-environment-r3-observability.md) — aceptada.
 - [ADR-013: Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) — propuesta, pendiente de aprobación.
 - [ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría](./records/ADR-014-audit-r5-contract-compatibility.md) — aceptada; decisión final de R5.
+- [ADR-015: Rendimiento reproducible de las consultas de Auditoría](./records/ADR-015-audit-r2-performance-data.md) — propuesta, pendiente de revisión arquitectónica.
