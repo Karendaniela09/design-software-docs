@@ -34,6 +34,6 @@ No se midió tiempo de indisponibilidad en un despliegue real con tráfico conti
 
 ## Referencias
 
-- [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r6-schema-evolution.md).
+- [ADR-017](../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md).
 - [Matriz de verificación](matriz-verificacion.md).
 - [PR de implementación](https://github.com/code-sena/design-software-training-environment-db/pull/134).

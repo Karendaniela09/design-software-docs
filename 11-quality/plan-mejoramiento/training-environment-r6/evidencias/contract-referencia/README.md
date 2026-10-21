@@ -14,4 +14,4 @@ Se conserva una copia de los archivos CONTRACT usados en los ensayos originales 
 
 ## Referencias
 
-- [ADR-012](../../../../../05-architecture/decisions/records/ADR-012-training-environment-r6-schema-evolution.md).
+- [ADR-017](../../../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md).

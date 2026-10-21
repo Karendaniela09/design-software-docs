@@ -76,6 +76,6 @@ Usa DATABASE_URL y JWT/JWKS; expone reportes de utilización e implementa observ
 ## Evolución R6 de maintenance
 
 - [Informe técnico y pruebas de la migración](./r6-schema-evolution.md).
-- [ADR-016: compatibilidad de reason y reason_detail](../../../05-architecture/decisions/records/ADR-016-training-environment-r6-schema-evolution.md).
+- [ADR-017: compatibilidad de reason y reason_detail](../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md).
 - [QA report y evidencia final 4/4](../../../11-quality/qa-report-r6-training-environment-db.md).
 - [Implementación DB: PR #134](https://github.com/code-sena/design-software-training-environment-db/pull/134).

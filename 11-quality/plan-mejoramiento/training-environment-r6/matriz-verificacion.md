@@ -26,6 +26,6 @@ Ver [el inventario](evidencias/README.md) y las carpetas `20261019_160331`, `202
 
 ## Referencias
 
-- [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r6-schema-evolution.md).
+- [ADR-017](../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md).
 - [Informe técnico](informe-tecnico-r6.md).
 - [Informe de integración](informe-integracion-local.md).

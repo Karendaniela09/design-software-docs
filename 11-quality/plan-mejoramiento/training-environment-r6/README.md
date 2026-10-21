@@ -11,7 +11,7 @@ Documenté la evolución de `training_environment.maintenance.reason` hacia `rea
 
 | Documento | Contenido |
 |---|---|
-| [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r6-schema-evolution.md) | Justificación de EXPAND/BACKFILL/CONTRACT. |
+| [ADR-017](../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md) | Justificación de EXPAND/BACKFILL/CONTRACT. |
 | [Informe técnico](informe-tecnico-r6.md) | Migraciones, pruebas SQL y reversión. |
 | [Informe de integración local](informe-integracion-local.md) | Web-shell, MFE, API Go y PostgreSQL. |
 | [Matriz de verificación](matriz-verificacion.md) | Criterios R6, evidencias y límites. |
