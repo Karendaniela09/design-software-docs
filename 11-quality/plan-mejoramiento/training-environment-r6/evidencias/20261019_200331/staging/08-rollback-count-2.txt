@@ -1,0 +1,24 @@
+﻿time="2026-10-19T20:08:49-05:00" level=warning msg="The \"IAM_JWT_PRIVATE_KEY\" variable is not set. Defaulting to a blank string."
+time="2026-10-19T20:08:49-05:00" level=warning msg="The \"IAM_JWT_ISSUER\" variable is not set. Defaulting to a blank string."
+ Container r6lab-staging-9cc93281-liquibase-training-run-9b1de1861bd0 Creating
+ Container r6lab-staging-9cc93281-liquibase-training-run-9b1de1861bd0 Created
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ##
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ##
+##                                                ##
+####################################################
+Starting Liquibase at 01:08:54 using Java 21.0.7 (version 4.33.0 #8744 built at 2025-07-08 20:43+0000)
+Liquibase Version: 4.33.0
+Liquibase Open Source 4.33.0 by Liquibase
+Rolling Back Changeset: 01_ddl/changelog.yaml::r6-env-maintenance-reason-backfill-v1::jsgh1
+Rolling Back Changeset: 01_ddl/changelog.yaml::r6-env-maintenance-reason-expand-v1::jsgh1
+Liquibase command 'rollbackCount' was executed successfully.
