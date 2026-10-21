@@ -3,7 +3,7 @@
   const stateView=(ctx,e)=>ctx.state&&ctx.state!=='normal'?C().state(ctx.state,e):null;
   M.screens=M.screens||{};
   M.screens.auditList=(ctx)=>{
-    // TODO BLOCKER B1: audit-service no expone API REST; datos mock basados en audit_record.
+    // B1 resuelto: audit-query-api publica el contrato REST de solo lectura.
     const state=stateView(ctx,'eventos'); if(state)return `${C().pageHeader('Auditoría')}${state}`;
     let html=`${C().pageHeader('Auditoría','Registro de solo lectura de las acciones del sistema.')}${C().filters([{label:'Actor (UUID)',type:'text',placeholder:'UUID'},{label:'Tipo de entidad',type:'text',placeholder:'schedule'},{label:'Tipo de evento',type:'text',placeholder:'SCHEDULE_PUBLISHED'},{label:'Correlación',type:'text',placeholder:'correlation_id'},{label:'Servicio origen',options:['Todos','scheduling-service','iam-service','document-service']},{label:'Desde',type:'date'}],'Exportar')}${C().table([{label:'Recibido',key:'date'},{label:'Ocurrido en origen',key:'date'},{label:'Evento',key:'event'},{label:'Servicio origen',render:r=>C().status('INFO',r.service)},{label:'Actor',key:'actor'},{label:'Entidad',render:r=>`${r.entity} · ${r.entityId}`},{label:'Acción',render:()=>'<button class="btn btn-secondary btn-sm" data-open-modal="audit">Ver payload</button>'}],D().audit,{caption:'Eventos de auditoría',total:1200,start:1,end:4,pageSize:10,cursor:true})}<p class="panel-subtitle" style="margin:12px 0">Registro append-only · retención mínima 7 años · particionado mensual · datos de más de 2 años se archivan en frío.</p>`;
     if(ctx.query.get('modal')==='audit') html+=auditModal();

@@ -10,7 +10,7 @@
 | DB repo | `design-software-audit-db` |
 | Stack | Go |
 | Deployables | audit-query-api, audit-worker |
-| Estado observado | Esqueleto Go con query API de health y worker pendiente. |
+| Estado observado | Query API de solo lectura y worker AMQP operativos; historial append-only con deduplicación. |
 
 ## Responsabilidad
 
@@ -25,12 +25,17 @@ Registro append-only de auditoría y consulta de eventos auditables.
 
 | Metodo | Ruta | Fuente |
 |---|---|---|
-| GET | `/health` | `.\design-software-audit-service\cmd\audit-query-api\main.go` |
+| GET | `/api/v1/health` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records/{id}` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records/export` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
 
 ## Configuración
 
-- `PORT`
+- `DATABASE_URL`, `IAM_JWKS_URL`, `IAM_JWT_ISSUER`, `AUDIT_CURSOR_SECRET` (query API)
+- `MESSAGE_BROKER_URL`, `BROKER_CONSUMER_GROUP`, `AUDIT_EVENTS_EXCHANGE` (worker)
 
 ## Notas
 
-Debe consumir eventos por AMQP y persistir auditoría idempotente.
+El contrato OpenAPI canónico está en `design-software-audit-service/api/openapi/audit.yaml`.
+El worker consume AMQP y persiste auditoría idempotente.
