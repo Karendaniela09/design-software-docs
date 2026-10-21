@@ -23,5 +23,4 @@ por falta de contrato de lectura).
 | Transporte | HTTP/REST |
 
 ## Contrato
-Ver [contract.md](./contract.md) y la fuente máquina
-[`07-api/contracts/openapi/audit.yaml`](../../../../../07-api/contracts/openapi/audit.yaml).
+Ver [contract.md](./contract.md) y la [fuente máquina canónica](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml).

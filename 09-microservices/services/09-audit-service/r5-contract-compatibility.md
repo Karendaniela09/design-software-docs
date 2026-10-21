@@ -15,7 +15,8 @@ posteriores no rompan el flujo E2E que ya funciona.
 | Criterio R5 | Fuente ejecutable | Evidencia |
 |---|---|---|
 | Pact consumidor/proveedor | `contracts/pact/audit-mfe-audit-query-api.json` y `cmd/audit-contract-provider` en `design-software-audit-service` | Verificación de estado `200`, `Content-Type` y body compatible. |
-| OpenAPI semántico | `07-api/contracts/openapi/audit.yaml`, versión `1.0.0` | Comparación de compatibilidad con `oasdiff`. |
+| Bloqueo de Pact incompatible | `scripts/test-pact-provider-gate.sh` | Una copia temporal exige `201`; el proveedor real entrega `200` y Pact falla. |
+| OpenAPI semántico | `design-software-audit-service/api/openapi/audit.yaml`, versión `1.1.0` | Fuente canónica única; esta documentación la enlaza sin mantener una copia. |
 | Bloqueo de breaking change | `oasdiff breaking --fail-on ERR` | Al eliminar `/audit-records`, devuelve `api-path-removed-without-deprecation` y código `1`. |
 | Evento canónico | `api/events/audit-consumed-event.schema.json` | El worker valida el envelope antes de persistir. |
 | Prueba de alineación | `TestCanonicalEventSchemaMatchesWorkerEnvelopeRules` | El schema y las reglas de `ParseEnvelope` permanecen alineados. |
@@ -59,38 +60,25 @@ go build ./cmd/audit-worker
 go build ./cmd/audit-contract-provider
 ```
 
-Con el proveedor Pact ejecutándose:
+Los scripts del repositorio inician el proveedor y usan imágenes fijadas por digest:
 
-```powershell
-docker run --rm `
-  -v "${PWD}\contracts\pact:/pacts:ro" `
-  pactfoundation/pact-cli:1.5.0.5 `
-  pact_verifier_cli `
-  --provider-name audit-query-api `
-  --hostname host.docker.internal `
-  --port 18080 `
-  --file /pacts/audit-mfe-audit-query-api.json `
-  --no-colour
+```bash
+bash scripts/verify-pact-provider.sh
+bash scripts/test-pact-provider-gate.sh
 ```
 
 Resultado esperado: la interacción paginada aparece como `OK` para status,
 cabeceras y body.
 
 Para OpenAPI, se compara la especificación candidata contra la de
-`origin/develop`:
+`origin/develop`. Después, el gate valida el incremento semántico: cambios
+compatibles bajo `paths` requieren `MINOR`; metadatos compatibles requieren
+`PATCH`; una ruptura se rechaza, aun si se incrementa `MAJOR`.
 
-```powershell
-$baseDir = Join-Path $env:TEMP 'audit-oasdiff-base-r5'
-New-Item -ItemType Directory -Force $baseDir | Out-Null
-git show origin/develop:api/openapi/audit.yaml |
-  Set-Content -Encoding utf8 (Join-Path $baseDir 'audit.yaml')
-
-docker run --rm `
-  -v "${baseDir}:/base:ro" `
-  -v "${PWD}\api\openapi:/candidate:ro" `
-  tufin/oasdiff:latest `
-  breaking /base/audit.yaml /candidate/audit.yaml `
-  --fail-on ERR
+```bash
+git show origin/develop:api/openapi/audit.yaml > /tmp/audit-base.yaml
+bash scripts/check-openapi-contract.sh /tmp/audit-base.yaml api/openapi/audit.yaml
+bash scripts/test-openapi-contract-gate.sh api/openapi/audit.yaml
 ```
 
 La comparación actual no debe reportar cambios incompatibles. Para demostrar
@@ -108,5 +96,12 @@ que ese recorrido pueda repetirse después de futuros cambios.
 ## Criterio de cierre
 
 La implementación técnica está realizada y validada localmente. Para el cierre
-formal del reto, los comandos anteriores deben estar documentados en el PR y
-ejecutarse como checks obligatorios de CI según las reglas de la organización.
+formal del reto, el workflow `R5 / contract compatibility` debe estar marcado
+como check obligatorio en la protección de `develop`. También se debe conservar
+la evidencia de un PR de prueba bloqueado por el check y luego corregido; esta
+es una configuración y evidencia administrativa posterior al código.
+
+El workflow ejecuta en cada PR hacia `develop`: pruebas Go y JSON Schema,
+Pact positivo, Pact negativo, `oasdiff`, validación semántica de versión y la
+mutación negativa de OpenAPI. Las imágenes de Docker se fijan por digest para
+que la validación sea reproducible.

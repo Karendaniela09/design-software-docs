@@ -1,6 +1,6 @@
 # Revisión de contratos OpenAPI
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-20
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 > Fecha: 2026-10-07. Resultado preparado en `07-api/contracts/openapi` dentro de esta carpeta, sin tocar `design-software-docs`.
@@ -12,7 +12,9 @@
   - `design-software-iam-service/contracts/openapi/iam.yaml`
   - `design-software-scheduling-service/contracts/openapi/scheduling.yaml`
 - Se agregaron endpoints implementados que no estaban documentados en contratos:
-  - `audit.yaml`: `GET /health`
+  - Auditoría: el contrato único y ejecutable se mantiene en
+    `design-software-audit-service/api/openapi/audit.yaml`; incluye liveness,
+    listado, detalle y exportación.
   - `document.yaml`: `GET /health`
   - `iam.yaml`: `GET /health`, `GET /ready`, `GET /auth/.well-known/jwks.json`
   - `monitoring.yaml`: `GET /health`, `POST /kpis`
@@ -29,7 +31,7 @@ Después de normalizar prefijos `/api/v1` y nombres de path params, todos los en
 |---|---:|---:|---:|
 | `academic-management-service` | 32 | 38 | 0 |
 | `actors-service` | 50 | 53 | 0 |
-| `audit-service` | 1 | 4 | 0 |
+| `audit-service` | 4 | 4 | 0 |
 | `document-service` | 1 | 12 | 0 |
 | `iam-service` | 3 | 25 | 0 |
 | `monitoring-service` | 2 | 30 | 0 |
@@ -42,7 +44,6 @@ Después de normalizar prefijos `/api/v1` y nombres de path params, todos los en
 
 Varios contratos documentan endpoints de negocio que todavía no aparecen como rutas implementadas en el código actual. Eso no se eliminó, porque en el repo de docs parecen funcionar como contrato objetivo/producto, no solo como snapshot de implementación. Los casos más claros son:
 
-- `audit-service`: contrato incluye consulta/export de auditoría; código actual solo expone health en `audit-query-api`.
 - `document-service`: contrato incluye documentos/versiones/reportes; código actual tiene APIs FastAPI con health mínimo.
 - `monitoring-service`: contrato incluye catálogos KPI/alertas/reportes; código actual expone health y registro KPI inicial.
 - `reference-data-service`: contrato completo de jerarquía/catálogos; detector solo observa health porque las rutas se registran desde estructuras protegidas internas y no con `HandleFunc` directo.

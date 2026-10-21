@@ -21,10 +21,11 @@ acepta y persiste, no un evento que publique.
 
 Se decide mantener contratos ejecutables y verificables para los tres acuerdos:
 
-1. **HTTP:** `07-api/contracts/openapi/audit.yaml` es la fuente documental del
-   contrato de `audit-query-api`. Los cambios se comparan semánticamente con
-   `oasdiff`; eliminaciones o estrechamientos incompatibles deben bloquear el
-   Pull Request.
+1. **HTTP:** `design-software-audit-service/api/openapi/audit.yaml` es la
+   fuente canónica, única y ejecutable del contrato de `audit-query-api`.
+   Este repositorio enlaza dicho artefacto en vez de conservar una copia.
+   Los cambios se comparan semánticamente con `oasdiff`;
+   eliminaciones o estrechamientos incompatibles bloquean el Pull Request.
 2. **Consumidor/proveedor:** el contrato Pact entre `audit-mfe` y
    `audit-query-api` se conserva en el repositorio de código del servicio y se
    verifica contra el proveedor mediante `audit-contract-provider`.
@@ -32,17 +33,19 @@ Se decide mantener contratos ejecutables y verificables para los tres acuerdos:
    repositorio `design-software-audit-service`. El worker debe validarlo antes
    de persistir; los inválidos siguen el flujo de reintento/DLQ.
 
-Los comandos de verificación son reproducibles localmente y deben convertirse
-en checks obligatorios de CI para los PR de implementación. La documentación
-normativa y la evidencia de R5 se mantienen en este repositorio de docs; los
-artefactos ejecutables permanecen junto al servicio que los compila y ejecuta.
+Los comandos de verificación son reproducibles localmente y se ejecutan como
+checks de CI en los PR hacia `develop`. La documentación normativa y la
+evidencia de R5 se mantienen en este repositorio de docs; los artefactos
+ejecutables permanecen junto al servicio que los compila y ejecuta.
 
 ## Consecuencias
 
 ### Positivas
 
 - Pact detecta respuestas HTTP incompatibles con el frontend antes de integrar.
-- OpenAPI/oasdiff protege rutas, parámetros, respuestas y versionado semántico.
+- OpenAPI/oasdiff protege rutas, parámetros y respuestas; el gate exige `MINOR`
+  para cambios compatibles en `paths`, `PATCH` para metadatos y rechaza
+  cambios incompatibles.
 - JSON Schema evita que un envelope inválido entre al histórico de auditoría.
 - La evidencia queda centralizada en la documentación oficial del proyecto.
 - La separación permite revisar arquitectura sin duplicar contratos ejecutables.
@@ -58,8 +61,8 @@ artefactos ejecutables permanecen junto al servicio que los compila y ejecuta.
 
 ### Riesgos
 
-- Si los comandos no se configuran como checks obligatorios, siguen siendo una
-  garantía manual.
+- La protección de rama debe marcar el check R5 como obligatorio; esa
+  configuración administrativa queda fuera del código versionado.
 - El contrato Pact debe actualizarse junto con los cambios intencionales de la
   API; una actualización automática sin revisión podría ocultar una ruptura.
 
@@ -74,7 +77,7 @@ artefactos ejecutables permanecen junto al servicio que los compila y ejecuta.
 
 ## Referencias
 
-- [Contrato OpenAPI de Auditoría](../../../07-api/contracts/openapi/audit.yaml)
+- [Contrato OpenAPI canónico de Auditoría](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml)
 - [Contrato del componente query API](../../../09-microservices/services/09-audit-service/components/audit-query-api/contract.md)
 - [Evidencia R5 del dominio](../../../09-microservices/services/09-audit-service/r5-contract-compatibility.md)
 - `design-software-audit-service/api/events/audit-consumed-event.schema.json`

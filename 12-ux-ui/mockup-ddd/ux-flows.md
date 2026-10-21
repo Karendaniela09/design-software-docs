@@ -7,7 +7,7 @@ dependencias_entrada: mockup-ddd/flows/01-auth.md…06-backoffice.md; screen-inv
 consumidores_siguientes: validación de diseño con usuarios reales; generación/ajuste de mockups en Stitch; construcción de los MFE (orden de navegación real)
 tldr: 8 journeys (17 sub-flujos) que hilan las 45 pantallas de flows/*.md en recorridos completos por rol — acceso, núcleo Coordinador (crear→publicar horario), consultas de Coordinador, Instructor, Aprendiz, Administrador y back-office. Cada paso cita pantalla real + #número + MFE dueño; no se inventan pantallas.
 decisiones_clave: la unidad de journey agrupa sub-flujos por intención de negocio (ej. "Acceso" cubre login+reset+sesión expirada); los pasos citan SIEMPRE el número de pantalla real de flows/*.md; los cruces de MFE/servicio se marcan explícitamente como composición
-halts_registrados: hereda los halts ya documentados en flows/*.md (GAP-1/2/3 de 04-aprendiz.md; HALT-BACKOFFICE-AUDIT-API de 06-backoffice.md) — no se repiten en detalle aquí, se referencian
+halts_registrados: hereda los halts ya documentados en flows/*.md (GAP-1/2/3 de 04-aprendiz.md); Auditoría ya dispone de contrato canónico y no conserva un HALT de API pendiente
 -->
 
 # UX Flows — Horarios SENA (mockup-ddd)
@@ -501,9 +501,8 @@ sub-secciones Documentos, Plantillas, Auditoría, Parametrización — ver encab
    - *Alternativa:* botón **"Exportar"** en **#3** → descarga CSV/JSON de la selección filtrada.
 
 **Ramas alternativas / errores:**
-- **HALT-BACKOFFICE-AUDIT-API** (`06-backoffice.md`): no existe `07-api/contracts/openapi/
-  audit.yaml` — `GET /audit-records` (y `GET /audit-records/{id}` para deep link) son un supuesto
-  v0 sobre el modelo real de `audit_record`, pendientes de contrato formal.
+- El contrato canónico de `audit-query-api` define `GET /audit-records` y
+  `GET /audit-records/{id}`; un deep link consulta el segundo endpoint dentro del scope RBAC.
 - Rango de fechas inválido ("Desde" posterior a "Hasta") → validación en línea en **#3**.
 
 ### 8.D — Parametrizar catálogo / parámetro
