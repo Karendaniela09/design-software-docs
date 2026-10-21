@@ -1,0 +1,5 @@
+﻿DO
+             resultado
+------------------------------------
+ ROLLBACK_COMPLETO_SIN_PERDER_DATOS
+(1 row)

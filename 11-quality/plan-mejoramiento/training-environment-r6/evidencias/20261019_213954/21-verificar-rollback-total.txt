@@ -1,0 +1,5 @@
+﻿DO
+                        result
+-------------------------------------------------------
+ R6 E4 OK: rollback expand/backfill, datos conservados
+(1 row)
