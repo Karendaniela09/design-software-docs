@@ -1,6 +1,6 @@
 # Gobierno documental
 
-> Estado: 🟢 Estable | Última actualización: 2026-10-21
+> Estado: 🟢 Estable | Última actualización: 2026-08-01
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
 ## Contenido
@@ -19,5 +19,3 @@ Reglas comunes para que todos los equipos documenten con el mismo criterio, sin 
 | [definition-of-ready.md](./definition-of-ready.md) | Criterios para saber si un documento puede pasar a revisión | 🟡 |
 | [definition-of-done.md](./definition-of-done.md) | Criterios para cerrar un documento como estable | 🟡 |
 | [docs-touchpoints-matrix.md](./docs-touchpoints-matrix.md) | Qué carpeta de docs es obligatorio actualizar en cada HU y cierre de épica (guardarraíl docs-first) | 🟢 |
-| [improvement-plan-documentation-guide.md](./improvement-plan-documentation-guide.md) | Ubicación y estándar de los informes del Plan de Mejoramiento | 🟢 |
-| [change-authorizations/2026-10-daniel-salazar-quality-normalization.md](./change-authorizations/2026-10-daniel-salazar-quality-normalization.md) | Autorización de normalización de `11-quality/` en PR #328 | 🟢 |
