@@ -28,7 +28,7 @@ producción.
 
 | Criterio R2 | Entrega versionada | Estado verificable |
 |-------------|-------------------|--------------------|
-| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js` | Umbrales y duración definidos; falta una ejecución autenticada para aprobar las dos métricas. |
+| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js` | Bloqueado: el intento autenticado del 2026-10-21 no obtuvo JWKS de IAM; no hay métricas k6 que permitan aprobar las dos métricas. |
 | Tres `EXPLAIN (ANALYZE, BUFFERS)` antes y después | `performance/sql/r2-explain.sql`, `performance/sql/r2-seed.sql`, `scripts/run-r2-data.ps1` | Ejecutado en PostgreSQL 16 con fixture aislado de 200 002 filas. |
 | Índices Liquibase con rollback | Changeset `r2-audit-performance-query-indexes` y SQL de rollback en `design-software-audit-db` | Rollback `rollback-count 1` probado y los tres índices quedaron ausentes. |
 | Informe comparativo | Este documento y [ADR-015](../../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Versionado; las salidas crudas quedan fuera de Git. |
@@ -41,6 +41,26 @@ audit-service. Los endpoints internos `audit-query-api:8081/ready` y
 `audit-worker:8082/ready` respondieron `200`; el worker mantuvo una conexión
 activa con RabbitMQ. Esta comprobación no sustituye la prueba de carga ni
 requiere credenciales de usuario IAM.
+
+### Intento autenticado del 2026-10-21
+
+Se ejecutó el arnés en el proyecto aislado `audit-r2-live` de Docker Desktop.
+PostgreSQL quedó saludable, Liquibase de audit terminó al día y se verificó
+el rollback/reaplicación del changeset R2. `audit-query-api:8081/ready` y
+`audit-worker:8082/ready` devolvieron `200`.
+
+La prueba se detuvo antes de k6 porque IAM no expuso JWKS (`000` al consultar
+`/api/v1/auth/.well-known/jwks.json`). El primer arranque reveló que faltaba
+el principal técnico local `design_software_app`; se creó exclusivamente en la
+base temporal con el rol ya versionado `iam_admin`. El siguiente arranque falló
+en `actorsActiveFichaClient` al resolver `E2E_IAM_MTLS_PASSWORD`. La imagen
+reconstruida por Compose conservó ese placeholder, aunque no existe en el
+checkout IAM inspeccionado, por lo que hay una discrepancia pendiente entre el
+contexto efectivo de Compose y el checkout esperado.
+
+No se generó `k6-summary.json`, no se ejecutaron 50 VUs durante cinco minutos
+y no se registran total de solicitudes, p95 ni tasa de errores. No se usaron
+tokens fabricados, mocks ni bypass de autorización.
 
 ## Resultados de datos
 
@@ -99,7 +119,7 @@ de 300 ms o `audit_request_errors` no es menor de 1 %.
 | AC | Estado | Evidencia |
 |----|--------|-----------|
 | 50 VUs por cinco minutos | Configurado | El escenario fija `vus: 50` y `duration: 5m`. |
-| p95 < 300 ms y errores < 1 % | Pendiente de aprobación | Los thresholds están activos, pero no existe una corrida autenticada con la cuenta requerida en este workspace. |
+| p95 < 300 ms y errores < 1 % | Bloqueado | IAM no expuso JWKS en el intento autenticado del 2026-10-21; no se ejecutó k6 ni hay métricas reales. |
 | Tres planes antes y después | Cumplido | Tabla de resultados y script reproducible. |
 | Changeset y rollback probado | Cumplido | Changeset, rollback SQL y verificación de ausencia de los tres índices. |
 | Informe antes y después | Cumplido | Este informe conserva cifras, alcance y limitación de la carga. |
