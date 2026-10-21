@@ -33,6 +33,15 @@ producción.
 | Índices Liquibase con rollback | Changeset `r2-audit-performance-query-indexes` y SQL de rollback en `design-software-audit-db` | Rollback `rollback-count 1` probado y los tres índices quedaron ausentes. |
 | Informe comparativo | Este documento y [ADR-015](../../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Versionado; las salidas crudas quedan fuera de Git. |
 
+## Validación del entorno
+
+El 2026-10-21 se levantó un proyecto Compose aislado con PostgreSQL, RabbitMQ,
+las 19 migraciones de audit-db, los roles técnicos y ambos procesos de
+audit-service. Los endpoints internos `audit-query-api:8081/ready` y
+`audit-worker:8082/ready` respondieron `200`; el worker mantuvo una conexión
+activa con RabbitMQ. Esta comprobación no sustituye la prueba de carga ni
+requiere credenciales de usuario IAM.
+
 ## Resultados de datos
 
 Las mediciones se ejecutaron el 2026-10-21 en PostgreSQL 16 y un proyecto
