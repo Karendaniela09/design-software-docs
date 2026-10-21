@@ -1,0 +1,6 @@
+﻿DO
+UPDATE 1
+         result
+------------------------
+ R6 CONTRACT aislado OK
+(1 row)
