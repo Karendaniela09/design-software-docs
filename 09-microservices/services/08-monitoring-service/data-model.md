@@ -1,6 +1,6 @@
 # Modelo de datos — monitoring-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-08-26
+> Estado: 🟢 Estable | Última actualización: 2026-10-20
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 > Fuente de dominio: análisis M9 (Seguimiento y Analítica)
 
@@ -236,7 +236,7 @@ una alerta activa. Diferente del `actor_improvement_plan` en actors-service, que
 | `instructor_id` | UUID | Sí | Referencia externa |
 | `title` | VARCHAR(200) | No | Título del plan |
 | `description` | TEXT | No | Descripción del plan de mejoramiento |
-| `specific_actions` | TEXT | No | Acciones concretas con responsables y fechas |
+| `specific_actions` | TEXT | No | Acciones concretas con responsables y fechas; durante R6 conserva el contrato HTTP textual |
 | `due_date` | DATE | No | |
 | `status` | VARCHAR(20) | No | CHECK (`status` IN (`PENDING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`)) |
 | `completion_notes` | TEXT | Sí | Notas al cerrar el plan |
@@ -247,6 +247,33 @@ una alerta activa. Diferente del `actor_improvement_plan` en actors-service, que
 ---
 
 > **Ownership actualizado (ADR-005):** `sent_notification` ya no pertenece a este modelo. La entidad y su persistencia viven en [`notification-service`](../10-notification-service/data-model.md).
+
+### Evolución R6 de `specific_actions`
+
+La entidad atraviesa tres estados de esquema. El estado documentado como final no implica que CONTRACT forme parte del arranque automático del servicio.
+
+| Fase | Definición efectiva | Lectura/escritura |
+|---|---|---|
+| Antes de EXPAND | `specific_actions TEXT NOT NULL` | El servicio lee y escribe TEXT. |
+| EXPAND/BACKFILL | `specific_actions TEXT NOT NULL` y `specific_actions_v2 JSONB NULL` | Coexisten ambas columnas; el adaptador de persistencia detecta `specific_actions_v2`, conserva el contrato HTTP `string` y sincroniza las escrituras nuevas. |
+| Después de CONTRACT | `specific_actions JSONB NOT NULL` | El adaptador detecta que la columna principal es JSONB; el HTTP sigue recibiendo y devolviendo `string`. |
+
+La representación JSONB real de R6 es:
+
+```json
+{
+  "version": 1,
+  "actions": [
+    { "text": "texto original exacto" }
+  ]
+}
+```
+
+`version` identifica la forma del documento y `actions` es un arreglo preparado para evolución, pero la implementación actual solo genera y revierte de forma segura un único elemento `actions[0].text`. BACKFILL conserva el texto original, incluidos Unicode, saltos de línea y caracteres especiales, mediante `jsonb_build_object`/`jsonb_build_array`; no separa el texto en múltiples acciones.
+
+EXPAND agrega `specific_actions_v2` nullable y no cambia la nulabilidad de la columna original. BACKFILL solo actualiza filas donde `specific_actions_v2 IS NULL`. Antes de CONTRACT, la precondición de Liquibase exige que todas las filas tengan el documento esperado y que `actions[0].text` sea equivalente a `specific_actions`; CONTRACT elimina la columna TEXT, renombra la v2 y establece `NOT NULL`. La operación se mantiene en un changelog separado y requiere autorización operativa.
+
+El rollback de BACKFILL reconstruye `specific_actions` desde `actions[0].text`; el rollback de EXPAND elimina la columna v2. El rollback de CONTRACT recrea TEXT en `specific_actions`, conserva la JSONB renombrada como `specific_actions_v2` y exige que la extracción produzca valores no nulos. No es seguro asumir pérdida cero si el documento contiene múltiples acciones, otra versión o una estructura futura. Véase [ADR-013](../../../05-architecture/decisions/records/ADR-013-monitoring-r6-text-jsonb-migration.md).
 
 ---
 
