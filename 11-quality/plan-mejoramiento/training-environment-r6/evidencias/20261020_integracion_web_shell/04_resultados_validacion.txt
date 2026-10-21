@@ -1,0 +1,19 @@
+ACTA 02 - PRUEBA LOCAL TRAINING ENVIRONMENT / 20 OCT 2026
+--------------------------------------------------------
+POSTGRESQL + LIQUIBASE: 33 changesets aplicados en el proyecto aislado env-integ-jsgh1.
+R6: reason_detail presente y sincronizado con reason (evidencia SQL adjunta).
+OUTBOX: tabla auxiliar creada SOLO en el laboratorio, evento asociado a mantenimiento = OK.
+GO: GET /health = 200; GET /environment-types = 200; GET /training-environments = 200; 3 ambientes.
+API: POST real de mantenimiento = OK; recuperado mediante GET.
+MFE: 14 archivos de prueba, 83 casos PASS; typecheck y build PASS.
+WEB SHELL: 15 archivos de prueba, 106 casos PASS; typecheck y build PASS.
+TOTAL: 189 casos frontend PASS.
+MODULE FEDERATION: /remoteEntry.js en 127.0.0.1:5104 = 200, text/javascript.
+NAVEGADOR: web-shell 127.0.0.1:5000/training-environment muestra 3 ambientes.
+ESCRITURA: Aula 101, 2026-11-16, 14:00-15:00, motivo PRUEBA_UI_R6_20261020.
+VERIFICACION POSTGRESQL: r6_sync=OK; outbox_event=OK.
+
+LIMITACIONES: JWT de laboratorio y sesion visual simulada, NO IAM oficial.
+OUTBOX no tiene migracion oficial en el dominio; fue creada como auxiliar del laboratorio.
+NO se acredita despliegue de servicios en los cuatro ambientes oficiales ni cero downtime medido.
+EL PR DEL REPO DB NO INCLUYE CODIGO DE MFE NI WEB-SHELL: van en repositorios distintos.
