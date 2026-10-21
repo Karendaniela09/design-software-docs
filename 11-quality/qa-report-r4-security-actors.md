@@ -43,15 +43,15 @@ mvn test -pl actors-adapters -Dtest=SecurityNegativeTests
 | **03** | `test03_algorithmNone_returns401TokenInvalid` | Evasión de firma usando cabecera `{"alg": "none"}` | **401 Unauthorized** | `TOKEN_INVALID` | ✅ **PASS** |
 | **04** | `test04_missingAuthorizationHeader_returns401MissingToken` | Petición anónima a recurso protegido sin cabecera | **401 Unauthorized** | `MISSING_TOKEN` | ✅ **PASS** |
 | **05** | `test05_malformedHeader_returns401TokenInvalid` | Cabecera `Authorization` corrupta o malformada | **401 Unauthorized** | `TOKEN_INVALID` | ✅ **PASS** |
-| **06** | `test06_differentTrainingCenterScope_returns403` | Token con ámbito (*scope*) de otro centro de formación | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
-| **07** | `test07_differentFichaScope_returns403` | Token sin permisos sobre la ficha solicitada | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
+| **06** | `test06_differentTrainingCenterScope_returns403` | Token con ámbito (*scope*) de un centro intentando consultar otro centro ajeno | **403 Forbidden** | `SCOPE_VIOLATION` | ✅ **PASS** |
+| **07** | `test07_differentFichaScope_returns403` | Token con permiso acotado a una ficha intentando consultar aprendices de otra ficha distinta | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
 | **08** | `test08_roleEscalation_apprenticeAttemptingInstructorCreation_returns403` | Escalada de privilegios: aprendiz intentando acción de admin | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
-| **09** | `test09_idorRead_accessDeniedWithoutLearnerViewAuthority_returns403` | IDOR: lectura de expediente de otro aprendiz sin permiso | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
-| **10** | `test10_idorUpdate_modificationDeniedWithoutManageAuthority_returns403` | IDOR: modificación de expediente ajeno sin permiso | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
-| **11** | `test11_sqlInjectionInQueryParams_sanitizedWithout500` | Inyección SQL en parámetros de consulta saneada | **200 OK** | Sanitizado JPA | ✅ **PASS** |
-| **12** | `test12_xssPayloadInBody_rejectedWith400ValidationError` | Inyección XSS con etiquetas `<script>` en payload JSON | **400 Bad Request** | `VALIDATION_ERROR` | ✅ **PASS** |
-| **13** | `test13_excessiveRequests_triggersRateLimiting429` | Ráfaga masiva sobrepasando cuota de solicitudes (DoS) | **429 Too Many Req.** | `TOO_MANY_REQUESTS` | ✅ **PASS** |
-| **14** | `test14_untrustedMtlsClientCallingInternalLearners_returnsUnauthorized` | Cliente mTLS sin certificado o con sujeto no confiable | **401 Unauthorized** | `MTLS_CERTIFICATE_UNTRUSTED`| ✅ **PASS** |
+| **09** | `test09_idorRead_accessDeniedWithoutLearnerViewAuthority_returns403` | IDOR: Usuario con permiso acotado a su propio perfil intentando leer expediente de otro aprendiz | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
+| **10** | `test10_idorUpdate_modificationDeniedWithoutManageAuthority_returns403` | IDOR: Usuario con permiso acotado a su propio perfil intentando modificar expediente ajeno | **403 Forbidden** | `INSUFFICIENT_PERMISSIONS` | ✅ **PASS** |
+| **11** | `test11_sqlInjectionInQueryParams_sanitizedWithout500` | Inyección SQL en parámetros de consulta saneada por vinculación JPA | **200 OK** | Sanitizado JPA | ✅ **PASS** |
+| **12** | `test12_xssPayloadInBody_rejectedWith400ValidationError` | Inyección XSS aislada con etiquetas `<script>` en `first_name` rechazada por Bean Validation | **400 Bad Request** | `VALIDATION_ERROR` | ✅ **PASS** |
+| **13** | `test13_excessiveRequests_triggersRateLimiting429` | Ráfaga masiva sobrepasando cuota de solicitudes de ventana fija (DoS) | **429 Too Many Req.** | `TOO_MANY_REQUESTS` | ✅ **PASS** |
+| **14** | `test14_untrustedMtlsClientCallingInternalLearners_returnsUnauthorized` | Cliente mTLS sin certificado o con sujeto distinto a `CN=iam-service` | **401 Unauthorized** | `MTLS_UNTRUSTED`| ✅ **PASS** |
 | **15** | `test15_internalServerError_doesNotLeakStacktraceOrDatabaseSchema` | Ocultación de stacktraces y esquemas SQL en error 500 | **500 Internal Error**| `INTERNAL_ERROR` | ✅ **PASS** |
 
 ### Transcripción de Ejecución en Consola (Maven Surefire)

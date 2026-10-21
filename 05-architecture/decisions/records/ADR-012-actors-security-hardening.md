@@ -1,7 +1,7 @@
 # ADR-012: Arquitectura de Seguridad y Control de Acceso para actors-service (OAuth2 RS256, mTLS y RBAC Granular)
 
-**Estado:** ACCEPTED (2026-10-19)  
-**Fecha:** 2026-10-19  
+**Estado:** PROPOSED (En proceso de validación y certificación QA)  
+**Fecha:** 2026-10-19 (Actualizado: 2026-10-21)  
 **Autores:** Laura Vanessa Pérez Perdomo (ADSO Ficha 3145555 · `@vanessaperdomo`)  
 **Equipos involucrados:** Arquitectura, Backend (Dominio Actores), Seguridad  
 
