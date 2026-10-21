@@ -20,7 +20,7 @@ posteriores no rompan el flujo E2E que ya funciona.
 | Bloqueo de breaking change | `oasdiff breaking --fail-on ERR` | Al eliminar `/audit-records`, devuelve `api-path-removed-without-deprecation` y código `1`. |
 | Evento canónico | `api/events/audit-consumed-event.schema.json` | El worker valida el envelope antes de persistir. |
 | Prueba de alineación | `TestCanonicalEventSchemaMatchesWorkerEnvelopeRules` | El schema y las reglas de `ParseEnvelope` permanecen alineados. |
-| Decisión arquitectónica | `ADR-010-audit-r5-contract-compatibility.md` | Define responsabilidades y consecuencias. |
+| Decisión arquitectónica | `ADR-014-audit-r5-contract-compatibility.md` | Define responsabilidades y consecuencias. |
 
 ## Interfaces protegidas
 

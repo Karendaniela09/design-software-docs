@@ -1,4 +1,4 @@
-# ADR-010: Compatibilidad ejecutable de contratos del dominio de Auditoría
+# ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría
 
 **Estado:** Aceptado  
 **Fecha:** 2026-10-20  
