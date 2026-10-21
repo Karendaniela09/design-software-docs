@@ -3,7 +3,7 @@ agente: Jesús Ariel González Bonilla (PM + Arquitecto)
 capacidad: contrato del API de solo lectura de auditoría (cierra B1)
 fase: diseño (contratos) — preliminar
 estado: draft
-dependencias_entrada: audit-service/data-model.md (audit_record); iam rbac (MOD_AUDIT); design-software-audit-service/api/openapi/audit.yaml
+dependencias_entrada: audit-service/data-model.md (audit_record); iam rbac (MOD_AUDIT); 07-api/contracts/openapi/audit.yaml
 consumidores_siguientes: frontend (pantalla de auditoría), backend audit-query-api cuando se construya
 tldr: API REST solo lectura sobre el event-store append-only audit_record. Consulta por cursor con filtros por índice + exportación. Sin escritura (exclusiva del audit-worker).
 decisiones_clave: solo lectura; cursor por received_at desc; RBAC AUDIT_LOG_VIEW/AUDIT_EXPORT; sin correlation_id físico
@@ -13,7 +13,7 @@ halts_registrados: ninguno
 # Contrato — audit-query-api
 
 API REST de **solo lectura** sobre `audit_record` (schema `audit`). Fuente máquina:
-[contrato OpenAPI canónico en audit-service](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml).
+[`07-api/contracts/openapi/audit.yaml`](../../../../../07-api/contracts/openapi/audit.yaml).
 
 ## Endpoints
 
