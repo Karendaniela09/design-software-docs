@@ -1,4 +1,4 @@
-# ADR-012: Arquitectura de Seguridad y Control de Acceso para actors-service (OAuth2 RS256, mTLS y RBAC Granular)
+# ADR-015: Arquitectura de Seguridad y Control de Acceso para actors-service (OAuth2 RS256, mTLS y RBAC Granular)
 
 **Estado:** PROPOSED (En proceso de validación y certificación QA)  
 **Fecha:** 2026-10-19 (Actualizado: 2026-10-21)  
@@ -42,6 +42,8 @@ Se decide usar **validación descentralizada de tokens JWT asimétricos con algo
 3. **Mapeo de Scopes y Autorización Granular (RBAC):**
    - El convertidor `JwtAuthenticationConverter` extrae el claim `features[]` (con formato `FEATURE:SCOPE`) y genera GrantedAuthorities de Spring Security (`ACT_INSTRUCTOR_MANAGE`, `ACT_LEARNER_VIEW`, `ACT_ACTIVITY_LOG_VIEW`, etc.).
    - Los métodos de los controladores y adaptadores aplican `@PreAuthorize` para garantizar que un aprendiz nunca acceda a funciones administrativas de instructor ni consulte fichas/centros fuera de su asignación.
+   - Aislamiento real de Centro de Formación evaluado en `@PreAuthorize("@instructorAuth.canView(#trainingCenterId)")` contra el claim `training_center_id` y scopes `TRAINING_CENTER_...`.
+   - Protección estricta contra IDOR en `@PreAuthorize("@learnerAuth.canAccessLearner(#id)")` verificando el contrato `learner.id == actor_id`.
 
 4. **Manejo Centralizado de Excepciones (`GlobalExceptionHandler.java`):**
    - Retorna respuestas JSON estructuradas (`ErrorResponse`) con códigos de negocio (`INSUFFICIENT_PERMISSIONS`, `VALIDATION_ERROR`, `INTERNAL_ERROR`).
@@ -95,7 +97,8 @@ flowchart TD
 
 ## Trazabilidad y Verificación
 
-- **Suite de Pruebas Negativas:** `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/SecurityNegativeTests.java` (15/15 tests aprobados).
-- **Modelo de Amenazas STRIDE y ASVS:** [09-microservices/services/06-actors-service/security.md](../../09-microservices/services/06-actors-service/security.md).
-- **Reporte de Calidad:** [11-quality/qa-report-r4-security-actors.md](../../11-quality/qa-report-r4-security-actors.md).
-- **Pull Request de Referencia:** [code-sena/design-software-actors-service#27](https://github.com/code-sena/design-software-actors-service/pull/27).
+- **Suite de Pruebas Negativas:** `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/SecurityNegativeTests.java` (16 tests aprobados, incluyendo caso positivo de centro).
+- **Pruebas de Criptografía RSA:** `actors-adapters/src/test/java/co/sena/actors/adapter/config/NimbusJwtCryptographicTest.java` (RSA 2048-bit, rechazo de firma alterada y alg:none).
+- **Pruebas de Contrato IDOR:** `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/LearnerAuthTest.java` (6 tests unitarios).
+- **Prueba de Inyección SQL en Persistencia:** `actors-adapters/src/test/java/co/sena/actors/adapter/out/persistence/LearnerPersistenceSqlInjectionIT.java` (PostgreSQL Testcontainers).
+- **Pull Request Oficial:** [code-sena/design-software-actors-service#27](https://github.com/code-sena/design-software-actors-service/pull/27).

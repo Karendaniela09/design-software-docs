@@ -22,12 +22,10 @@ decisiones_clave: storage_key nunca se muestra (write-only); descarga solo por U
   pantallas adicionales); catálogos/parámetros solo editables por ADMIN_STAFF/SYSTEM_ADMIN
   (RN-REF-03); code/key inmutables tras creación en plantilla, catálogo, valor de catálogo y
   parámetro
-halts_registrados: HALT-BACKOFFICE-AUDIT-API — audit-service declara explícitamente "no expone API"
-  (README.md); no existe `07-api/contracts/openapi/audit.yaml`. La Pantalla 3 asume un endpoint de
-  consulta de solo lectura (`GET /api/v1/audit-records`) sobre el modelo real de `audit_record` y el
-  feature RBAC ya definido (`AUDIT_LOG_VIEW`, `AUDIT_EXPORT` en rbac-design.md §MOD_AUDIT); ese
-  endpoint queda pendiente de contrato formal. No se inventan campos: los mostrados son los reales
-  del data-model de audit-service.
+halts_registrados: ninguno para Auditoría. El contrato canónico de audit-service declara la consulta
+  de solo lectura (`GET /api/v1/audit-records`) sobre el modelo real de `audit_record` y las features
+  RBAC `AUDIT_LOG_VIEW` y `AUDIT_EXPORT`. No se inventan campos: los mostrados son los reales del
+  data-model de audit-service.
 -->
 
 # Flujo — Back-office / Soporte (documentos, auditoría, parametrización)
@@ -235,13 +233,10 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 
 - **Ruta:** `/backoffice/auditoria` · **Rol:** `ADMIN_STAFF`/`SYSTEM_ADMIN` · **MFE:** `audit-mfe`
   · **HU:** pendiente
-- **Endpoint:** ⚠️ **`GET /api/v1/audit-records`** — **no existe en ningún contrato openapi
-  actual** (`audit-service` declara explícitamente "no expone API", ver
-  `09-audit-service/README.md`). Esta pantalla asume, para efectos de este DDD v0, un endpoint de
-  **solo lectura** sobre `audit_record` protegido por los features RBAC ya definidos en
-  `rbac-design.md §MOD_AUDIT`: `AUDIT_LOG_VIEW` (ver) y `AUDIT_EXPORT` (exportar). **Queda
-  pendiente de contrato formal** (`07-api/contracts/openapi/audit.yaml` no existe todavía).
-  Filtros propuestos, consistentes con los índices reales de `audit_record`: `actor_id`,
+- **Endpoint:** [`GET /api/v1/audit-records`](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml)
+  — consulta de **solo lectura** sobre `audit_record`, protegida por
+  `AUDIT_LOG_VIEW` (ver) y `AUDIT_EXPORT` (exportar). Los filtros definidos por el contrato son
+  consistentes con los índices reales de `audit_record`: `actor_id`,
   `entity_type` + `entity_id`, `event_type`, `source_service`, rango de fechas sobre `received_at`
   (clave de partición) con `event_occurred_at` visible por registro.
 - **Campos reales (`audit_record`, data-model de audit-service):** `id`, `event_id`, `event_type`
@@ -635,12 +630,11 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 
 - **Ruta:** modal sobre `/backoffice/auditoria` (no tiene URL propia) · **Rol:**
   `ADMIN_STAFF`/`SYSTEM_ADMIN` · **MFE:** `audit-mfe` · **HU:** pendiente
-- **Endpoint:** ⚠️ mismo HALT que Pantalla 3 (`HALT-BACKOFFICE-AUDIT-API`): no existe
-  `07-api/contracts/openapi/audit.yaml`. El detalle se abre con el registro **ya cargado en la
-  fila** de la tabla de Pantalla 3 (sin round-trip adicional); si el modal se abre por deep link
-  directo (ej. enlace compartido con un `id`), se asume un endpoint de solo lectura
-  **`GET /api/v1/audit-records/{id}`** (`AUDIT_LOG_VIEW`), consistente con el mismo modelo y
-  protección RBAC que la Pantalla 3. Queda pendiente de contrato formal.
+- **Endpoint:** `GET /api/v1/audit-records/{id}` (`AUDIT_LOG_VIEW`), definido en el
+  [contrato canónico de audit-service](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml).
+  El detalle se abre con el registro **ya cargado en la fila** de la tabla de Pantalla 3 (sin
+  round-trip adicional); un deep link directo consulta el endpoint de solo lectura con la misma
+  protección RBAC.
 - **Campos reales (`audit_record`, data-model de audit-service):** `id`, `event_id`, `event_type`,
   `source_service`, `actor_id` (nullable — null = acción del sistema), `entity_type` (nullable),
   `entity_id` (nullable), `payload` (JSONB completo), `event_occurred_at` (nullable),
@@ -660,7 +654,7 @@ con botón "Copiar JSON"). Sin ningún control de edición/eliminación (append-
 | Control | Endpoint | Resultado |
 |---|---|---|
 | Ver detalle (desde la tabla) | — (dato ya cargado en la fila de Pantalla 3) | abre el modal instantáneamente |
-| Abrir por deep link | `GET /audit-records/{id}` *(supuesto, mismo HALT)* | carga el registro y abre el modal |
+| Abrir por deep link | `GET /audit-records/{id}` | carga el registro y abre el modal |
 | Copiar `event_id` / copiar JSON | — | copia al portapapeles, toast de confirmación |
 | Cerrar | — | vuelve a la tabla de Pantalla 3 sin mutar nada |
 

@@ -24,7 +24,7 @@ aquí quedan como feedback para refinar contratos / HU / RBAC **más adelante** 
 > exigía solo `SCH_VIEW_ALL`/`MON_DASHBOARD_FULL`. Se corrigió con `x-required-feature-any` en
 > `07-api/contracts/openapi/{scheduling,monitoring}.yaml` (5 GET de horarios/sesiones + `/ficha-trackings`).
 > **B1 RESUELTO**: se agregó el API de solo lectura de auditoría — contrato
-> [`07-api/contracts/openapi/audit.yaml`](../../07-api/contracts/openapi/audit.yaml) + componente
+> [contrato OpenAPI canónico de audit-service](https://github.com/code-sena/design-software-audit-service/blob/develop/api/openapi/audit.yaml) + componente
 > `audit-query-api` (GET `/audit-records` cursor+filtros, `/{id}`, `/export`; features `AUDIT_LOG_VIEW`/`AUDIT_EXPORT`
 > que ya existían en rbac). La pantalla de auditoría ya es construible. **Sin bloqueantes abiertos.**
 
@@ -32,7 +32,7 @@ aquí quedan como feedback para refinar contratos / HU / RBAC **más adelante** 
 
 | # | Flujo | Hallazgo | Impacto |
 |---|---|---|---|
-| B1 | back-office (Auditoría) | **`audit-service` no expone API REST** (no hay `audit.yaml`; el servicio declara "no expone API"). La pantalla de auditoría asume `GET /audit-records` apoyada en features `AUDIT_LOG_VIEW`/`AUDIT_EXPORT` | Sin contrato, la pantalla no se puede construir |
+| B1 | back-office (Auditoría) | **RESUELTO:** `audit-query-api` expone `GET /audit-records`, detalle y exportación; el contrato canónico vive en `design-software-audit-service/api/openapi/audit.yaml` y aplica `AUDIT_LOG_VIEW`/`AUDIT_EXPORT`. | La pantalla de auditoría es construible y verificable. |
 | B2 | Aprendiz | Feature **`SCH_VIEW_OWN`** (scope `OWN_FICHA_AS_LEARNER`) **no está declarado en ningún endpoint** de `scheduling.yaml` — todos los `GET` exigen `SCH_VIEW_ALL` | El aprendiz no podría ver solo su horario |
 | B3 | Instructor | `GET /ficha-trackings` exige `MON_DASHBOARD_FULL`; no hay feature "mis fichas" acotado al instructor | Selector de ficha en "Seguimiento" quedaría bloqueado |
 

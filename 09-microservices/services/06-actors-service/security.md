@@ -84,7 +84,6 @@ flowchart TD
 
 ## 4. Trazabilidad
 
-- **Decisión Arquitectural:** [05-architecture/decisions/records/ADR-012-actors-security-hardening.md](../../05-architecture/decisions/records/ADR-012-actors-security-hardening.md)
-- **Reporte Técnico de Calidad y Suite Negativa:** [11-quality/qa-report-r4-security-actors.md](../../11-quality/qa-report-r4-security-actors.md)
-- **Suite Automatizada:** `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/SecurityNegativeTests.java` (15/15 tests en verde)
+- **Decisión Arquitectural:** [05-architecture/decisions/records/ADR-015-actors-security-hardening.md](../../../05-architecture/decisions/records/ADR-015-actors-security-hardening.md)
+- **Suite Automatizada:** `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/SecurityNegativeTests.java` (16 tests en verde)
 - **Pull Request Backend:** [code-sena/design-software-actors-service#27](https://github.com/code-sena/design-software-actors-service/pull/27)

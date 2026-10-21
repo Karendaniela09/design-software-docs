@@ -33,11 +33,14 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-009](./records/ADR-009-frontend-framework-and-build-strategy.md) | Framework de frontend y estrategia de compilación | ACCEPTED |
 | [ADR-010](./records/ADR-010-monitoring-r3-observability.md) | Observabilidad de Monitoring para R3 | PROPOSED |
 | [ADR-011](./records/ADR-011-document-outbox-inbox-resilience.md) | Outbox transaccional e inbox idempotente para document-service | ACCEPTED |
-| [ADR-011](./records/ADR-011-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
-| [ADR-012](./records/ADR-012-actors-security-hardening.md) | Seguridad y control de acceso para actors-service (OAuth2 RS256, mTLS, RBAC) | ACCEPTED |
+| [ADR-012](./records/ADR-012-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
+| [ADR-013](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) | Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring | PROPOSED |
+| [ADR-014](./records/ADR-014-audit-r5-contract-compatibility.md) | Compatibilidad ejecutable de contratos del dominio de Auditoría | ACCEPTED |
+| [ADR-015](./records/ADR-015-actors-security-hardening.md) | Seguridad y control de acceso para actors-service (OAuth2 RS256, mTLS, RBAC) | PROPOSED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
-- [ADR-011: Observabilidad de Training Environment para R3](./records/ADR-011-training-environment-r3-observability.md) — aceptada.
-- [ADR-012: Seguridad y control de acceso para actors-service](./records/ADR-012-actors-security-hardening.md) — aceptada.
-
+- [ADR-012: Observabilidad de Training Environment para R3](./records/ADR-012-training-environment-r3-observability.md) — aceptada.
+- [ADR-013: Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) — propuesta, pendiente de aprobación.
+- [ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría](./records/ADR-014-audit-r5-contract-compatibility.md) — aceptada; decisión final de R5.
+- [ADR-015: Seguridad y control de acceso para actors-service](./records/ADR-015-actors-security-hardening.md) — propuesta.

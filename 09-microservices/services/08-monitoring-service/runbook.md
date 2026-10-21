@@ -1,6 +1,6 @@
 # Runbook — monitoring-service
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Estado: 🟡 En progreso | Última actualización: 2026-10-20
 
 ## Componentes operativos
 
@@ -72,6 +72,78 @@ SELECT to_regclass('monitoring.kpi_tracking');
 SELECT to_regclass('monitoring.generated_alert');
 SELECT to_regclass('monitoring.outbox');
 ```
+
+## Migración R6 — TEXT a JSONB
+
+Referencia arquitectónica: [ADR-013](../../../05-architecture/decisions/records/ADR-013-monitoring-r6-text-jsonb-migration.md).
+
+### Preparación
+
+1. Confirmar la base de destino y que no sea una base compartida para una prueba destructiva.
+2. Obtener y comprobar un respaldo recuperable de PostgreSQL.
+3. Verificar disponibilidad de PostgreSQL y acceso al esquema `monitoring`.
+4. Ejecutar `liquibase validate` con el repositorio `design-software-monitoring-db` y confirmar la versión de Liquibase compatible con el pipeline.
+5. Identificar escritores antiguos que solo conozcan `specific_actions TEXT`; no autorizar CONTRACT mientras puedan escribir.
+6. Confirmar que la versión del servicio contiene `specific_actions_compat.py` y que el cambio cuenta con autorización operativa.
+
+### EXPAND y BACKFILL
+
+EXPAND y BACKFILL pertenecen a `changelog/changelog-master.yaml`, mediante los changesets `r6-monitoring-expand-specific-actions-v2-991` y `r6-monitoring-backfill-specific-actions-v2-992`.
+
+Desde `design-software-docker-infra`, con variables de entorno cargadas, el patrón de ejecución es:
+
+```powershell
+docker compose --profile tooling run --rm liquibase-monitoring update
+```
+
+Verificar la forma del esquema y la equivalencia sin modificar datos:
+
+```sql
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'monitoring'
+  AND table_name = 'improvement_plan'
+  AND column_name IN ('specific_actions', 'specific_actions_v2')
+ORDER BY ordinal_position;
+
+SELECT count(*) AS inconsistentes
+FROM monitoring.improvement_plan
+WHERE specific_actions_v2 IS NULL
+   OR specific_actions_v2->'actions'->0->>'text' IS DISTINCT FROM specific_actions;
+```
+
+El resultado esperado durante la transición es TEXT `NOT NULL`, JSONB nullable y cero filas inconsistentes después de BACKFILL. El riesgo principal son escrituras concurrentes de versiones antiguas entre BACKFILL y CONTRACT; repetir BACKFILL solo llena v2 nula y no corrige por sí mismo divergencias posteriores.
+
+Cuando existan escritores antiguos, detenerlos antes de CONTRACT y ejecutar el SQL operativo `01_ddl/04_alter/r6_sync_specific_actions_v2.sql` del commit DB validado. El script solo resincroniza documentos JSONB con `version: 1`, un único elemento `actions[0].text` de tipo string y texto TEXT no nulo; no sobrescribe documentos fuera de ese formato. Registrar los conteos `discrepancias_before` y `discrepancias_after`, y exigir cero después de la sincronización.
+
+### CONTRACT
+
+CONTRACT usa `changelog/changelog-contract.yaml` y el changeset `r6-monitoring-contract-specific-actions-v2-993`, separado del changelog habitual. Sus precondiciones bloquean datos nulos, documentos con versión/forma no soportada y diferencias entre TEXT y JSONB.
+
+La definición Compose de `liquibase-monitoring-contract` usa la imagen `ds-liquibase:latest`, perfil `r6-contract`, volumen del repositorio DB en `/workspace`, `working_dir: /workspace`, dependencia de PostgreSQL saludable y `--changeLogFile=changelog/changelog-contract.yaml`; además fija las tablas de control Liquibase en `public`. El entrypoint no incluye `update` de forma fija: prepara Liquibase y requiere añadir el comando explícito:
+
+```powershell
+docker compose --profile r6-contract run --rm liquibase-monitoring-contract update
+```
+
+El perfil evita que se incluya en un arranque convencional sin activación explícita, pero activar el perfil no sustituye la autorización ni las comprobaciones de equivalencia, respaldo, base de destino y ausencia de escritores antiguos. No ejecutar CONTRACT solo porque el contenedor pueda arrancar.
+
+### ROLLBACK
+
+Considerar rollback ante una divergencia detectada antes de CONTRACT, un fallo de compatibilidad del servicio o una decisión operativa de restaurar la representación anterior. Los scripts disponibles son `r6_backfill_specific_actions_v2.rollback.sql`, `r6_expand_specific_actions_v2.rollback.sql` y `r6_contract_specific_actions_v2.rollback.sql` en `design-software-monitoring-db/05_rollbacks/01_ddl/04_alter/`. El resultado esperado del rollback CONTRACT es `specific_actions TEXT NOT NULL` y `specific_actions_v2 JSONB NULL`; cualquier evidencia con `JSONB NOT NULL` debe marcarse como histórica y reconciliarse antes de aprobar.
+
+Antes de ejecutarlo, identificar la fase real, respaldar el estado actual y verificar que cada documento JSONB use `version: 1`, un único elemento en `actions` y `actions[0].text` string. La reconstrucción TEXT no es segura para múltiples acciones, versiones futuras, documentos inválidos o información adicional fuera de `actions[0].text`; esos datos podrían perderse al volver a TEXT. Tras el rollback, comprobar columnas, nulabilidad, equivalencia extraída y operaciones HTTP.
+
+### Seguridad operativa
+
+- No ejecutar CONTRACT sobre entornos compartidos sin autorización explícita.
+- No destruir volúmenes ni usar `down -v`.
+- No utilizar bases de producción en pruebas destructivas.
+- No exponer credenciales en comandos, logs o documentación.
+- No ejecutar rollback sin verificar la representación efectiva de los datos.
+- La exigencia R6 de rollback en DEV, QA, STAGING y PROD simulada permanece pendiente hasta conservar evidencia trazable por ambiente.
+- La identidad Liquibase de los changesets 991/992/993 debe coincidir con el historial aplicado; no editar `DATABASECHANGELOG` manualmente para ocultar diferencias.
+- El workflow de integración R6 debe reportar aprobadas, fallidas y omitidas por separado; un CI verde con pruebas omitidas no demuestra compatibilidad PostgreSQL/HTTP.
 
 ## Verificación de readiness
 
