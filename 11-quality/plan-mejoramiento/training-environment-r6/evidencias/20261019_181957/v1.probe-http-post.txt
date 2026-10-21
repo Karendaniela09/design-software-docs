@@ -1,0 +1,2 @@
+﻿status=201
+body={"id":"0c65acbe-d152-438a-af2b-afcba54340fb","environment_id":"00000000-0000-4000-8000-000000000611","start_date":"2030-12-07","end_date":"2030-12-07","start_time":"08:00:00","end_time":"09:00:00","reason":"R6-PROBE-v1","created_by":"00000000-0000-4000-8000-000000000614","created_at":"2026-10-19T23:22:34Z"}

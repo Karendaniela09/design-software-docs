@@ -1,0 +1,2 @@
+2026/10/19 18:22:33 connected to PostgreSQL repositories
+2026/10/19 18:22:33 training-environment-service API listening on :18081 (env: development)
