@@ -34,3 +34,5 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 - **No hay CI todavía**: las suites de `iam` (~162 tests) y `notification` (unit + E2E) se ejecutan a mano; hay 3 tests de integración *flaky* en `develop` sin pipeline que los estabilice. Deuda nombrada: HU-NOTIF-009 (docs#78) para CI + gate Pact automatizado; se enlaza con [TD-010](../15-project-control/technical-backlog.md) y [ci-cd.md](../10-devops/ci-cd.md).
 - Umbral de cobertura exacto y su gate automatizado en CI: pendiente de cerrar junto con [ci-cd.md](../10-devops/ci-cd.md).
 - Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.
+
+- [Plan de mejoramiento R3 de Monitoring](./plan-mejoramiento/README.md).

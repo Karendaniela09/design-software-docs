@@ -27,8 +27,20 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-003](./records/ADR-003-object-storage.md) | Estrategia de almacenamiento de objetos (MinIO/S3) | PROPOSED |
 | [ADR-004](./records/ADR-004-status-parametrization-and-audit-standard.md) | Parametrización de estados y estándar de auditoría | PROPOSED |
 | [ADR-005](./records/ADR-005-microservices-topology-and-transversal-capabilities.md) | Topología de microservicios y capacidades transversales | ACCEPTED |
-| [ADR-006](./records/ADR-006-polyglot-stack-strategy.md) | Estrategia de stack políglota para el backend | ACCEPTED |
-| [ADR-007](./records/ADR-007-edge-gateway-and-port-convention.md) | Convención de puertos y Edge Gateway (Traefik) | ACCEPTED |
-| [ADR-008](./records/ADR-008-observability-opentelemetry.md) | Estrategia de observabilidad y trazabilidad con OpenTelemetry | ACCEPTED |
-| [ADR-009](./records/ADR-009-frontend-framework-and-build-strategy.md) | Framework de microfrontends y arquitectura Module Federation | ACCEPTED |
-| [ADR-010](./records/ADR-010-scheduling-security-hardening.md) | Scheduling service security hardening and cryptographic JWT validation | ACCEPTED |
+| [ADR-006](./records/ADR-006-polyglot-stack-strategy.md) | Estrategia de stack polyglot (Go, Java, Python, Node) | ACCEPTED |
+| [ADR-007](./records/ADR-007-edge-gateway-and-port-convention.md) | Edge gateway y convención de puertos | ACCEPTED |
+| [ADR-008](./records/ADR-008-observability-opentelemetry.md) | Observabilidad — OpenTelemetry + Grafana (LGTM) | ACCEPTED |
+| [ADR-009](./records/ADR-009-frontend-framework-and-build-strategy.md) | Framework de frontend y estrategia de compilación | ACCEPTED |
+| [ADR-010](./records/ADR-010-monitoring-r3-observability.md) | Observabilidad de Monitoring para R3 | PROPOSED |
+| [ADR-011](./records/ADR-011-document-outbox-inbox-resilience.md) | Outbox transaccional e inbox idempotente para document-service | ACCEPTED |
+| [ADR-012](./records/ADR-012-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
+| [ADR-013](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) | Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring | PROPOSED |
+| [ADR-014](./records/ADR-014-audit-r5-contract-compatibility.md) | Compatibilidad ejecutable de contratos del dominio de Auditoría | ACCEPTED |
+| [ADR-015](./records/ADR-015-scheduling-security-hardening.md) | Scheduling service security hardening and cryptographic JWT validation | ACCEPTED |
+
+- [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
+- [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
+- [ADR-012: Observabilidad de Training Environment para R3](./records/ADR-012-training-environment-r3-observability.md) — aceptada.
+- [ADR-013: Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) — propuesta, pendiente de aprobación.
+- [ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría](./records/ADR-014-audit-r5-contract-compatibility.md) — aceptada; decisión final de R5.
+- [ADR-015: Scheduling service security hardening and cryptographic JWT validation](./records/ADR-015-scheduling-security-hardening.md) — aceptada.

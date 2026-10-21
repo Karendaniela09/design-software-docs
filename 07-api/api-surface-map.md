@@ -220,7 +220,10 @@ Nota IAM: los controladores principales implementan interfaces generadas desde `
 
 | Metodo | Ruta | Fuente |
 |---|---|---|
-| GET | `/health` | `.\design-software-audit-service\cmd\audit-query-api\main.go` |
+| GET | `/api/v1/health` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records/{id}` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
+| GET | `/api/v1/audit-records/export` | `design-software-audit-service/internal/adapter/in/httpapi/query.go` |
 
 ## notification-service
 

@@ -104,6 +104,6 @@ During the security audit and automated test suite creation, the following concr
 
 ## 4. Trazabilidad
 
-- Architectural Decision: [05-architecture/decisions/records/ADR-010-scheduling-security-hardening.md](../../05-architecture/decisions/records/ADR-010-scheduling-security-hardening.md)
+- Architectural Decision: [05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md](../../05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md)
 - Quality & ASVS Audit: [11-quality/qa-report-r4-security-scheduling.md](../../11-quality/qa-report-r4-security-scheduling.md)
 - Automated Test Suite: `schedules-api/src/test/java/co/sena/scheduling/api/SecurityNegativeAuthIT.java`

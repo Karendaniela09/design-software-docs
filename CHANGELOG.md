@@ -255,3 +255,15 @@
 
 ### Added
 - Estructura inicial del repositorio de documentación
+
+## 2026-10-20 — Centralización documental R3
+
+Se trasladan desde Monitoring, Actors y Scheduling las guías R3, junto con las adiciones documentales de Notification y los informes públicos de entrega que estaban en el workspace. Se registra ADR-010. Las evidencias de ejecución quedan únicamente en la carpeta raíz local `EVIDENCIAS-PLAN-MEJORAMIENTO-R3`; la guía de práctica personal permanece privada.
+
+## 2026-10-20 — Correcciones QA de R3
+
+Se corrige la referencia canónica de ADR-010, se documentan los repositorios compartidos y sus montajes frontend con commits reproducibles, y se elimina la matriz duplicada del informe. La matriz distingue las últimas evidencias por criterio de un arranque aún pendiente desde ramas fusionadas; conserva PARCIAL en HU externas y práctica personal. Se registran números, estados, heads y checks reales de los PR. La rama documental pasa a `fix/r3-observability`.
+
+## 2026-10-20 — Informe técnico breve de entrega R3
+
+Se añade el informe breve con enlace a ADR-010 y una selección de capturas originales, métricas, logs y salidas de pruebas verificadas por SHA-256. Los originales completos permanecen en la carpeta raíz de evidencias. Se corrige el SHA del corte documental anterior señalado por QA, sin declarar nuevas pruebas ni fusiones.

@@ -1,0 +1,664 @@
+{
+  "source": "05-metricas/prometheus-panels.json",
+  "transformation": "Exact queries and samples; instance label omitted from published metrics. NaN strings retained.",
+  "queries": {
+    "Monitoring API ready (DB + broker)": {
+      "promql": "probe_success{job=\"monitoring-health\"}",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "__name__": "probe_success",
+            "job": "monitoring-health"
+          },
+          "value": [
+            1792446961.609,
+            "1"
+          ]
+        }
+      ]
+    },
+    "Requests per second": {
+      "promql": "sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m]))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {},
+          "value": [
+            1792446963.668,
+            "0"
+          ]
+        }
+      ]
+    },
+    "Requests by endpoint": {
+      "promql": "sum by (http_route,http_method)(rate(monitoring_http_requests_total[1m]))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/ready"
+          },
+          "value": [
+            1792446968.294,
+            "0.20974354085232147"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/health"
+          },
+          "value": [
+            1792446968.294,
+            "0.057202783868814944"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/ficha-trackings"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/generated-alerts"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "POST",
+            "http_route": "/api/v1/improvement-plans"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/improvement-plans/{id}"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "PUT",
+            "http_route": "/api/v1/generated-alerts/{id}/resolve"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/ficha-trackings/{id}"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/alert-types"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/kpi-statuses"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/risk-levels"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "POST",
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_method": "GET",
+            "http_route": "/api/v1/reports/kpi-summary"
+          },
+          "value": [
+            1792446968.294,
+            "0"
+          ]
+        }
+      ]
+    },
+    "Error percentage (4xx + 5xx)": {
+      "promql": "100 * (sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\",http_status_code=~\"4..|5..\"}[1m])) or vector(0)) / clamp_min((sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m])) or vector(0)), 0.000001)",
+      "status": "success",
+      "result": [
+        {
+          "metric": {},
+          "value": [
+            1792446970.373,
+            "0"
+          ]
+        }
+      ]
+    },
+    "Errors by endpoint": {
+      "promql": "sum by (http_route)(rate(monitoring_http_requests_total{http_status_code=~\"4..|5..\"}[1m]))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings/{id}"
+          },
+          "value": [
+            1792446972.612,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446972.612,
+            "0"
+          ]
+        }
+      ]
+    },
+    "p95 latency by endpoint": {
+      "promql": "histogram_quantile(0.95, sum by (le,http_route)(rate(monitoring_http_duration_seconds_bucket[1m])))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_route": "/api/v1/ready"
+          },
+          "value": [
+            1792446975.033,
+            "3.625"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/health"
+          },
+          "value": [
+            1792446975.033,
+            "0.00475"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans/{id}"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts/{id}/resolve"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings/{id}"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/alert-types"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-statuses"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/risk-levels"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/reports/kpi-summary"
+          },
+          "value": [
+            1792446975.033,
+            "NaN"
+          ]
+        }
+      ]
+    },
+    "p50 / median latency": {
+      "promql": "histogram_quantile(0.50, sum by (le,http_route)(rate(monitoring_http_duration_seconds_bucket[1m])))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts/{id}/resolve"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/alert-types"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-statuses"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/risk-levels"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/reports/kpi-summary"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/health"
+          },
+          "value": [
+            1792446977.875,
+            "0.0025"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans/{id}"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings/{id}"
+          },
+          "value": [
+            1792446977.875,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ready"
+          },
+          "value": [
+            1792446977.875,
+            "0.175"
+          ]
+        }
+      ]
+    },
+    "p99 latency": {
+      "promql": "histogram_quantile(0.99, sum by (le,http_route)(rate(monitoring_http_duration_seconds_bucket[1m])))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_route": "/api/v1/health"
+          },
+          "value": [
+            1792446980.251,
+            "0.00495"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts/{id}/resolve"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-types"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/kpi-statuses"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/risk-levels"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ready"
+          },
+          "value": [
+            1792446980.251,
+            "4.725000000000001"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/generated-alerts"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/improvement-plans/{id}"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/ficha-trackings/{id}"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/alert-types"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        },
+        {
+          "metric": {
+            "http_route": "/api/v1/reports/kpi-summary"
+          },
+          "value": [
+            1792446980.251,
+            "NaN"
+          ]
+        }
+      ]
+    },
+    "Mean request duration": {
+      "promql": "sum(rate(monitoring_http_duration_seconds_sum[1m])) / clamp_min(sum(rate(monitoring_http_duration_seconds_count[1m])),0.000001)",
+      "status": "success",
+      "result": [
+        {
+          "metric": {},
+          "value": [
+            1792446982.516,
+            "0.42857276064276967"
+          ]
+        }
+      ]
+    },
+    "HTTP status distribution": {
+      "promql": "sum by (http_status_code)(increase(monitoring_http_requests_total[1m]))",
+      "status": "success",
+      "result": [
+        {
+          "metric": {
+            "http_status_code": "200"
+          },
+          "value": [
+            1792446984.414,
+            "15.281062397671455"
+          ]
+        },
+        {
+          "metric": {
+            "http_status_code": "201"
+          },
+          "value": [
+            1792446984.414,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_status_code": "403"
+          },
+          "value": [
+            1792446984.414,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_status_code": "422"
+          },
+          "value": [
+            1792446984.414,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "http_status_code": "409"
+          },
+          "value": [
+            1792446984.414,
+            "0"
+          ]
+        }
+      ]
+    },
+    "Error alert: 1 = Firing": {
+      "promql": "max(ALERTS{alertname=\"MonitoringHighErrorRate\",alertstate=\"firing\"}) or vector(0)",
+      "status": "success",
+      "result": [
+        {
+          "metric": {},
+          "value": [
+            1792446986.308,
+            "0"
+          ]
+        }
+      ]
+    }
+  }
+}
