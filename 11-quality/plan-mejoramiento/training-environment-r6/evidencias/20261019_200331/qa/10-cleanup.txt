@@ -1,0 +1,10 @@
+﻿time="2026-10-19T20:07:48-05:00" level=warning msg="The \"IAM_JWT_ISSUER\" variable is not set. Defaulting to a blank string."
+time="2026-10-19T20:07:48-05:00" level=warning msg="The \"IAM_JWT_PRIVATE_KEY\" variable is not set. Defaulting to a blank string."
+ Container r6lab-qa-9cc93281-postgres-1 Stopping
+ Container r6lab-qa-9cc93281-postgres-1 Stopped
+ Container r6lab-qa-9cc93281-postgres-1 Removing
+ Container r6lab-qa-9cc93281-postgres-1 Removed
+ Network r6lab-qa-9cc93281_default Removing
+ Volume r6lab-qa-9cc93281_postgres_data Removing
+ Volume r6lab-qa-9cc93281_postgres_data Removed
+ Network r6lab-qa-9cc93281_default Removed
