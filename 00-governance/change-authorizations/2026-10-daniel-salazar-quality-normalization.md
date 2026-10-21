@@ -29,7 +29,15 @@ The change must preserve canonical QA documents. In particular, `qa-report-r4-se
 
 ## Evidence reviewed
 
-The submitted before/after screenshots show the removal of the non-standard directory while retaining `qa-report-r4-security-scheduling.md`. The repository policy is detailed in [Improvement Plan documentation guide](../improvement-plan-documentation-guide.md).
+### Before normalization
+
+![PR #328 before: 11-quality contains the non-standard plan-mejoramiento directory.](./evidence/quality-before-normalization.png)
+
+### Expected normalized state
+
+![PR #328 after: the plan-mejoramiento directory is absent and the QA report remains.](./evidence/quality-after-normalization.png)
+
+The repository policy is detailed in [Improvement Plan documentation guide](../improvement-plan-documentation-guide.md).
 
 ## Completion criteria
 
