@@ -1,0 +1,20 @@
+
+> monitoring-mfe@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/sena/Micro Horario/design-software-monitoring-mfe
+
+
+ Test Files  15 passed (15)
+      Tests  65 passed (65)
+   Start at  16:49:55
+   Duration  42.45s (environment 64%, import 22%, tests 12%, transform 2%)
+
+Environment  jsdom was created 15 times · 225.94s total, 64% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.

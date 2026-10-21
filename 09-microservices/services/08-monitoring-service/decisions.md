@@ -1,6 +1,6 @@
 # Decisiones internas — monitoring-service
 
-> Estado: 🟢 Vigente | Última actualización: 2026-08-26
+> Estado: 🟢 Vigente | Última actualización: 2026-10-20
 > Para decisiones que afectan más de un servicio → ADR en `05-architecture/decisions/records/`.
 
 | # | Decisión | Motivo | Estado |
@@ -15,6 +15,7 @@
 | 08 | Monitoring construye su estado principalmente por eventos. | Evita polling/acoplamiento síncrono. | ACCEPTED |
 | 09 | Evento canónico de alerta: `monitoring.alert.triggered`. | Unifica contratos y elimina el alias histórico `monitoring.alert.generated`. | ACCEPTED |
 | 10 | **Decisión histórica: mantener `notification-worker` dentro de Monitoring.** | Era la opción previa a separar capacidades transversales. | **SUPERSEDED por ADR-005** |
+| 11 | Migración progresiva de `improvement_plan.specific_actions` de TEXT a JSONB mediante EXPAND, BACKFILL, CONTRACT y ROLLBACK. | Preservar datos y compatibilidad HTTP durante la evolución del esquema. Ver ADR-013. | PROPOSED                         |
 
 ## Consecuencias de ADR-005 para Monitoring
 
@@ -34,3 +35,4 @@ Monitoring conserva `generated_alert` y publica `monitoring.alert.triggered`. Cu
 
 - [ADR-005](../../../05-architecture/decisions/records/ADR-005-microservices-topology-and-transversal-capabilities.md)
 - [notification-service decisions](../10-notification-service/decisions.md)
+- [ADR-013: Migración progresiva TEXT a JSONB](../../../05-architecture/decisions/records/ADR-013-monitoring-r6-text-jsonb-migration.md)

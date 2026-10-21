@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2026-10-19T21:53:19.465002+00:00",
+    "service": "monitoring-service",
+    "level": "INFO",
+    "logger": "monitoring",
+    "message": "http_request_completed",
+    "trace_id": "1541ef6e05e37e0356b570c7b2c37b5c",
+    "correlation_id": "cc0809db-8662-41a1-962a-cf0687afc63f",
+    "event_id": null,
+    "span_id": "4ffabac0e7fb6aba",
+    "method": "POST",
+    "route": "/api/v1/kpi-types",
+    "status_code": 201,
+    "duration_ms": 48.951,
+    "error_type": null
+  }
+]

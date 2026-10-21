@@ -1,0 +1,32 @@
+..................................                                       [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\sena\Micro Horario\design-software-monitoring-service\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_domain_projection_postgres.py::test_real_assignment_survives_redelivery_and_unassigned_kpi_and_schedule_context
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:326: SAWarning: Column 'monitoring.ficha_tracking.id' is marked as a member of the primary key for table 'monitoring.ficha_tracking', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL.
+    session.execute(
+
+tests/test_domain_projection_postgres.py::test_real_assignment_survives_redelivery_and_unassigned_kpi_and_schedule_context
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:373: SAWarning: Column 'monitoring.kpi_tracking.id' is marked as a member of the primary key for table 'monitoring.kpi_tracking', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL. Note that as of SQLAlchemy 1.1, 'autoincrement=True' must be indicated explicitly for composite (e.g. multicolumn) primary keys if AUTO_INCREMENT/SERIAL/IDENTITY behavior is expected for one of the columns in the primary key. CREATE TABLE statements are impacted by this change as well on most backends.
+    session.execute(
+
+tests/test_domain_projection_postgres.py::test_real_assignment_survives_redelivery_and_unassigned_kpi_and_schedule_context
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:466: SAWarning: Column 'monitoring.generated_alert.id' is marked as a member of the primary key for table 'monitoring.generated_alert', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL.
+    alert_id = session.execute(
+
+tests/test_domain_projection_postgres.py::test_real_assignment_survives_redelivery_and_unassigned_kpi_and_schedule_context
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:504: SAWarning: Column 'monitoring.outbox.id' is marked as a member of the primary key for table 'monitoring.outbox', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL.
+    session.execute(insert(outbox).values(event_id=outbox_event_id, event_type="monitoring.alert.triggered", payload=payload, created_at=event.timestamp))
+
+tests/test_sqlalchemy_kpi_repository.py::SqlAlchemyKpiRepositoryIntegrationTest::test_inserts_and_queries_real_kpi_rows
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:288: SAWarning: Column 'monitoring.ficha_tracking.id' is marked as a member of the primary key for table 'monitoring.ficha_tracking', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL.
+    row = session.execute(
+
+tests/test_sqlalchemy_kpi_repository.py::SqlAlchemyKpiRepositoryIntegrationTest::test_inserts_and_queries_real_kpi_rows
+  C:\sena\Micro Horario\design-software-monitoring-service\src\monitoring\adapter\outbound\persistence\repo.py:216: SAWarning: Column 'monitoring.kpi_tracking.id' is marked as a member of the primary key for table 'monitoring.kpi_tracking', but has no Python-side or server-side default generator indicated, nor does it indicate 'autoincrement=True' or 'nullable=True', and no explicit value is passed.  Primary key columns typically may not store NULL. Note that as of SQLAlchemy 1.1, 'autoincrement=True' must be indicated explicitly for composite (e.g. multicolumn) primary keys if AUTO_INCREMENT/SERIAL/IDENTITY behavior is expected for one of the columns in the primary key. CREATE TABLE statements are impacted by this change as well on most backends.
+    row = session.execute(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+34 passed, 7 warnings in 24.62s

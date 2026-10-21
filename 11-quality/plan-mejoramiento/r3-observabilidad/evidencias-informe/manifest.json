@@ -1,0 +1,57 @@
+[
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/04-tracing/trace-summary.json",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/trace-summary.json",
+    "sha256": "32fb10e7a36cdbe54fad851baf3c2866e92967a62ec0ba3356135379341d0575",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/06-logs/correlated-logs.json",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/correlated-logs.json",
+    "sha256": "5860edff20de8349ef8beab06db425145d2844911b698fa6cc58f1859a474bd4",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/07-grafana/alert-firing.json",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/alert-firing.json",
+    "sha256": "bbcebe237a383ce2f5516f56a245e57d8e98805be354df008494a7d9c19bea57",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/07-grafana/alert-recovered.json",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/alert-recovered.json",
+    "sha256": "6fced5df934a3393872aec5fa97e4822d6a4e281582a591ab4b468ec803157c0",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/08-pruebas/domains-backend-tests.txt",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/domains-backend-tests.txt",
+    "sha256": "9f7e46451b87d4df4e74b076606b2414ce0f16f433cad86a5f702b05103db45e",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/08-pruebas/mfe-tests-final.txt",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/mfe-tests-final.txt",
+    "sha256": "4c41cc462e59e4459b288fa602f2734ba30a4c82f46d978c7cf6b650210a278f",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/04-tracing/tempo-trace.png",
+    "published": "assets/images/r3-observability/tempo-trace.png",
+    "sha256": "0ab0fa3dcc7ba27da2271cda1fe84153a81caa1b745e37da5e7db98cf75bc1ff",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/07-grafana/dashboard-firing.png",
+    "published": "assets/images/r3-observability/dashboard-firing.png",
+    "sha256": "fd3c5de3cafae72d90ddb7d924a25eaa58f2a837a8cd11059d41499012dedb4e",
+    "transformation": "none; exact copy"
+  },
+  {
+    "source": "EVIDENCIAS-PLAN-MEJORAMIENTO-R3/05-metricas/prometheus-panels.json",
+    "source_sha256": "23f5759e2c94441afc47a3ea936294d20270234816ea91a3413f96526f77339c",
+    "published": "11-quality/plan-mejoramiento/r3-observabilidad/evidencias-informe/metricas-extracto.json",
+    "sha256": "29bca6f8b79df964edbcb18537ee688688d46751ba3f05b4a53969bb74571a99",
+    "transformation": "Extract of original query results, omitting only instance labels."
+  }
+]

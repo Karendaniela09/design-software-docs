@@ -29,6 +29,7 @@ Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimie
 | POST | `/environment-types` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
 | GET | `/environment-types/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
 | GET | `/health` | `.\design-software-training-environment-service\cmd\training-environment-api\main.go` |
+| GET | `/metrics` | `.\design-software-training-environment-service\cmd\training-environment-api\main.go` |
 | GET | `/reports/environment-utilization` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_utilization_handler.go` |
 | GET | `/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
 | POST | `/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
@@ -69,4 +70,6 @@ Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimie
 
 ## Notas
 
-Usa DATABASE_URL y JWT/JWKS; expone reportes de utilizacion.
+Usa DATABASE_URL y JWT/JWKS; expone reportes de utilización e implementa observabilidad integral conforme a [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md) (OpenTelemetry W3C, métricas RED en /metrics, logs JSON correlacionados y alertas Grafana).
+
+- **Informe técnico de observabilidad (Reto R3):** [informe-tecnico-r3.md](./informe-tecnico-r3.md)

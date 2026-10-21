@@ -1,0 +1,71 @@
+{
+  "trace_id": "1541ef6e05e37e0356b570c7b2c37b5c",
+  "captured_at": "2026-10-19T21:55:59.159330+00:00",
+  "parent_chain_verified": true,
+  "spans": [
+    {
+      "service": "monitoring-mfe",
+      "name": "monitoring.ui POST /api/v1/kpi-types",
+      "span_id": "f273a6c5e5befffe",
+      "parent_span_id": "",
+      "duration_ms": 69.3,
+      "kind": "SPAN_KIND_CLIENT"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "POST /api/v1/kpi-types",
+      "span_id": "9650ff9d1e27959d",
+      "parent_span_id": "f273a6c5e5befffe",
+      "duration_ms": 49.479746,
+      "kind": "SPAN_KIND_SERVER"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "POST /api/v1/kpi-types http receive",
+      "span_id": "153f51f21a827a17",
+      "parent_span_id": "4ffabac0e7fb6aba",
+      "duration_ms": 0.132919,
+      "kind": "SPAN_KIND_INTERNAL"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "POST /api/v1/kpi-types http send",
+      "span_id": "77cbd6bb74987d4f",
+      "parent_span_id": "4ffabac0e7fb6aba",
+      "duration_ms": 0.051982,
+      "kind": "SPAN_KIND_INTERNAL"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "POST /api/v1/kpi-types http send",
+      "span_id": "79558752283e19ff",
+      "parent_span_id": "4ffabac0e7fb6aba",
+      "duration_ms": 0.022877,
+      "kind": "SPAN_KIND_INTERNAL"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "monitoring POST /api/v1/kpi-types",
+      "span_id": "4ffabac0e7fb6aba",
+      "parent_span_id": "9650ff9d1e27959d",
+      "duration_ms": 49.201911,
+      "kind": "SPAN_KIND_INTERNAL"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "connect",
+      "span_id": "31f6fe62de067852",
+      "parent_span_id": "4ffabac0e7fb6aba",
+      "duration_ms": 0.375315,
+      "kind": "SPAN_KIND_CLIENT"
+    },
+    {
+      "service": "monitoring-service",
+      "name": "INSERT monitoring_r3",
+      "span_id": "6f939e0351072091",
+      "parent_span_id": "4ffabac0e7fb6aba",
+      "duration_ms": 6.41415,
+      "kind": "SPAN_KIND_CLIENT"
+    }
+  ]
+}

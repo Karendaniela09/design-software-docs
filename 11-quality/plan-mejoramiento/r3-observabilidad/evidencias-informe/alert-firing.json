@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-10-19T21:50:59.420421+00:00",
+  "prometheus": {
+    "state": "firing",
+    "name": "MonitoringHighErrorRate",
+    "query": "100 * (sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\",http_status_code=~\"4..|5..\"}[1m])) or vector(0)) / clamp_min((sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m])) or vector(0)), 1e-06) > 5",
+    "duration": 20,
+    "keepFiringFor": 0,
+    "labels": {
+      "service": "monitoring-service",
+      "severity": "warning"
+    },
+    "annotations": {
+      "description": "HTTP 4xx and 5xx responses, excluding liveness/readiness, over one minute. Returns to normal at 5 percent or less.",
+      "summary": "Monitoring error ratio exceeds 5 percent"
+    },
+    "alerts": [
+      {
+        "labels": {
+          "alertname": "MonitoringHighErrorRate",
+          "service": "monitoring-service",
+          "severity": "warning"
+        },
+        "annotations": {
+          "description": "HTTP 4xx and 5xx responses, excluding liveness/readiness, over one minute. Returns to normal at 5 percent or less.",
+          "summary": "Monitoring error ratio exceeds 5 percent"
+        },
+        "state": "firing",
+        "activeAt": "2026-10-19T21:50:26.642335451Z",
+        "value": "1.4148584094341889e+01"
+      }
+    ],
+    "health": "ok",
+    "evaluationTime": 0.02836868,
+    "lastEvaluation": "2026-10-19T21:50:53.751736161Z",
+    "type": "alerting"
+  },
+  "grafana": {
+    "state": "firing",
+    "name": "Monitoring errors above 5 percent",
+    "query": "100 * (sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\",http_status_code=~\"4..|5..\"}[1m])) or vector(0)) / clamp_min((sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m])) or vector(0)), 0.000001)",
+    "duration": 20,
+    "annotations": {
+      "summary": "HTTP 4xx and 5xx above 5 percent over one minute"
+    },
+    "activeAt": "2026-10-19T21:50:40Z",
+    "alerts": [
+      {
+        "labels": {
+          "alertname": "Monitoring errors above 5 percent",
+          "grafana_folder": "Monitoring",
+          "service": "monitoring-service",
+          "severity": "warning"
+        },
+        "annotations": {
+          "summary": "HTTP 4xx and 5xx above 5 percent over one minute"
+        },
+        "state": "Alerting",
+        "activeAt": "2026-10-19T21:50:40Z",
+        "value": "1e+00"
+      }
+    ],
+    "totals": {
+      "alerting": 1
+    },
+    "totalsFiltered": {
+      "alerting": 1
+    },
+    "labels": {
+      "service": "monitoring-service",
+      "severity": "warning"
+    },
+    "health": "ok",
+    "type": "alerting",
+    "lastEvaluation": "2026-10-19T21:50:50Z",
+    "evaluationTime": 0.776163114
+  }
+}

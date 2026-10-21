@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-10-19T21:52:22.654616+00:00",
+  "prometheus": {
+    "state": "inactive",
+    "name": "MonitoringHighErrorRate",
+    "query": "100 * (sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\",http_status_code=~\"4..|5..\"}[1m])) or vector(0)) / clamp_min((sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m])) or vector(0)), 1e-06) > 5",
+    "duration": 20,
+    "keepFiringFor": 0,
+    "labels": {
+      "service": "monitoring-service",
+      "severity": "warning"
+    },
+    "annotations": {
+      "description": "HTTP 4xx and 5xx responses, excluding liveness/readiness, over one minute. Returns to normal at 5 percent or less.",
+      "summary": "Monitoring error ratio exceeds 5 percent"
+    },
+    "alerts": [],
+    "health": "ok",
+    "evaluationTime": 0.010210531,
+    "lastEvaluation": "2026-10-19T21:52:12.755249785Z",
+    "type": "alerting"
+  },
+  "grafana": {
+    "state": "inactive",
+    "name": "Monitoring errors above 5 percent",
+    "query": "100 * (sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\",http_status_code=~\"4..|5..\"}[1m])) or vector(0)) / clamp_min((sum(rate(monitoring_http_requests_total{http_route!~\".*/(health|ready)\"}[1m])) or vector(0)), 0.000001)",
+    "duration": 20,
+    "annotations": {
+      "summary": "HTTP 4xx and 5xx above 5 percent over one minute"
+    },
+    "alerts": [
+      {
+        "labels": {
+          "alertname": "Monitoring errors above 5 percent",
+          "grafana_folder": "Monitoring",
+          "service": "monitoring-service",
+          "severity": "warning"
+        },
+        "annotations": {
+          "summary": "HTTP 4xx and 5xx above 5 percent over one minute"
+        },
+        "state": "Normal",
+        "activeAt": "2026-10-19T21:52:00Z",
+        "value": ""
+      }
+    ],
+    "totals": {
+      "normal": 1
+    },
+    "totalsFiltered": {
+      "normal": 1
+    },
+    "labels": {
+      "service": "monitoring-service",
+      "severity": "warning"
+    },
+    "health": "ok",
+    "type": "alerting",
+    "lastEvaluation": "2026-10-19T21:52:20Z",
+    "evaluationTime": 0.245820833
+  }
+}
