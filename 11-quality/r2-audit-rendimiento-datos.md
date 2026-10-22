@@ -220,6 +220,29 @@ y la actualización de los archivos `after`.
 El workflow R5 tampoco fue modificado. La ejecución remota #4 del PR de
 audit-service terminó en `success` después de publicar la evidencia anterior.
 
+## PRs abiertos del autor en el workspace
+
+Consulta realizada el 2026-10-22 sobre los diez repositorios Git presentes en
+este workspace. Se incluyen únicamente PRs con estado `open`, creados por
+`FreinierCardona` y cuya rama origen coincide con una rama local del workspace.
+No se infiere aprobación, despliegue ni certificación desde la existencia de un
+PR; cada uno conserva su propio alcance, revisión y validaciones.
+
+| Repositorio | PR abierto | Rama origen → destino | Alcance declarado |
+|-------------|------------|-----------------------|-------------------|
+| `design-software-audit-service` | [#6 — Fix/audit r2 performance data](https://github.com/code-sena/design-software-audit-service/pull/6) | `fix/audit-r2-performance-data` → `develop` | Evidencia R2: k6, EXPLAIN, índices y rollback. |
+| `design-software-audit-db` | [#36 — perf(audit-db): add reversible query indexes](https://github.com/code-sena/design-software-audit-db/pull/36) | `fix/audit-r2-performance-data` → `develop` | Índices de consulta R2 y rollback Liquibase. |
+| `design-software-docker-infra` | [#46 — fix(infra): run audit service R2 topology](https://github.com/code-sena/design-software-docker-infra/pull/46) | `fix/audit-r2-performance-data` → `develop` | Topología local de Auditoría para R2. |
+| `design-software-docs` | [#346 — docs(audit): document R2 performance evidence](https://github.com/code-sena/design-software-docs/pull/346) | `fix/audit-r2-performance-data` → `main` | Informe técnico y evidencia documental de R2. |
+| `design-software-audit-mfe` | [#8 — fix(audit-mfe): forward shell access token](https://github.com/code-sena/design-software-audit-mfe/pull/8) | `fix/audit-e2e-token-forwarding` → `develop` | Reenvío opcional del token del shell al MFE de Auditoría. |
+| `design-software-frontend-platform` | [#9 — fix(platform): extend audit remote props](https://github.com/code-sena/design-software-frontend-platform/pull/9) | `fix/audit-e2e-token-contract` → `develop` | Contrato tipado de props para el remoto de Auditoría. |
+| `design-software-web-shell` | [#24 — fix(web-shell): proxy audit API and pass token](https://github.com/code-sena/design-software-web-shell/pull/24) | `fix/audit-e2e-gateway-proxy` → `develop` | Proxy restringido de la API de Auditoría y entrega del token al remoto. |
+
+No se encontraron PRs abiertos de `FreinierCardona` asociados a las ramas
+locales de `design-software-design-system`, `design-software-iam-service` ni
+`design-software-iam-db`. Los PRs abiertos de otros autores presentes en algunos
+de esos repositorios no se incluyen para no atribuirlos incorrectamente.
+
 ## Puntos ciegos y límites de la evidencia
 
 - Es una prueba local en un solo Docker Desktop; no incorpora balanceador,
