@@ -3,8 +3,8 @@
 > Evaluation Scope: `design-software-scheduling-service`  
 > Author: Daniel Salazar Vargas (CC 1075790810) — ADSO 3145555  
 > Date: 2026-10-21  
-> Status: **CERRADO / 100% CUMPLIMIENTO**  
-> Reference: Improvement Plan (Acta No. 02 - 2026, Criteria 11.b, 11.c, 11.d) — Auditoría QA R4 Seguridad
+> Status: **CLOSED / 100% COMPLIANT**  
+> Reference: Improvement Plan (Acta No. 02 - 2026, Criteria 11.b, 11.c, 11.d) — QA R4 Security Audit
 
 ---
 
@@ -69,14 +69,14 @@ mvn test -Dtest=SecurityNegativeAuthIT -Dsurefire.failIfNoSpecifiedTests=false
 
 ## 3. Findings Resolution & Closure Log
 
-### QA-R4-001 — Cobertura incompleta de scopes ajenos
-- **Severidad:** Alta para cierre de R4
-- **Estado:** **CERRADO (RESOLVED)**
-- **Hallazgo original:** La suite contaba con 17 pruebas y evaluaba ausencia de claim (`trainingCenterScopeWithoutCenterClaimIs403`), pero no demostraba explícitamente el rechazo ante claims válidos pertenecientes a otra entidad (centro ajeno o ficha ajena).
-- **Acción implementada:**
-  1. Se implementó el método `trainingCenterScopeFromForeignCenterCannotReadSchedule` en `SecurityNegativeAuthIT.java`, mapeando una ficha a un centro permitido en la proyección `ficha_training_center_projection` y ejecutando una petición GET con un JWT válido firmado con RSA cuyo `training_center_id` pertenece a otro centro (`OTHER_TRAINING_CENTER_ID`). Se verifica respuesta `404 Not Found` (`SCHEDULE_NOT_FOUND`) y ausencia total de datos del recurso protegido.
-  2. Se implementó el método `ownFichaScopeCannotReadForeignSchedule` en `SecurityNegativeAuthIT.java`, insertando un horario publicado para `TEST_FICHA_ID` y ejecutando una consulta con un JWT válido firmado con RSA con feature `SCH_VIEW_OWN:OWN_FICHA_AS_LEARNER` y claim `ficha_id` correspondiente a una ficha ajena (`OTHER_FICHA_ID`). Se verifica respuesta `404 Not Found` (`SCHEDULE_NOT_FOUND`) sin revelar existencia ni datos.
-  3. Total de pruebas negativas elevado a **19**, todas ejecutadas y aprobadas en local y en el pipeline de CI (GitHub Actions).
+### QA-R4-001 — Incomplete Coverage of Foreign Scopes
+- **Severity:** High (blocker for R4 sign-off)
+- **Status:** **CLOSED (RESOLVED)**
+- **Original Finding:** The suite contained 17 tests and verified missing claims (`trainingCenterScopeWithoutCenterClaimIs403`), but did not explicitly demonstrate rejection when a valid JWT contains claims identifying a foreign entity (foreign training center or foreign ficha).
+- **Remediation Implemented:**
+  1. Implemented test method `trainingCenterScopeFromForeignCenterCannotReadSchedule` in `SecurityNegativeAuthIT.java`, mapping a ficha to an allowed center in `ficha_training_center_projection` and performing a GET request using a valid RSA-signed JWT whose `training_center_id` belongs to another center (`OTHER_TRAINING_CENTER_ID`). Verified `404 Not Found` (`SCHEDULE_NOT_FOUND`) response with zero exposure of protected resource attributes.
+  2. Implemented test method `ownFichaScopeCannotReadForeignSchedule` in `SecurityNegativeAuthIT.java`, inserting a published schedule for `TEST_FICHA_ID` and issuing a query using a valid RSA-signed JWT with feature `SCH_VIEW_OWN:OWN_FICHA_AS_LEARNER` and `ficha_id` claim corresponding to a foreign ficha (`OTHER_FICHA_ID`). Verified `404 Not Found` (`SCHEDULE_NOT_FOUND`) response without disclosing existence or data.
+  3. Total negative integration test count increased to **19**, with all tests executed and passing both locally and in the GitHub Actions CI pipeline.
 
 ---
 
