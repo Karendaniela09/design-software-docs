@@ -103,44 +103,153 @@ Después de `rollback-count 1`, la comprobación `to_regclass` devolvió
 finaliza actualizando el esquema completo para no dejar el entorno a medio
 estado.
 
-## Reproducción local
+## Implementación técnica
 
-Desde un checkout con los repositorios como hermanos, crear archivos locales a
-partir de sus plantillas, sin versionarlos:
+La solución versionada mantiene separadas las responsabilidades y no modifica
+el workflow R5:
+
+1. `performance/k6/audit-query.js` define un escenario `constant-vus` de 50
+   VUs durante 5 minutos. `setup()` inicia sesión por el endpoint contractual
+   `POST /api/v1/auth/login`; no fabrica JWT ni desactiva seguridad.
+2. El token permanece en memoria durante la carga. Las solicitudes cubren 70 %
+   listado, 20 % detalle y 10 % exportación, todas con checks de HTTP 200.
+3. Los thresholds ejecutables son `http_req_duration: p(95)<300` y
+   `audit_request_errors: rate<0.01`. Además, la aceptación exige cero checks
+   fallidos.
+4. `scripts/run-r2-data.ps1` crea un proyecto Compose aislado, aplica el
+   baseline, inserta 200 002 registros, captura tres planes
+   `EXPLAIN (ANALYZE, BUFFERS)`, aplica el changeset R2, vuelve a capturar los
+   planes y comprueba el rollback antes de dejar el esquema actualizado.
+5. `scripts/run-r2-k6.ps1` invoca el servicio `audit-k6`, crea siempre
+   `performance/results/before/` y `performance/results/after/`, guarda el JSON
+   de la fase y produce `summary.md`.
+6. k6 incluye el retorno de `setup()` en `setup_data`; el script elimina esa
+   propiedad antes de conservar la evidencia para que el Bearer token no quede
+   versionado.
+
+“Sin pasar credenciales al comando” significa que el correo y la contraseña de
+la identidad de práctica se leen desde el `.env` local ignorado por Git. No
+significa acceso anónimo: IAM, JWKS, issuer, features y los permisos
+`AUDIT_LOG_VIEW`/`AUDIT_EXPORT` siguen siendo obligatorios. La automatización
+existente no crea usuarios IAM ni genera credenciales; esa preparación pertenece
+al entorno de prueba y debe usar únicamente datos de práctica.
+
+## Ejecución exacta
+
+Requisitos: Docker Desktop, Windows PowerShell 5.1 o PowerShell 7, los
+repositorios hermanos y una identidad IAM de práctica con `AUDIT_LOG_VIEW` y
+`AUDIT_EXPORT`. Desde la raíz del workspace, cree archivos locales a partir de
+las plantillas; no los versione:
 
 ```powershell
-Copy-Item design-software-audit-service/.env.example design-software-audit-service/.env
-Copy-Item design-software-audit-service/.env.worker.example design-software-audit-service/.env.worker
-Copy-Item docker-infra/design-software-docker-infra/.env.example docker-infra/design-software-docker-infra/.env
+Copy-Item .\design-software-audit-service\.env.example `
+  .\design-software-audit-service\.env
+Copy-Item .\design-software-audit-service\.env.worker.example `
+  .\design-software-audit-service\.env.worker
+Copy-Item .\docker-infra\design-software-docker-infra\.env.example `
+  .\docker-infra\design-software-docker-infra\.env
 ```
 
-Completar únicamente los valores locales de `.env`, incluida una cuenta IAM de
-prueba con `AUDIT_LOG_VIEW` y `AUDIT_EXPORT`; no guardar un access token. Para
-los planes y rollback, desde `design-software-audit-service`:
+Complete los placeholders de infraestructura y los valores
+`AUDIT_LOAD_EMAIL`/`AUDIT_LOAD_PASSWORD` con la cuenta desechable. El JWT no se
+configura ni se guarda: `setup()` lo obtiene mediante IAM.
+
+Desde `design-software-audit-service`, prepare fixture, planes y rollback:
 
 ```powershell
-pwsh .\scripts\run-r2-data.ps1 `
+.\scripts\run-r2-data.ps1 `
   -InfraDirectory ..\docker-infra\design-software-docker-infra `
-  -EnvFile ..\docker-infra\design-software-docker-infra\.env
+  -EnvFile ..\docker-infra\design-software-docker-infra\.env `
+  -ProjectName audit-r2
 ```
 
-Para guardar cada carga autenticada en carpetas comparables, desde
-`design-software-audit-service`:
+Con IAM, PostgreSQL, sus migraciones y `audit-query-api` activos, capture ambas
+fases. `before` se ejecuta sin los tres índices R2 y `after` después de aplicar
+el changeset:
 
 ```powershell
 .\scripts\run-r2-k6.ps1 -Phase before `
   -InfraDirectory ..\docker-infra\design-software-docker-infra `
-  -EnvFile ..\docker-infra\design-software-docker-infra\.env
+  -EnvFile ..\docker-infra\design-software-docker-infra\.env `
+  -ProjectName audit-r2
 
 .\scripts\run-r2-k6.ps1 -Phase after `
   -InfraDirectory ..\docker-infra\design-software-docker-infra `
-  -EnvFile ..\docker-infra\design-software-docker-infra\.env
+  -EnvFile ..\docker-infra\design-software-docker-infra\.env `
+  -ProjectName audit-r2
 ```
 
-El script crea siempre `performance/results/before/` y
-`performance/results/after/`, guarda en cada fase `k6-summary.json` y una vista
-legible `summary.md`. La fase `after` termina con error si no cumple p95 menor
-de 300 ms, errores menores de 1 % y cero checks fallidos.
+Al terminar, elimine exclusivamente el proyecto aislado y sus volúmenes:
+
+```powershell
+docker compose --project-name audit-r2 `
+  --env-file ..\docker-infra\design-software-docker-infra\.env `
+  -f ..\docker-infra\design-software-docker-infra\docker-compose.yml `
+  down -v --remove-orphans
+```
+
+## Identificación y lectura de resultados
+
+| Ruta | Contenido y uso |
+|------|-----------------|
+| `performance/results/after/k6-summary.json` | Métricas k6 estructuradas de la última ejecución optimizada. Está sanitizado y no contiene `setup_data`, JWT ni credenciales. |
+| `performance/results/after/summary.md` | Resumen humano con VUs, duración, iteraciones, p95, errores, checks y `PASS`/`FAIL`. Es la primera evidencia que debe revisar QA. |
+| `performance/results/before/k6-summary.json` | Línea base real de 50 VUs/5 min tomada con los índices R2 retirados. |
+| `performance/results/before/summary.md` | Resumen humano de la línea base; su `FAIL` de p95 es esperado y demuestra la necesidad del cambio. |
+| `performance/results/explain-before.txt` | Tres planes SQL antes de aplicar los índices. |
+| `performance/results/explain-after.txt` | Los mismos tres planes después de aplicar los índices. |
+| `performance/results/rollback-verification.txt` | Resultado `t | t | t` que demuestra la ausencia de los tres índices tras rollback. |
+| `performance/results/seed.txt` | Confirmación del volumen de datos insertado. |
+
+La aceptación automática de `after` exige p95 `< 300 ms`, tasa de
+`audit_request_errors < 0.01` y cero checks fallidos. Un archivo existente no
+prueba una ejecución nueva: debe revisarse la salida del comando, su exit code
+y la actualización de los archivos `after`.
+
+## Repositorios involucrados
+
+| Repositorio | Uso en el flujo | Modificación de esta entrega |
+|-------------|-----------------|------------------------------|
+| `design-software-audit-service` | Escenario k6, datos SQL, sanitización, README y resultados. | Sí: README actualizado; los scripts y resultados ya estaban versionados en la rama R2. |
+| `design-software-docs` | Informe técnico y ADR de R2. | Sí: este informe detallado. |
+| `design-software-audit-db` | Changeset de tres índices y rollback ya versionados en la rama R2. | No se requirió un cambio nuevo. |
+| `design-software-docker-infra` | Compose para PostgreSQL, Liquibase, IAM, query-api y k6. | No se requirió un cambio nuevo. |
+| `design-software-iam-service` | Login real, emisión JWT y JWKS. | No modificado. |
+| `design-software-iam-db` | Esquema, roles y features contractuales. | No modificado. |
+
+El workflow R5 tampoco fue modificado. La ejecución remota #4 del PR de
+audit-service terminó en `success` después de publicar la evidencia anterior.
+
+## Puntos ciegos y límites de la evidencia
+
+- Es una prueba local en un solo Docker Desktop; no incorpora balanceador,
+  latencia entre hosts, límites de nube, TLS externo ni ruido de producción.
+- El fixture tiene 200 002 filas y una distribución controlada. Un volumen o
+  cardinalidad diferentes requieren repetir k6 y los `EXPLAIN`.
+- Se mide la API de lectura (lista, detalle y exportación); no se prueba el
+  throughput de ingestión de `audit-worker` ni RabbitMQ durante esta carga.
+- La identidad de aceptación usa scope `GLOBAL`. La corrección del filtrado
+  `TRAINING_CENTER` está cubierta por implementación y planes, pero no por una
+  segunda corrida k6 específica de ese scope.
+- La integración IAM→Actors para `ficha_id` no se ejecuta porque el usuario de
+  práctica no es `LEARNER`; este R2 no demuestra ese flujo mTLS.
+- PostgreSQL puede conservar páginas calientes en caché. La comparación
+  before/after mantiene el mismo host, dataset y mezcla para reducir el sesgo,
+  pero no equivale a una prueba de almacenamiento frío.
+- El p95 agregado incluye los tres endpoints y una única llamada de login del
+  `setup`; no publica percentiles independientes por endpoint. Los checks sí
+  prueban cada ruta por separado.
+- `responseType: none` evita retener cuerpos en memoria de k6, pero la API sí
+  produce y transfiere la respuesta; la cifra de bytes recibidos lo confirma.
+- La automatización no aprovisiona una cuenta IAM. El ejecutor debe preparar
+  una identidad descartable compatible con el contrato y mantener sus valores
+  solamente en archivos `.env` locales ignorados por Git.
+- `before` y `after` son invocaciones separadas. Para una comparación nueva se
+  deben retirar los índices en el proyecto aislado, ejecutar `before`, aplicar
+  el changeset y después ejecutar `after`.
+- Un readiness `200`, una compilación o un `EXPLAIN` aislado no sustituyen la
+  corrida k6 de 50 VUs/5 minutos. La aceptación se basa en el resumen k6 y su
+  código de salida.
 
 ## Estado de aceptación
 
