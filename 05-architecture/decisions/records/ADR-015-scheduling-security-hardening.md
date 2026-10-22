@@ -28,7 +28,8 @@ We decide to implement an **asymmetric cryptographic JWT validation layer with f
 Specifically:
 
 1. **Strict Asymmetric Cryptographic Verification (RS256):**
-   - The service enforces RS256 signature verification using public keys fetched from IAM's JSON Web Key Set (`JWKS`, `kid=iam-rsa-1`).
+   - In runtime and deployed environments, the service enforces RS256 signature verification using public keys fetched from IAM's JSON Web Key Set (`JWKS`, `kid=iam-rsa-1`).
+   - In the automated CI integration suite (`SecurityNegativeAuthIT`), verification is executed hermetically using Spring Security's real `SecurityFilterChain` and `NimbusJwtDecoder` backed by an ephemeral 2048-bit RSA key pair, validating exact RS256 cryptography and issuer without an external IAM service dependency in CI.
    - Unsigned tokens (`alg: none`) and symmetric key forgery attempts are rejected at the security filter layer with `401 Unauthorized`.
    - The token issuer (`iss: sena-iam-service`) and strict time-to-live (`exp`) are validated before any controller execution.
 

@@ -486,7 +486,11 @@ redis-cli TTL "scheduling:readmodel:environment:<uuid-ambiente>"
 
 ## Security Verification & Negative Integration Tests (R4 Hardening)
 
-### Health & Cryptographic Endpoint Probing
+### Cryptographic Architecture & Scope Boundary
+- **Runtime / Staging / Production:** `scheduling-service` verifies RS256 token signatures against IAM's public keys via the JWKS endpoint (`IAM_JWKS_URI=http://iam-service:8001/.well-known/jwks.json`, exposed through Edge Gateway at `/iam/api/v1/auth/.well-known/jwks.json`).
+- **Automated CI Integration Suite (`SecurityNegativeAuthIT`):** The automated suite runs hermetically against Spring Security's real `SecurityFilterChain` and `NimbusJwtDecoder` with an isolated 2048-bit RSA key pair and valid `sena-iam-service` issuer. This verifies complete RS256 signature enforcement, `alg: none` rejection, key tampering defense, and granular claim/scope rules without requiring an external `iam-service` container during CI.
+
+### Health & Cryptographic Endpoint Probing (Runtime / Gateway)
 Verify service health and cryptographic key availability through the Traefik Edge Gateway:
 
 ```bash
@@ -500,7 +504,7 @@ curl -s http://localhost:18080/iam/api/v1/auth/.well-known/jwks.json
 ```
 
 ### Running Automated Security Negative Integration Tests
-Execute the 17 automated negative authentication and authorization tests in `schedules-api`:
+Execute the 19 automated negative authentication and authorization tests in `schedules-api`:
 
 ```bash
 mvn test -Dtest=SecurityNegativeAuthIT -Dsurefire.failIfNoSpecifiedTests=false

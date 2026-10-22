@@ -39,7 +39,7 @@ The following matrix documents the 30 specific threats analyzed across the 9 com
 
 | STRIDE Category | Threat ID | Threat Description | Vulnerable Component | Implemented Mitigation | Verification Test |
 |---|---|---|---|---|---|
-| **Spoofing** | TH-S01 | Request with forged JWT signed with attacker's private key | `scheduling-api` / Security Filter | Asymmetric RS256 signature verification against IAM JWKS (`kid=iam-rsa-1`). | `tokenSignedWithWrongKeyIs401` |
+| **Spoofing** | TH-S01 | Request with forged JWT signed with attacker's private key | `scheduling-api` / Security Filter | Asymmetric RS256 signature verification (against IAM JWKS in production; isolated RSA Nimbus decoder in CI suite). | `tokenSignedWithWrongKeyIs401` |
 | **Spoofing** | TH-S02 | Token with unsigned algorithm (`alg: none`) | `scheduling-api` / Nimbus Decoder | Explicit enforcement of RS256; `alg: none` rejected with HTTP 401. | `algNoneTokenIs401` |
 | **Spoofing** | TH-S03 | Token issued by untrusted/foreign identity provider | `scheduling-api` / Security Filter | Validator enforces `iss: sena-iam-service`. Foreign issuers fail with HTTP 401. | `tokenWithForeignIssuerIs401` |
 | **Spoofing** | TH-S04 | Anonymous request without `Authorization` header | Traefik Gateway / API | Endpoint security requires valid bearer token; returns HTTP 401. | `missingAuthorizationHeaderIs401` |

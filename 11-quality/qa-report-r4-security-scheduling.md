@@ -109,7 +109,7 @@ The service was audited against the applicable Level 1 requirements of the OWASP
 | Requirement | ASVS Code | Description | Compliance Status | Evidence / Implementation |
 |---|:---:|---|:---:|---|
 | V2.1.1 | 2.1.1 | Verify that user-supplied passwords are not accepted by API | **COMPLIANT** | Authentication delegated to `iam-service`; scheduling receives only JWTs. |
-| V2.7.1 | 2.7.1 | Token verification using cryptographically secure algorithms | **COMPLIANT** | Mandatory RS256 signature verification via Nimbus and IAM JWKS. |
+| V2.7.1 | 2.7.1 | Token verification using cryptographically secure algorithms | **COMPLIANT** | Mandatory RS256 signature verification via Nimbus. In production, keys are resolved from IAM JWKS; in automated CI (`SecurityNegativeAuthIT`), tests run hermetically with an isolated 2048-bit RSA key pair. |
 | V2.7.2 | 2.7.2 | Reject tokens with weak or disabled cryptographic schemes | **COMPLIANT** | Tokens with `alg: none` or symmetric HS256 rejected with HTTP 401. |
 | V2.7.3 | 2.7.3 | Reject expired tokens | **COMPLIANT** | Built-in Spring Security `JwtTimestampValidator` validates `exp` claim. |
 
@@ -138,7 +138,7 @@ The service was audited against the applicable Level 1 requirements of the OWASP
 | Requirement | ASVS Code | Description | Compliance Status | Evidence / Implementation |
 |---|:---:|---|:---:|---|
 | V8.1.1 | 8.1.1 | Cryptographic algorithms use approved standards | **COMPLIANT** | RSA 2048-bit with SHA-256 (RS256) used for all token signatures. |
-| V8.2.1 | 8.2.1 | Secrets and private keys are not hardcoded | **COMPLIANT** | Public keys dynamically retrieved from JWKS; zero hardcoded DB/JWT credentials in codebase or test suites (R4-SEC-001 remediated via `requiredEnv`). |
+| V8.2.1 | 8.2.1 | Secrets and private keys are not hardcoded | **COMPLIANT** | Public keys dynamically retrieved from JWKS in runtime / isolated 2048-bit RSA test decoder; zero hardcoded DB/JWT credentials in codebase or test suites (R4-SEC-001 remediated via `requiredEnv`). |
 
 ### V10: Malicious Code and Error Handling
 | Requirement | ASVS Code | Description | Compliance Status | Evidence / Implementation |
