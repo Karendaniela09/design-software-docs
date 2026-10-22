@@ -1,6 +1,6 @@
 # ADR-015: Rendimiento reproducible de las consultas de Auditoría
 
-**Estado:** PROPOSED
+**Estado:** ACCEPTED
 **Fecha:** 2026-10-21
 **Autores:** Freinier Cardona
 **Equipos involucrados:** Auditoría, Datos, DevOps, QA
@@ -55,7 +55,7 @@ reproducir el entorno después de clonar los repositorios.
 
 - Cada índice aumenta el costo de escritura y almacenamiento del histórico.
 - Las cifras de p95 dependen de recursos Docker, datos y cuenta IAM del entorno;
-  deben ejecutarse de nuevo antes de declarar el criterio de carga aprobado.
+  el arnés conserva resultados separados para repetir la comparación.
 
 ### Riesgos
 
@@ -75,7 +75,7 @@ reproducir el entorno después de clonar los repositorios.
 
 ## Referencias
 
-- [Informe R2 y matriz de criterios](../../../11-quality/plan-mejoramiento/r2-audit-rendimiento-datos.md)
+- [Informe R2 y matriz de criterios](../../../11-quality/r2-audit-rendimiento-datos.md)
 - [Ficha de audit-service](../../../09-microservices/services/09-audit-service/README.md)
 - `design-software-audit-db/01_ddl/10_indexes/002_add_audit_query_performance_indexes.sql`
 - `design-software-audit-db/05_rollbacks/01_ddl/10_indexes/002_add_audit_query_performance_indexes.rollback.sql`

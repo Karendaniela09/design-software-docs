@@ -1,6 +1,6 @@
 # R2 — Rendimiento y datos de audit-service
 
-> Estado: 🟡 En revisión | Última actualización: 2026-10-21
+> Estado: 🟢 Verificado | Última actualización: 2026-10-22
 > Autor: Freinier Cardona | Equipo: Auditoría / ADSO 3145555
 
 ## Contexto
@@ -22,16 +22,19 @@ Se evalúan exclusivamente los endpoints de lectura ya contratados:
 
 La prueba conserva IAM, `AUDIT_LOG_VIEW`, `AUDIT_EXPORT` y el alcance del
 centro de formación. No agrega rutas, bypass de autenticación ni datos de
-producción.
+producción. La identidad usada el 2026-10-22 fue un `SYSTEM_ADMIN` local de
+práctica creado únicamente en la base desechable. IAM emitió el JWT RS256 real
+por `POST /api/v1/auth/login`, publicó su JWKS contractual y entregó
+`AUDIT_LOG_VIEW:GLOBAL` y `AUDIT_EXPORT:GLOBAL`; no se fabricaron tokens.
 
 ## Entregables y trazabilidad
 
 | Criterio R2 | Entrega versionada | Estado verificable |
 |-------------|-------------------|--------------------|
-| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js` | Bloqueado: el intento autenticado del 2026-10-21 no obtuvo JWKS de IAM; no hay métricas k6 que permitan aprobar las dos métricas. |
+| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js`, `scripts/run-r2-k6.ps1`, `performance/results/{before,after}` | Cumplido el 2026-10-22: `after` p95 46.46 ms, 0 % de errores, 235 611 iteraciones y 100 % de checks. |
 | Tres `EXPLAIN (ANALYZE, BUFFERS)` antes y después | `performance/sql/r2-explain.sql`, `performance/sql/r2-seed.sql`, `scripts/run-r2-data.ps1` | Ejecutado en PostgreSQL 16 con fixture aislado de 200 002 filas. |
 | Índices Liquibase con rollback | Changeset `r2-audit-performance-query-indexes` y SQL de rollback en `design-software-audit-db` | Rollback `rollback-count 1` probado y los tres índices quedaron ausentes. |
-| Informe comparativo | Este documento y [ADR-015](../../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Versionado; las salidas crudas quedan fuera de Git. |
+| Informe comparativo | Este documento y [ADR-015](../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Resúmenes JSON y Markdown separados en `before/` y `after/`. |
 
 ## Validación del entorno
 
@@ -62,17 +65,38 @@ No se generó `k6-summary.json`, no se ejecutaron 50 VUs durante cinco minutos
 y no se registran total de solicitudes, p95 ni tasa de errores. No se usaron
 tokens fabricados, mocks ni bypass de autorización.
 
+### Cierre autenticado del 2026-10-22
+
+El bloqueo anterior se cerró en el proyecto Compose aislado `audit-r2-final`.
+Se aplicaron las migraciones IAM reales y se creó una cuenta de práctica con
+las features de Auditoría. Para el perfil `SYSTEM_ADMIN` se dejó vacía en el
+runtime de prueba la integración opcional `active-ficha` con Actors, que el
+contrato solo consulta para perfiles exclusivamente `LEARNER`. La clave RSA,
+las contraseñas y el token fueron efímeros y no se imprimieron ni versionaron.
+
+Las dos corridas usaron exactamente 50 VUs durante 5 minutos, el mismo fixture
+de 200 002 filas y la misma mezcla de lista, detalle y exportación:
+
+| Fase | p95 HTTP | Errores audit | Checks | Iteraciones | Resultado |
+|------|----------|----------------|--------|-------------|-----------|
+| `before` (sin los tres índices R2) | 1 487.17 ms | 0.00 % | 15 111 / 15 111 | 15 110 | No cumple p95 |
+| `after` (con los tres índices R2) | 46.46 ms | 0.00 % | 235 612 / 235 612 | 235 611 | Cumple |
+
+El p95 disminuyó 96.88 % y el volumen de iteraciones completadas aumentó 15.59
+veces. En ambas fases todos los endpoints devolvieron 200, por lo que la mejora
+no depende de omitir rutas ni de aceptar errores.
+
 ## Resultados de datos
 
-Las mediciones se ejecutaron el 2026-10-21 en PostgreSQL 16 y un proyecto
+Las mediciones se repitieron el 2026-10-22 en PostgreSQL 16 y un proyecto
 Compose aislado. Son evidencia de planificación y selección de índices; deben
 repetirse si cambian el motor, recursos Docker o la forma del fixture.
 
 | Consulta representada | Antes | Después | Efecto observado |
 |-----------------------|-------|---------|------------------|
-| Listado por centro y tipo de evento | incremental sort; 0.849 ms; 14 hit / 0 read buffers | index scan ordenado; 0.277 ms; 5 hit / 4 read buffers | 67.4 % menos tiempo; desaparece el incremental sort. |
-| Listado por servicio origen | parallel sequential scan + sort; 76.578 ms; 5 354 hit / 0 read | index scan ordenado; 0.190 ms; 4 hit / 3 read | 99.8 % menos tiempo; elimina scan completo y sort. |
-| Exportación por centro (160 002 filas) | incremental sort; 117.388 ms; 7 816 hit / 284 read | index scan ordenado; 99.244 ms; 5 266 hit / 1 145 read | 15.5 % menos tiempo; elimina incremental sort. |
+| Listado por centro y tipo de evento | incremental sort; 0.373 ms | index scan ordenado; 0.703 ms | Ambos sub-milisegundo; el plan optimizado evita el sort principal y la diferencia puntual es ruido de ejecución. |
+| Listado por servicio origen | parallel sequential scan + sort; 116.178 ms | index scan ordenado; 0.545 ms | 99.53 % menos tiempo; elimina scan completo y sort. |
+| Exportación por centro (160 002 filas) | incremental sort; 236.239 ms | index scan ordenado; 129.685 ms | 45.10 % menos tiempo; elimina incremental sort. |
 
 Después de `rollback-count 1`, la comprobación `to_regclass` devolvió
 `t | t | t`: los tres índices R2 estaban ausentes. El script los reaplica y
@@ -100,34 +124,38 @@ pwsh .\scripts\run-r2-data.ps1 `
   -EnvFile ..\docker-infra\design-software-docker-infra\.env
 ```
 
-Para la carga autenticada, desde `design-software-docker-infra`:
+Para guardar cada carga autenticada en carpetas comparables, desde
+`design-software-audit-service`:
 
 ```powershell
-docker compose --env-file .env --profile tooling up -d postgres
-docker compose --env-file .env --profile tooling run --rm liquibase-audit update
-docker compose --env-file .env --profile audit-bootstrap run --rm audit-db-principals
-docker compose --env-file .env --profile iam --profile audit up -d --build
-docker compose --env-file .env --profile audit-load run --rm audit-k6
+.\scripts\run-r2-k6.ps1 -Phase before `
+  -InfraDirectory ..\docker-infra\design-software-docker-infra `
+  -EnvFile ..\docker-infra\design-software-docker-infra\.env
+
+.\scripts\run-r2-k6.ps1 -Phase after `
+  -InfraDirectory ..\docker-infra\design-software-docker-infra `
+  -EnvFile ..\docker-infra\design-software-docker-infra\.env
 ```
 
-k6 produce `performance/results/k6-summary.json` localmente. El escenario
-termina con código distinto de cero cuando `http_req_duration` p95 no es menor
-de 300 ms o `audit_request_errors` no es menor de 1 %.
+El script crea siempre `performance/results/before/` y
+`performance/results/after/`, guarda en cada fase `k6-summary.json` y una vista
+legible `summary.md`. La fase `after` termina con error si no cumple p95 menor
+de 300 ms, errores menores de 1 % y cero checks fallidos.
 
 ## Estado de aceptación
 
 | AC | Estado | Evidencia |
 |----|--------|-----------|
-| 50 VUs por cinco minutos | Configurado | El escenario fija `vus: 50` y `duration: 5m`. |
-| p95 < 300 ms y errores < 1 % | Bloqueado | IAM no expuso JWKS en el intento autenticado del 2026-10-21; no se ejecutó k6 ni hay métricas reales. |
+| 50 VUs por cinco minutos | Cumplido | Ambas corridas ejecutaron 50 VUs durante 5 minutos. |
+| p95 < 300 ms y errores < 1 % | Cumplido | `after`: p95 46.46 ms y 0.00 % de errores con IAM real. |
 | Tres planes antes y después | Cumplido | Tabla de resultados y script reproducible. |
 | Changeset y rollback probado | Cumplido | Changeset, rollback SQL y verificación de ausencia de los tres índices. |
 | Informe antes y después | Cumplido | Este informe conserva cifras, alcance y limitación de la carga. |
 
 ## Referencias
 
-- [ADR-015 — Rendimiento reproducible de las consultas de Auditoría](../../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md)
-- [Ficha técnica de audit-service](../../09-microservices/services/09-audit-service/README.md)
+- [ADR-015 — Rendimiento reproducible de las consultas de Auditoría](../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md)
+- [Ficha técnica de audit-service](../09-microservices/services/09-audit-service/README.md)
 - `design-software-audit-service/.env.example`
 - `design-software-audit-service/.env.worker.example`
 - `design-software-docker-infra/.env.example`
