@@ -72,4 +72,4 @@ Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimie
 
 Usa DATABASE_URL y JWT/JWKS; expone reportes de utilización e implementa observabilidad integral conforme a [ADR-012](../../../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md) (OpenTelemetry W3C, métricas RED en /metrics, logs JSON correlacionados y alertas Grafana).
 
-- **Informe técnico de observabilidad (Reto R3):** [informe-tecnico-r3.md](./informe-tecnico-r3.md)
+- **R3 observability technical report:** [qa-report-r3-training-enviroment-service.md](../../../11-quality/qa-report-r3-training-enviroment-service.md)
