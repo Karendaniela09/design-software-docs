@@ -28,6 +28,12 @@ Los changesets 964 y 965 se registran desde el changelog principal. El 966 queda
 
 **Reversión.** Se probó la recuperación de `reason` después de CONTRACT y el rollback de EXPAND/BACKFILL, conservando los valores existentes. Los resultados y comandos ejecutados se adjuntan en [evidencias](evidencias/README.md).
 
+## Cierre de observaciones QA (22/10/2026)
+
+Los cuatro laboratorios anteriores incluyen `06-contract.liquibase.log.txt`, `07-contract-check.sql.log.txt`, `08-contract-rb.liquibase.log.txt` y `09-contract-rb-check.sql.log.txt` por ambiente; los mensajes Liquibase y la validación SQL posterior indican ejecución y rollback de CONTRACT con la **ruta anterior**. Se encuentran enlazados en la [matriz QA](matriz-qa-20261022.md).
+
+La **estructura final** del PR DB reubica CONTRACT en `changelog/changelog-r6-contract.yaml`. La aplicación y reversión de esa ruta aún requieren ejecución en una base temporal aislada, con registro de commits, hashes, recuentos y pruebas posteriores; véase [README de reproducción](README-VALIDACION-R6.md). No se atribuye un resultado a una ejecución no realizada.
+
 ## Alcance y riesgos
 
 No se midió tiempo de indisponibilidad en un despliegue real con tráfico continuo. El backend Go publicado continúa utilizando `reason` y no se debe ejecutar CONTRACT contra ese consumidor. El cambio definitivo al nuevo campo requiere una versión coordinada del servicio y su correspondiente validación.

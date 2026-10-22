@@ -19,6 +19,10 @@ Salidas originales de los ensayos del 19 y 20 de octubre de 2026. Los nombres co
 | [pruebas-sql](pruebas-sql/README.md) | Copias de las cinco aserciones SQL del reto. |
 | [contract-referencia](contract-referencia/README.md) | Referencia del CONTRACT originalmente ensayado. El código ejecutable permanece en ENV DB. |
 
+## Trazabilidad para revisión de QA
+
+La [matriz por ambiente](../matriz-qa-20261022.md) enlaza los cuatro logs de CONTRACT y rollback bajo `20261019_160331/`. La [guía de reproducción](../README-VALIDACION-R6.md) identifica la prueba aún pendiente con la ruta final. Los nuevos resultados deberán almacenarse por separado, tras ejecutarlos: no se han añadido logs ficticios.
+
 ## Capturas
 
 - [Listado de ambientes](../../../../../assets/images/training-environment-r6/01-ambientes-web-shell.png).

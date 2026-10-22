@@ -20,6 +20,13 @@ Resumen de las pruebas efectuadas sobre los changesets y el flujo de mantenimien
 | Cuatro ambientes institucionales | Infraestructura compartida oficial | No probado |
 | Continuidad sin errores en despliegue real | Métricas con tráfico continuo y versiones definitivas del servicio | No medido |
 
+## Verificación técnica final y observaciones de QA
+
+La prueba del 19/10/2026 contiene registros verificables de **aplicación de CONTRACT, comprobación SQL, rollback de CONTRACT y datos preservados en 4/4 laboratorios locales**, pero utiliza la ruta histórica `r6/contract/changelog.yaml`. **Pendiente:** repetir la ejecución y el rollback desde `changelog/changelog-r6-contract.yaml` con el código final del PR DB #134. Hasta tener nuevos logs, el cierre de esa validación no debe marcarse como PASS.
+
+- [Matriz de QA con enlaces a los cuatro laboratorios](matriz-qa-20261022.md).
+- [Guía de reproducción y controles](README-VALIDACION-R6.md).
+
 ## Archivos de evidencia
 
 Ver [el inventario](evidencias/README.md) y las carpetas `20261019_160331`, `20261019_181957`, `20261019_200331`, `20261019_213954` y `20261020_integracion_web_shell`. Los archivos conservan los resultados originales de los ensayos.

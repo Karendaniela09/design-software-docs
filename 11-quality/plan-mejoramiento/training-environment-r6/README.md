@@ -16,6 +16,8 @@ Documenté la evolución de `training_environment.maintenance.reason` hacia `rea
 | [Informe de integración local](informe-integracion-local.md) | Web-shell, MFE, API Go y PostgreSQL. |
 | [Matriz de verificación](matriz-verificacion.md) | Criterios R6, evidencias y límites. |
 | [Evidencias](evidencias/README.md) | Salidas originales de las pruebas y capturas. |
+| [Reproducción técnica](README-VALIDACION-R6.md) | Secuencia y comandos para validar la ruta final. |
+| [Revisión QA 22/10](matriz-qa-20261022.md) | Logs 4/4 de CONTRACT, rollback y pendientes de validación final. |
 
 ## Referencias
 
