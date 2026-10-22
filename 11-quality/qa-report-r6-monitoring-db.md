@@ -1,419 +1,174 @@
-# Informe técnico R6 — Migración TEXT a JSONB
+# Technical Report R6 — TEXT to JSONB Migration
 
-**Proyecto:** Code-SENA  
-**Reto:** R6 — EXPAND → BACKFILL → CONTRACT → ROLLBACK  
-**Campo:** `monitoring.improvement_plan.specific_actions`  
-**Responsable:** Nicolas Estid Ruiz Sastoque  
-**Fecha de actualización:** 21 de octubre de 2026
+**Project:** Code-SENA  
+**Challenge:** R6 — EXPAND → BACKFILL → CONTRACT → ROLLBACK  
+**Field:** `monitoring.improvement_plan.specific_actions`  
+**Owner:** Nicolas Estid Ruiz Sastoque  
+**Last updated:** October 21, 2026
 
-## 1. Resumen ejecutivo
+## 1. Executive summary
 
-R6 implementa una migración progresiva de `TEXT` a `JSONB` para `monitoring.improvement_plan.specific_actions`, conservando compatibilidad durante la transición y separando CONTRACT en un changelog operativo independiente.
+R6 implements a progressive `TEXT` to `JSONB` migration for `monitoring.improvement_plan.specific_actions`, preserving compatibility during the transition and separating CONTRACT into an independent operational changelog.
 
-La implementación está distribuida entre cuatro repositorios:
+The implementation is distributed across four repositories:
 
-- `design-software-monitoring-db`: changesets, SQL y rollbacks.
-- `design-software-monitoring-service`: compatibilidad de persistencia, serialización y pruebas.
-- `design-software-docker-infra`: servicio Liquibase con perfil `r6-contract`.
-- `design-software-docs`: ADR, modelo de datos, decisiones y runbook.
+- `design-software-monitoring-db`: changesets, SQL, and rollbacks.
+- `design-software-monitoring-service`: persistence compatibility, serialization, and tests.
+- `design-software-docker-infra`: Liquibase service with the `r6-contract` profile.
+- `design-software-docs`: ADR, data model, decisions, and runbook.
 
-El informe técnico ya no se mantiene dentro de `design-software-monitoring-db/docs`; esa copia fue eliminada por estar duplicada y desactualizada. La documentación oficial se conserva en `design-software-docs` y las evidencias personales en `docs/plan-mejoramiento-R6`.
+The previous report was removed from `design-software-monitoring-db/docs` because it was duplicated and outdated. The official documentation remains in `design-software-docs`; personal evidence is stored under `docs/plan-mejoramiento-R6`.
 
-## 2. Versiones y commits
+## 2. Versions and commits
 
-| Repositorio | Rama | Commits R6 relacionados | Commit final |
+| Repository | Branch | R6 commits | Final commit |
 |---|---|---:|---|
 | `design-software-monitoring-db` | `hu-r6-nicolas-dev` | 3 | `c9bac2e` |
 | `design-software-monitoring-service` | `hu-r6-nicolas-dev` | 2 | `90de34a` |
 | `design-software-docker-infra` | `hu-r6-nicolas-dev` | 1 | `8f75bbd` |
 | `design-software-docs` | `feat/r6-documentation` | 2 | `1d05bd2` |
 
-### Commits DB
+Relevant commits include the initial EXPAND/BACKFILL/CONTRACT/ROLLBACK implementation (`3dc359f`), service compatibility and tests (`68f6edb`), the isolated PostgreSQL CI job (`90de34a`), the Liquibase `r6-contract` profile (`8f75bbd`), documentation and ADR (`0641156`), and QA corrections (`1d05bd2`).
 
-- `3dc359f`: implementación inicial EXPAND, BACKFILL, CONTRACT y ROLLBACK.
-- `fe61fcf`: informe técnico anterior dentro del repositorio DB.
-- `c9bac2e`: reconciliación de autor Liquibase y script de sincronización final.
-
-### Commits Service
-
-- `68f6edb`: compatibilidad TEXT/JSONB, router y pruebas de integración.
-- `90de34a`: job CI para integraciones PostgreSQL R6 aisladas.
-
-### Commit Infra
-
-- `8f75bbd`: servicio Liquibase `liquibase-monitoring-contract` y perfil `r6-contract`.
-
-### Commits Docs
-
-- `0641156`: documentación R6, ADR y corrección de numeración.
-- `1d05bd2`: bloqueos QA y procedimiento de corrección.
-
-## 3. Implementación en Monitoring DB
+## 3. Monitoring DB implementation
 
 ### EXPAND
 
-Changeset `r6-monitoring-expand-specific-actions-v2-991`:
-
-- Agrega `specific_actions_v2 JSONB NULL`.
-- Conserva `specific_actions TEXT NOT NULL`.
-- Usa preconditions para validar la tabla y evitar duplicar la columna.
-- Tiene rollback que elimina la columna v2.
-
-Archivo principal: `01_ddl/04_alter/r6_expand_specific_actions_v2.sql`.
+Changeset `r6-monitoring-expand-specific-actions-v2-991` adds nullable `specific_actions_v2 JSONB`, keeps `specific_actions TEXT NOT NULL`, validates the table with preconditions, prevents duplicate-column creation, and provides a rollback that removes the v2 column. Main file: `01_ddl/04_alter/r6_expand_specific_actions_v2.sql`.
 
 ### BACKFILL
 
-Changeset `r6-monitoring-backfill-specific-actions-v2-992`:
-
-- Actualiza solo filas con `specific_actions_v2 IS NULL`.
-- Conserva el TEXT original.
-- Genera documentos con esta estructura:
+Changeset `r6-monitoring-backfill-specific-actions-v2-992` updates only rows where `specific_actions_v2 IS NULL`, preserves the original TEXT, and produces:
 
 ```json
 {
   "version": 1,
   "actions": [
-    { "text": "valor original" }
+    { "text": "original value" }
   ]
 }
 ```
 
-La conversión conserva Unicode, comillas, caracteres especiales, texto vacío y saltos de línea como valores de cadena. La representación soportada contiene una única acción.
+The conversion preserves Unicode, quotation marks, special characters, empty strings, and line breaks. The supported representation contains one action.
 
-### Sincronización final
+### Final synchronization
 
-El archivo `01_ddl/04_alter/r6_sync_specific_actions_v2.sql` fue agregado en `c9bac2e`.
-
-Características:
-
-- Es transaccional e idempotente.
-- Reporta discrepancias antes y después.
-- Actualiza únicamente documentos JSONB compatibles con `version: 1` y una acción.
-- No sobrescribe documentos nulos, malformados o de versiones no soportadas.
-- Debe ejecutarse después de detener escritores antiguos y antes de CONTRACT.
+`01_ddl/04_alter/r6_sync_specific_actions_v2.sql` was added in `c9bac2e`. It is transactional and idempotent, reports discrepancies before and after execution, updates only compatible version-1 documents with one action, and does not overwrite null, malformed, or unsupported-version documents. It must run after old writers are stopped and before CONTRACT.
 
 ### CONTRACT
 
-Changeset `r6-monitoring-contract-specific-actions-v2-993`:
+Changeset `r6-monitoring-contract-specific-actions-v2-993` runs from `changelog/changelog-contract.yaml` with context `r6-contract`. It verifies that there are no nulls, invalid documents, or TEXT/JSONB differences; removes the TEXT column; renames `specific_actions_v2` to `specific_actions`; and sets `specific_actions JSONB NOT NULL`.
 
-- Se ejecuta desde `changelog/changelog-contract.yaml`.
-- Usa el contexto `r6-contract`.
-- Verifica que no haya nulos, documentos inválidos ni diferencias TEXT/JSONB.
-- Elimina la columna TEXT.
-- Renombra `specific_actions_v2` a `specific_actions`.
-- Establece `specific_actions JSONB NOT NULL`.
-
-CONTRACT no se ejecuta durante el arranque convencional y requiere autorización, respaldo y validación operativa.
+CONTRACT is not executed during conventional startup and requires authorization, backup, and operational validation.
 
 ### ROLLBACK
 
-El rollback de CONTRACT:
+The CONTRACT rollback reconstructs `specific_actions TEXT NOT NULL` from `actions[0].text`, keeps `specific_actions_v2 JSONB NULL`, and preserves compatible JSONB documents. Full reconstruction is not guaranteed for multiple actions, future versions, additional fields, or unsupported JSONB documents.
 
-- Reconstruye `specific_actions TEXT NOT NULL` desde `actions[0].text`.
-- Conserva `specific_actions_v2 JSONB NULL`.
-- Mantiene los documentos JSONB compatibles.
+## 4. Monitoring Service compatibility
 
-No se garantiza reconstrucción completa para múltiples acciones, versiones futuras, campos adicionales o documentos JSONB no soportados.
+The service supports all three states:
 
-## 4. Compatibilidad de Monitoring Service
-
-El servicio contiene una capa de compatibilidad para los tres estados:
-
-| Estado | Comportamiento |
+| State | Behavior |
 |---|---|
-| Antes de EXPAND | Lectura y escritura sobre TEXT |
-| Durante EXPAND/BACKFILL | Coexistencia y sincronización TEXT/JSONB |
-| Después de CONTRACT | Lectura y escritura sobre JSONB |
+| Before EXPAND | Read and write TEXT. |
+| During EXPAND/BACKFILL | TEXT/JSONB coexistence and synchronization. |
+| After CONTRACT | Read and write JSONB. |
 
-El contrato HTTP mantiene `specific_actions` como `string`. La migración del almacenamiento no cambia OpenAPI a `object` porque el backend continúa serializando el valor como texto.
+The HTTP contract keeps `specific_actions` as a string. Storage migration does not change OpenAPI to an object because the backend continues to serialize the value as text.
 
-Pruebas relacionadas:
+Related tests:
 
-- `tests/test_specific_actions_compat.py`.
-- `tests/test_router_serialization.py`.
-- `tests/test_r6_postgres_integration.py`.
-- `tests/test_r6_http_postgres_integration.py`.
-- `tests/test_monitoring_http_contract.py`.
+- `tests/test_specific_actions_compat.py`
+- `tests/test_router_serialization.py`
+- `tests/test_r6_postgres_integration.py`
+- `tests/test_r6_http_postgres_integration.py`
+- `tests/test_monitoring_http_contract.py`
 
-El workflow CI para PostgreSQL aislado quedó preparado en el commit `90de34a`, pero su ejecución remota debe adjuntarse cuando exista el resultado del workflow. No se presenta como resultado aprobado en este informe.
+The isolated PostgreSQL CI workflow was prepared in `90de34a`; its remote result must be attached when available and is not claimed as an approved result in this report.
 
-## 5. Evidencias ejecutadas
+## 5. Executed evidence
 
-Las evidencias completas están en:
+Complete evidence is under [`docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6). Four ephemeral isolated PostgreSQL databases were used: DEV, QA, STAGING, and simulated PROD. None was a shared or real production database.
 
-[`docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6)
-
-Se utilizaron cuatro bases PostgreSQL efímeras y aisladas, identificadas como DEV, QA, STAGING y PROD simulada. No fueron bases compartidas ni producción real.
-
-### Identidad y esquema
-
-Carpeta: [`01-liquibase-identidad`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/01-liquibase-identidad)
-
-Contiene una salida por ambiente con changesets, autor, tipos y nulabilidad antes de CONTRACT.
-
-### Sincronización final
-
-Carpeta: [`02-sincronizacion-final`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/02-sincronizacion-final)
-
-Las cuatro salidas reportan:
+The four synchronization outputs reported:
 
 ```text
 discrepancies_before = 0
 UPDATE 0
 discrepancies_after = 0
-discrepancias_finales = 0
+final_discrepancies = 0
 ```
 
-### CONTRACT y ROLLBACK
-
-Cada ambiente tiene cinco archivos de salida:
-
-- `01-before-contract.txt`.
-- `02-contract.txt`.
-- `03-after-contract.txt`.
-- `04-rollback.txt`.
-- `05-after-rollback.txt`.
-
-Carpetas:
-
-- [`04-rollback-dev`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-dev).
-- [`04-rollback-qa`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-qa).
-- [`04-rollback-staging`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-staging).
-- [`04-rollback-prod-simulada`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-prod-simulada).
-
-Resultado observado después del rollback en cada base:
+Each environment completed CONTRACT and `rollback-count 1` successfully. The post-rollback result was:
 
 ```text
 specific_actions    TEXT NOT NULL
 specific_actions_v2 JSONB NULL
-planes              3
-jsonb_poblados      3
-inconsistencias     0
+plans               3
+populated_jsonb     3
+inconsistencies     0
 ```
 
-Los datos sintéticos incluyeron texto normal, Unicode y salto de línea. Los fingerprints normalizados de TEXT y JSONB coincidieron en los cuatro ambientes aislados.
+Synthetic data included normal text, Unicode, and line breaks. Normalized TEXT and JSONB fingerprints matched in all four isolated environments.
 
-## 6. Resultados históricos y resultados actuales
+## 6. Results and limitations
 
-### Resultados históricos previamente comunicados
+Observed results include successful Liquibase validation and update, one approved real-PostgreSQL R6 SQL integration, one approved HTTP/PostgreSQL integration, a general Monitoring Service suite with 34 passed and 8 skipped, successful Ruff validation, and successful Python compilation.
 
-- Liquibase `validate`: correcto.
-- Liquibase `update`: 26 changesets ejecutados.
-- Integración SQL R6 con PostgreSQL real: 1 aprobada.
-- Integración HTTP + PostgreSQL R6: 1 aprobada.
-- Suite general Monitoring Service: 34 aprobadas y 8 omitidas.
-- Ruff: aprobado.
-- Compilación Python: satisfactoria.
+New evidence validated EXPAND/BACKFILL on four ephemeral databases, idempotent synchronization, CONTRACT with Liquibase 4.33.0, `rollback-count 1`, PostgreSQL structure/nullability/count/equivalence/fingerprint queries, Markdown links, and removal of temporary containers and networks.
 
-### Validación ejecutada para las evidencias nuevas
+Open items:
 
-- EXPAND/BACKFILL sobre cuatro bases efímeras.
-- Sincronización final idempotente.
-- CONTRACT con Liquibase 4.33.0.
-- `rollback-count 1` con Liquibase 4.33.0.
-- Consultas PostgreSQL de estructura, nulabilidad, conteos, equivalencia y fingerprints.
-- Validación de enlaces Markdown: correcta.
-- Eliminación posterior de los contenedores y red efímeros.
+- Remote CI result for the service.
+- Repetition in authorized operational environments.
+- Evidence of a restored backup.
+- Validation with multiple actions or future JSONB versions.
 
-### Pendientes
+## 7. R6 compliance
 
-- Resultado del workflow CI del servicio.
-- Repetición en ambientes operativos autorizados.
-- Evidencia de respaldo restaurado.
-- Validación con múltiples acciones o versiones JSONB futuras.
-
-## 7. Cumplimiento R6
-
-| Requisito | Evidencia | Estado |
+| Requirement | Evidence | Status |
 |---|---|---|
-| R6(a) EXPAND/CONTRACT | Changesets, preconditions, changelog independiente y logs Liquibase | Cumplido en bases aisladas; pendiente promoción operativa |
-| R6(b) Datos y BACKFILL | Tres planes sintéticos por base, backfill y sincronización final | Cumplido en bases aisladas |
-| R6(c) Compatibilidad | Adaptador TEXT/JSONB, serialización HTTP y pruebas preparadas | Parcial hasta ejecutar CI y ambientes autorizados |
-| R6(d) ROLLBACK en cuatro ambientes | Cuatro ciclos CONTRACT → ROLLBACK documentados | Cumplido para bases efímeras; pendiente validación operacional |
+| R6(a) EXPAND/CONTRACT | Changesets, preconditions, independent changelog, and Liquibase logs | Met in isolated databases; operational promotion pending |
+| R6(b) Data and BACKFILL | Three synthetic plans per database, backfill, and final synchronization | Met in isolated databases |
+| R6(c) Compatibility | TEXT/JSONB adapter, HTTP serialization, and prepared service tests | Partial until CI and authorized environments are executed |
+| R6(d) ROLLBACK in four environments | Four documented CONTRACT → ROLLBACK cycles | Met for ephemeral databases; operational validation pending |
 
-## 8. Trazabilidad incorporada en este informe
+## 8. Environment traceability
 
-### 8.1 Trazabilidad de los requisitos R6
-
-| Requisito | Evidencia incorporada | Resultado |
-|---|---|---|
-| R6(a) EXPAND/CONTRACT sobre tabla real | Changesets 991, 992 y 993, preconditions, SQL y logs Liquibase | Cumplido en las cuatro bases aisladas; pendiente promoción operativa |
-| R6(b) Datos de prueba y BACKFILL | Tres planes sintéticos por base, documento JSONB generado y sincronización final | Cumplido en las bases aisladas |
-| R6(c) Compatibilidad de versiones | Adaptador TEXT/JSONB, doble escritura, serialización HTTP y pruebas del servicio | Parcial hasta ejecutar CI y validar ambientes operativos |
-| R6(d) ROLLBACK en cuatro ambientes | CONTRACT → `rollback-count 1`, consultas PostgreSQL y fingerprints por ambiente | Cumplido en cuatro bases efímeras; pendiente validación operacional |
-
-### 8.2 Resultados por ambiente
-
-| Ambiente | Base | Resultado CONTRACT | Resultado ROLLBACK | Verificación final |
+| Environment | Database | CONTRACT | ROLLBACK | Final verification |
 |---|---|---|---|---|
-| DEV | `r6_dev_db` | Ejecutado correctamente. `specific_actions` pasó a `JSONB NOT NULL`. 3 planes y 3 documentos JSONB. | Ejecutado correctamente con `rollback-count 1`. | `specific_actions TEXT NOT NULL`; `specific_actions_v2 JSONB NULL`; 3 planes; 3 JSONB conservados; 0 inconsistencias. Fingerprint: `a65ed94bf0bc33bbddc036be663bc1e4`. |
-| QA | `r6_qa_db` | Ejecutado correctamente. `specific_actions` pasó a `JSONB NOT NULL`. 3 planes y 3 documentos JSONB. | Ejecutado correctamente con `rollback-count 1`. | `specific_actions TEXT NOT NULL`; `specific_actions_v2 JSONB NULL`; 3 planes; 3 JSONB conservados; 0 inconsistencias. Fingerprint: `a65ed94bf0bc33bbddc036be663bc1e4`. |
-| STAGING | `r6_staging_db` | Ejecutado correctamente. `specific_actions` pasó a `JSONB NOT NULL`. 3 planes y 3 documentos JSONB. | Ejecutado correctamente con `rollback-count 1`. | `specific_actions TEXT NOT NULL`; `specific_actions_v2 JSONB NULL`; 3 planes; 3 JSONB conservados; 0 inconsistencias. Fingerprint: `a65ed94bf0bc33bbddc036be663bc1e4`. |
-| PROD simulada | `r6_prod_sim_db` | Ejecutado correctamente. `specific_actions` pasó a `JSONB NOT NULL`. 3 planes y 3 documentos JSONB. | Ejecutado correctamente con `rollback-count 1`. | `specific_actions TEXT NOT NULL`; `specific_actions_v2 JSONB NULL`; 3 planes; 3 JSONB conservados; 0 inconsistencias. Fingerprint: `a65ed94bf0bc33bbddc036be663bc1e4`. |
+| DEV | `r6_dev_db` | `specific_actions` became `JSONB NOT NULL`; 3 plans and 3 JSONB documents | Successful with `rollback-count 1` | TEXT restored, JSONB retained, 0 inconsistencies |
+| QA | `r6_qa_db` | `specific_actions` became `JSONB NOT NULL`; 3 plans and 3 JSONB documents | Successful with `rollback-count 1` | TEXT restored, JSONB retained, 0 inconsistencies |
+| STAGING | `r6_staging_db` | `specific_actions` became `JSONB NOT NULL`; 3 plans and 3 JSONB documents | Successful with `rollback-count 1` | TEXT restored, JSONB retained, 0 inconsistencies |
+| Simulated PROD | `r6_prod_sim_db` | `specific_actions` became `JSONB NOT NULL`; 3 plans and 3 JSONB documents | Successful with `rollback-count 1` | TEXT restored, JSONB retained, 0 inconsistencies |
 
-### Lectura del cuadro
+All environments produced the normalized fingerprint `a65ed94bf0bc33bbddc036be663bc1e4` after rollback. Complete Liquibase and PostgreSQL outputs remain in the linked evidence folders.
 
-- **CONTRACT:** eliminó la columna TEXT, renombró la columna JSONB y dejó `specific_actions JSONB NOT NULL`.
-- **ROLLBACK:** reconstruyó el campo TEXT y conservó el documento JSONB en `specific_actions_v2` como columna nullable.
-- **3 planes:** cada base aislada recibió exactamente tres registros sintéticos.
-- **3 JSONB conservados:** cada uno de los tres planes mantuvo su documento JSONB después del rollback.
-- **0 inconsistencias:** el texto reconstruido coincidió con `specific_actions_v2->'actions'->0->>'text'`.
-- **Fingerprint:** es la huella de los textos normalizados; coincide entre la columna TEXT y la representación JSONB.
+## 9. QA corrections and evidence files
 
-Las salidas completas de Liquibase y PostgreSQL se conservaron como anexos en las carpetas de evidencia, pero los resultados importantes quedan escritos directamente en este informe para que no sea necesario abrirlas.
-
-### 8.3 Correcciones QA aplicadas
-
-| Hallazgo | Corrección incorporada |
+| Finding | Correction |
 |---|---|
-| Identidad de changesets | Se alinearon los autores R6 del repositorio DB con el historial esperado (`codex`) en `c9bac2e`. |
-| Rollback con nulabilidad incorrecta | Se ejecutó el changeset versionado y se comprobó `specific_actions_v2 JSONB NULL` después de `rollback-count 1`. |
-| Secuencia no demostrada | Se conservaron salidas separadas de pre-CONTRACT, CONTRACT, post-CONTRACT, rollback y verificación final. |
-| Divergencias antes de CONTRACT | Se ejecutó `r6_sync_specific_actions_v2.sql` en los cuatro ambientes aislados; las discrepancias finales fueron cero. |
-| Documentación duplicada | Se eliminó `design-software-monitoring-db/docs/informe-tecnico-r6.md`; la documentación oficial permanece en `design-software-docs`. |
-| CI opt-in | Se agregó el job PostgreSQL aislado al workflow del servicio; el resultado remoto queda pendiente de adjuntar. |
+| Changeset identity | R6 Liquibase authors were aligned with the expected DB history (`codex`) in `c9bac2e`. |
+| Incorrect rollback nullability | Versioned changeset execution confirmed `specific_actions_v2 JSONB NULL` after `rollback-count 1`. |
+| Sequence not demonstrated | Separate pre-CONTRACT, CONTRACT, post-CONTRACT, rollback, and final verification outputs were preserved. |
+| Pre-CONTRACT discrepancies | `r6_sync_specific_actions_v2.sql` ran in all four isolated environments; final discrepancies were zero. |
+| Duplicate documentation | `design-software-monitoring-db/docs/informe-tecnico-r6.md` was removed; official documentation remains here. |
+| Opt-in CI | An isolated PostgreSQL job was added to the service workflow; the remote result remains pending. |
 
-### 8.4 Archivos y logs de evidencia
+Evidence folders:
 
-La evidencia se encuentra en las carpetas siguientes y está enlazada directamente desde este informe:
+- [Liquibase identity](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/01-liquibase-identidad)
+- [Final synchronization](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/02-sincronizacion-final)
+- [DEV rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-dev)
+- [QA rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-qa)
+- [STAGING rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-staging)
+- [Simulated PROD rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-prod-simulada)
 
-- [Identidad Liquibase](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/01-liquibase-identidad).
-- [Sincronización final](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/02-sincronizacion-final).
-- [Rollback DEV](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-dev).
-- [Rollback QA](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-qa).
-- [Rollback STAGING](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-staging).
-- [Rollback PROD simulada](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-prod-simulada).
+## 10. Technical references and scope statement
 
-No se incluyen como requisito otros documentos Markdown de entrega; este informe contiene directamente la explicación, la trazabilidad y los resultados.
+- [DB PR #62](https://github.com/code-sena/design-software-monitoring-db/pull/62)
+- [Service PR #8](https://github.com/code-sena/design-software-monitoring-service/pull/8)
+- [Infrastructure PR #43](https://github.com/code-sena/design-software-docker-infra/pull/43)
 
-### 8.5 Salidas incorporadas dentro de este informe
-
-Esta sección reproduce las salidas esenciales de los archivos de evidencia para que la revisión pueda realizarse sin abrir documentos adicionales.
-
-#### Identidad Liquibase y estado pre-CONTRACT
-
-En los cuatro ambientes se ejecutaron los changesets sobre el commit DB `c9bac2e`. Los resultados fueron:
-
-```text
-CHANGESET                                           AUTHOR  FILENAME                         EXECUTED
-r6-monitoring-expand-specific-actions-v2-991       codex   01_ddl/04_alter/changelog.yaml  EXECUTED
-r6-monitoring-backfill-specific-actions-v2-992     codex   01_ddl/04_alter/changelog.yaml  EXECUTED
-
-SCHEMA
-specific_actions    text    NO
-specific_actions_v2 jsonb   YES
-```
-
-| Ambiente | Base | Fecha UTC de captura | Planes antes de cargar datos | JSONB nulos | Diferencias |
-|---|---|---|---:|---:|---:|
-| DEV | `r6_dev_db` | `2026-10-21T04:41:05.6606673Z` | 0 | 0 | 0 |
-| QA | `r6_qa_db` | `2026-10-21T04:41:05.9385184Z` | 0 | 0 | 0 |
-| STAGING | `r6_staging_db` | `2026-10-21T04:41:05.9081676Z` | 0 | 0 | 0 |
-| PROD simulada | `r6_prod_sim_db` | `2026-10-21T04:41:04.0598543Z` | 0 | 0 | 0 |
-
-#### Sincronización final
-
-La salida real de `r6_sync_specific_actions_v2.sql` fue equivalente en los cuatro ambientes:
-
-```text
-BEGIN
-discrepancies_before
-                    0
-UPDATE 0
-discrepancies_after
-                   0
-COMMIT
-discrepancias_finales=0
-```
-
-Capturas: DEV `2026-10-21T04:47:25.2740769Z`, QA `2026-10-21T04:47:25.6475271Z`, STAGING `2026-10-21T04:47:26.0161614Z` y PROD simulada `2026-10-21T04:47:26.3616574Z`.
-
-#### DEV — CONTRACT, ROLLBACK y verificación final
-
-```text
-Base: r6_dev_db
-CONTRACT: Liquibase command 'update' was executed successfully.
-POST-CONTRACT:
-specific_actions=jsonb,nullable=NO
-planes=3,jsonb_documents=3
-Fingerprint JSONB: 54fb5f68fe128405dc6fb9834bafc151
-ROLLBACK: Liquibase command 'rollback-count' was executed successfully.
-POST-ROLLBACK:
-specific_actions=text,nullable=NO
-specific_actions_v2=jsonb,nullable=YES
-planes=3,jsonb_poblados=3,inconsistencias=0
-Fingerprint TEXT: a65ed94bf0bc33bbddc036be663bc1e4
-Fingerprint JSONB normalizado: a65ed94bf0bc33bbddc036be663bc1e4
-```
-
-Datos conservados:
-
-```json
-{"id":"00000000-0000-0000-0000-000000000101","text":"Seguimiento académico"}
-{"id":"00000000-0000-0000-0000-000000000102","text":"Evaluación técnica ✅"}
-{"id":"00000000-0000-0000-0000-000000000103","text":"Revisión de evidencias.\nCorrección de errores."}
-```
-
-#### QA — CONTRACT, ROLLBACK y verificación final
-
-```text
-Base: r6_qa_db
-CONTRACT: Liquibase command 'update' was executed successfully.
-POST-CONTRACT: specific_actions=jsonb,nullable=NO; planes=3; jsonb_documents=3
-ROLLBACK: Liquibase command 'rollback-count' was executed successfully.
-POST-ROLLBACK:
-specific_actions=text,nullable=NO
-specific_actions_v2=jsonb,nullable=YES
-planes=3,jsonb_poblados=3,inconsistencias=0
-Fingerprint TEXT = Fingerprint JSONB normalizado:
-a65ed94bf0bc33bbddc036be663bc1e4
-```
-
-#### STAGING — CONTRACT, ROLLBACK y verificación final
-
-```text
-Base: r6_staging_db
-CONTRACT: Liquibase command 'update' was executed successfully.
-POST-CONTRACT: specific_actions=jsonb,nullable=NO; planes=3; jsonb_documents=3
-ROLLBACK: Liquibase command 'rollback-count' was executed successfully.
-POST-ROLLBACK:
-specific_actions=text,nullable=NO
-specific_actions_v2=jsonb,nullable=YES
-planes=3,jsonb_poblados=3,inconsistencias=0
-Fingerprint TEXT = Fingerprint JSONB normalizado:
-a65ed94bf0bc33bbddc036be663bc1e4
-```
-
-#### PROD simulada — CONTRACT, ROLLBACK y verificación final
-
-```text
-Base: r6_prod_sim_db
-CONTRACT: Liquibase command 'update' was executed successfully.
-POST-CONTRACT: specific_actions=jsonb,nullable=NO; planes=3; jsonb_documents=3
-ROLLBACK: Liquibase command 'rollback-count' was executed successfully.
-POST-ROLLBACK:
-specific_actions=text,nullable=NO
-specific_actions_v2=jsonb,nullable=YES
-planes=3,jsonb_poblados=3,inconsistencias=0
-Fingerprint TEXT = Fingerprint JSONB normalizado:
-a65ed94bf0bc33bbddc036be663bc1e4
-```
-
-#### Interpretación de las salidas
-
-- Antes de CONTRACT coexistían TEXT y JSONB; los tres planes tenían documentos JSONB válidos.
-- CONTRACT dejó `specific_actions` como JSONB `NOT NULL`.
-- ROLLBACK reconstruyó TEXT y dejó `specific_actions_v2` como JSONB nullable.
-- Los tres textos originales se conservaron, incluyendo Unicode y salto de línea.
-- La comparación final reportó cero inconsistencias en cada ambiente.
-- Las bases fueron efímeras y aisladas; no representan bases operativas reales.
-
-## 9. Referencias técnicas
-
-- [PR DB #62](https://github.com/code-sena/design-software-monitoring-db/pull/62).
-- [PR Service #8](https://github.com/code-sena/design-software-monitoring-service/pull/8).
-- [PR Infra #43](https://github.com/code-sena/design-software-docker-infra/pull/43).
-
-## 10. Declaración de alcance
-
-Este informe refleja la implementación y las evidencias disponibles al 21 de octubre de 2026. No afirma pruebas, despliegues o resultados que no estén respaldados por los logs enlazados. Las evidencias nuevas cubren tres registros sintéticos por base, una versión JSONB y una acción por documento; no se extienden a más condiciones.
+This report reflects the implementation and evidence available on October 21, 2026. It does not claim tests, deployments, or results that are not supported by the linked logs. The new evidence covers three synthetic records per database, one JSONB version, and one action per document; it does not cover additional conditions.

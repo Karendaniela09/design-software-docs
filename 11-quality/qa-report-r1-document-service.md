@@ -1,47 +1,47 @@
-# Informe técnico R1 — Resiliencia y mensajería (Document)
+# Technical Report R1 — Resilience and Messaging (Document)
 
-**Responsable:** Danna Valentina Barrios Penagos. **Rama:** `hu-r1-dev` desde `develop`. **Fecha:** 20 de octubre de 2026.
+**Owner:** Danna Valentina Barrios Penagos. **Branch:** `hu-r1-dev` from `develop`. **Date:** October 20, 2026.
 
-**Decisión de diseño:** ADR-011 en el repositorio `design-software-docs` (`05-architecture/decisions/records/ADR-011-document-outbox-inbox-resilience.md`).
-**Capturas de pantalla:** se entregan junto con el MD de entrega a QA y no se guardan en este repositorio.
+**Design decision:** ADR-011 in the `design-software-docs` repository (`05-architecture/decisions/records/ADR-011-document-outbox-inbox-resilience.md`).  
+**Screenshots:** delivered with the QA submission Markdown and not stored in this repository.
 
-## 1. Qué se entrega
+## 1. Delivered scope
 
-| Criterio del reto | Implementación | Prueba |
+| Challenge criterion | Implementation | Test |
 |---|---|---|
-| (a) Outbox transaccional | `complete_generation` escribe la versión, el estado, el recibo del inbox y las filas de `event_outbox` en una sola transacción. El proceso `apps.outbox_dispatcher.main` entrega las filas pendientes. | `test_generation_request_becomes_an_available_downloadable_document`, caos |
-| (b) Consumidor idempotente con tabla de deduplicación | `document.message_inbox` con clave primaria `(consumer_name, document_id, message_id)`; la redelivery se responde desde el recibo sin renderizar. `event_id` determinístico. | `test_new_version_and_redelivered_message`, caos |
-| (c) Reintentos con backoff exponencial y DLQ con reproceso manual | Render: `min(backoff * 2^(n-1), 30 s)`. Publicación del outbox: `min(2^(n-1), 300 s)`. DLQ `pdf-renderer.dlq`; `apps.replay_dlq.main` republica con confirmación y solo entonces hace ACK. | `test_definitive_failure_...`, `test_manual_dlq_replay_...`, `test_long_retry_delay_...` |
-| (d) Prueba de caos automatizada | Dos escenarios (sección 4): uno en proceso y otro contra los contenedores desplegados, con reinicio real del worker y del dispatcher. | `test_broker_outage_after_commit_...` y `test_chaos_broker_outage_and_service_restart_...` |
+| (a) Transactional outbox | `complete_generation` writes the version, status, inbox receipt, and `event_outbox` rows in one transaction. `apps.outbox_dispatcher.main` delivers pending rows. | `test_generation_request_becomes_an_available_downloadable_document`, chaos test |
+| (b) Idempotent consumer with deduplication table | `document.message_inbox` uses primary key `(consumer_name, document_id, message_id)`; redelivery is answered from the receipt without rendering again. `event_id` is deterministic. | `test_new_version_and_redelivered_message`, chaos test |
+| (c) Exponential backoff retries and DLQ with manual replay | Rendering: `min(backoff * 2^(n-1), 30 s)`. Outbox publishing: `min(2^(n-1), 300 s)`. DLQ: `pdf-renderer.dlq`; `apps.replay_dlq.main` republishes with confirmation and only then acknowledges the message. | `test_definitive_failure_...`, `test_manual_dlq_replay_...`, `test_long_retry_delay_...` |
+| (d) Automated chaos test | Two scenarios (Section 4): one in-process and one against deployed containers, including an actual worker and dispatcher restart. | `test_broker_outage_after_commit_...` and `test_chaos_broker_outage_and_service_restart_...` |
 
-## 2. Cómo reproducirlo
+## 2. Reproduction
 
-Requisitos: Docker, Python 3.12 y el stack Document levantado con el perfil de `docker-infra`:
+Requirements: Docker, Python 3.12, and the Document stack running with the `docker-infra` profile:
 
 ```bash
 docker compose --profile document --profile iam --profile tooling --profile edge up -d --build
 pip install -e '.[dev]'
 ```
 
-Variables de la prueba de integración: `TEST_POSTGRES_DB_URL`, `TEST_AMQP_URL`, `TEST_S3_ENDPOINT` (y opcionalmente `TEST_S3_ACCESS_KEY`, `TEST_S3_SECRET_KEY`). Para los escenarios de caos se agregan:
+Integration test variables: `TEST_POSTGRES_DB_URL`, `TEST_AMQP_URL`, `TEST_S3_ENDPOINT` and, optionally, `TEST_S3_ACCESS_KEY` and `TEST_S3_SECRET_KEY`. Chaos scenarios additionally use:
 
-- `TEST_CHAOS_COMPOSE_FILE`: ruta absoluta del `docker-compose.yml` de `docker-infra`.
-- `TEST_CHAOS_PROJECT` y `TEST_CHAOS_ENV_FILE` (opcionales): nombre del proyecto Compose y su archivo de entorno.
+- `TEST_CHAOS_COMPOSE_FILE`: absolute path to the `docker-compose.yml` file from `docker-infra`.
+- `TEST_CHAOS_PROJECT` and `TEST_CHAOS_ENV_FILE` (optional): Compose project name and environment file.
 
 ```bash
 python -m pytest -q
 python -m pytest -q tests/test_pdf_renderer_worker_integration.py -k "broker_outage or service_restart"
 ```
 
-Sin `TEST_CHAOS_COMPOSE_FILE` los dos escenarios de caos se omiten limpiamente (`5 passed, 2 skipped`, sin errores). Si el stack usa otro nombre de proyecto de Compose, el fallo indica configurar `TEST_CHAOS_PROJECT` y `TEST_CHAOS_ENV_FILE`.
+Without `TEST_CHAOS_COMPOSE_FILE`, both chaos scenarios are cleanly skipped (`5 passed, 2 skipped`, with no errors). If the stack uses another Compose project name, the failure indicates that `TEST_CHAOS_PROJECT` and `TEST_CHAOS_ENV_FILE` must be configured.
 
-**Aislamiento.** El worker y el dispatcher desplegados comparten la base de datos con los que corren dentro de `pytest` y publicarían las filas del outbox antes que la prueba. Por eso el fixture `infra` los detiene al empezar y los vuelve a iniciar al terminar, salvo en la prueba marcada `deployed_stack`, que los gobierna ella misma. No hay pasos manuales.
+**Isolation.** The deployed worker and dispatcher share the database with the processes running inside `pytest` and could publish outbox rows before the test does. Therefore, the `infra` fixture stops them at the beginning and starts them again at the end, except for the test marked `deployed_stack`, which controls them directly. No manual steps are required.
 
-## 3. Resultados
+## 3. Results
 
-Línea base: la suite del servicio sobre `develop` limpio (sin R1) da **98 passed**.
+Baseline: the service suite on a clean `develop` branch (without R1) produces **98 passed**.
 
-Con los cambios de R1, suite completa, stack levantado y caos habilitado, en dos corridas seguidas:
+With the R1 changes, the complete suite, the stack running, and chaos enabled, two consecutive runs produced:
 
 ```text
 tests/test_pdf_renderer_worker_integration.py
@@ -56,11 +56,11 @@ tests/test_pdf_renderer_worker_integration.py
 ======================= 101 passed in 150.63s (0:02:30) =======================
 ```
 
-Migraciones: el changeset `975` se aplica sobre los 18 anteriores (total 19) desde una base nueva. En una base nueva los roles `document_reader`, `document_writer` y `document_admin` pueden no existir, por lo que los `GRANT` son condicionales y el changeset usa `splitStatements: false`. Rollback probado: elimina ambas tablas y deja 18 changesets; reaplicar restaura 19.
+Migrations: changeset `975` is applied after the previous 18 changesets, for a total of 19. On a new database, the `document_reader`, `document_writer`, and `document_admin` roles may not exist; therefore, the `GRANT` statements are conditional and the changeset uses `splitStatements: false`. Rollback was tested: it removes both tables and returns to 18 changesets; reapplying restores 19.
 
-Recorrido por el gateway con IAM real (generación, outbox, inbox, eventos y descarga): 29 de 30 comprobaciones. La que falla es el preflight CORS, que `docker-infra` no configura para ningún dominio y que no pertenece a este reto.
+The real IAM gateway flow (generation, outbox, inbox, events, and download) completed 29 of 30 checks. The only failure is the CORS preflight, which `docker-infra` does not configure for any domain and is outside the scope of this challenge.
 
-Estado de las tablas tras el recorrido (consulta a PostgreSQL):
+Database state after the flow:
 
 ```text
          event_type          | attempts | published | event_id
@@ -79,24 +79,24 @@ Estado de las tablas tras el recorrido (consulta a PostgreSQL):
          8 |       0
 ```
 
-## 4. Prueba de caos
+## 4. Chaos testing
 
-**Escenario A — en proceso** (`test_broker_outage_after_commit_preserves_events_and_restart_is_idempotent`): el worker confirma la versión con dos eventos pendientes; se detiene RabbitMQ y el despacho reporta `(0 publicados, 2 aplazados)`; al reiniciarlo reporta `(2 publicados, 0 aplazados)`; un worker nuevo recibe de nuevo el mismo comando y no crea otra versión ni otros eventos.
+**Scenario A — in-process** (`test_broker_outage_after_commit_preserves_events_and_restart_is_idempotent`): the worker confirms the version with two pending events; RabbitMQ is stopped and dispatch reports `(0 published, 2 deferred)`; after restart it reports `(2 published, 0 deferred)`. A new worker receives the same command again and creates neither another version nor additional events.
 
-**Escenario B — contra los contenedores desplegados** (`test_chaos_broker_outage_and_service_restart_lose_no_event_and_duplicate_none`):
+**Scenario B — deployed containers** (`test_chaos_broker_outage_and_service_restart_lose_no_event_and_duplicate_none`):
 
-1. Se detiene el dispatcher y se publica el comando de generación; el worker desplegado confirma la versión y las dos filas quedan pendientes en el outbox.
-2. Se detiene RabbitMQ a mitad del flujo.
-3. Se **reinician el worker y el dispatcher** con el broker todavía caído; el dispatcher aplaza las dos filas (`attempts > 0`) y no se pierde nada: siguen en PostgreSQL.
-4. Se levanta RabbitMQ; el dispatcher reiniciado publica las dos filas.
-5. Se comprueba que llegaron exactamente dos eventos, de tipos distintos y con `event_id` distintos.
-6. Se reenvía el mismo comando al worker reiniciado: sigue habiendo una versión, cero eventos nuevos y cero filas pendientes.
+1. The dispatcher is stopped and the generation command is published; the deployed worker confirms the version and two rows remain pending in the outbox.
+2. RabbitMQ is stopped during the flow.
+3. The worker and dispatcher are restarted while the broker is still down; the dispatcher defers both rows (`attempts > 0`) and nothing is lost because the rows remain in PostgreSQL.
+4. RabbitMQ is started; the restarted dispatcher publishes both rows.
+5. Exactly two events are verified, with different types and different `event_id` values.
+6. The same command is sent to the restarted worker; there is still one version, no new events, and no pending rows.
 
-Con esto se demuestran los dos criterios del Acta: **cero eventos perdidos y cero efectos duplicados** tras detener el broker y reiniciar el servicio.
+These scenarios demonstrate the two Acta criteria: **zero lost events and zero duplicate effects** after the broker is stopped and the service is restarted.
 
-## 5. Decisiones y límites
+## 5. Decisions and limitations
 
-- **Entrega al menos una vez.** Una confirmación del broker seguida de un fallo antes del commit de `published_at` puede repetir un evento con el mismo `event_id`; los consumidores deduplican por `event_id`.
-- **Filas del outbox que fallan siempre.** Se reintentan con backoff de hasta 300 s y no hay una DLQ específica para ellas; son visibles por `attempts` y `last_error`. Se añadiría un límite y un estado de fallo si se exigiera un tope duro. La DLQ con reproceso manual cubre los mensajes de generación.
-- **Solicitud de generación.** `POST /documents/generate` publica directo a la cola y responde 503 si no puede; el outbox protege los eventos posteriores al render.
-- **Bloqueo durante la publicación.** El dispatcher mantiene el bloqueo de la fila mientras publica; es simple y correcto, y con un volumen muy alto convendría reclamar por lotes.
+- **At-least-once delivery.** A broker confirmation followed by a failure before the `published_at` commit may repeat an event with the same `event_id`; consumers deduplicate by `event_id`.
+- **Outbox rows that always fail.** They are retried with backoff up to 300 seconds and have no dedicated DLQ; they remain visible through `attempts` and `last_error`. A hard limit and failure status would be required if a strict cap were mandated. The manual-replay DLQ covers generation messages.
+- **Generation request.** `POST /documents/generate` publishes directly to the queue and returns 503 if it cannot; the outbox protects events generated after rendering.
+- **Publishing lock.** The dispatcher keeps the row lock while publishing. This is simple and correct; with very high volume, batch claiming would be advisable.
