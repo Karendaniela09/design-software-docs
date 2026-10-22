@@ -508,7 +508,7 @@ mvn test -Dtest=SecurityNegativeAuthIT -Dsurefire.failIfNoSpecifiedTests=false
 
 Expected output:
 ```text
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 

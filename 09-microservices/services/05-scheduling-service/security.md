@@ -84,15 +84,15 @@ During the security audit and automated test suite creation, the following concr
 
 ### Finding SEC-02: IDOR and Sensitive Entity Existence Confirmation
 * **CVSS Score:** 6.5 (Medium) — `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N`
-* **Vulnerability:** Querying a schedule belonging to a foreign instructor or training center confirmed existence when returning descriptive errors or 403 statuses.
-* **Remediation:** If the target schedule is outside the requester's authorized scope, the use case returns `Optional.empty()`, producing an **HTTP 404 Not Found** response.
-* **Verification:** `SecurityNegativeAuthIT.accessingForeignScheduleByIdIs404NotData`.
+* **Vulnerability:** Querying a schedule belonging to a foreign instructor, ficha, or training center confirmed existence when returning descriptive errors or 403 statuses.
+* **Remediation:** If the target schedule is outside the requester's authorized scope (cross-instructor, cross-ficha, or cross-training-center), the use case throws `ScheduleNotFoundException`, producing an **HTTP 404 Not Found** (`SCHEDULE_NOT_FOUND`) response without revealing resource attributes.
+* **Verification:** `SecurityNegativeAuthIT.accessingForeignScheduleByIdIs404NotData`, `trainingCenterScopeFromForeignCenterCannotReadSchedule`, and `ownFichaScopeCannotReadForeignSchedule`.
 
 ### Finding SEC-03: Permissive Scope Fallback (Fail-Open Risk)
 * **CVSS Score:** 7.1 (High) — `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N`
 * **Vulnerability:** Missing or unrecognized `scope_type` claims risked falling through to default permissive execution.
-* **Remediation:** Implemented **Fail-Closed** handling in `viewerScope()`: any unsupported scope or scope lacking corresponding claim identifiers throws `ForbiddenScopeException` resulting in **HTTP 403 Forbidden**.
-* **Verification:** `SecurityNegativeAuthIT.unknownScopeFailsClosed403` and `trainingCenterScopeWithoutCenterClaimIs403`.
+* **Remediation:** Implemented **Fail-Closed** handling in `ScheduleScope.resolve()`: any unsupported scope or scope lacking corresponding claim identifiers throws `ScheduleAccessDeniedException` resulting in **HTTP 403 Forbidden**.
+* **Verification:** `SecurityNegativeAuthIT.unknownScopeFailsClosed403`, `trainingCenterScopeWithoutCenterClaimIs403`, and `trainingCenterScopeFromForeignCenterCannotReadSchedule`.
 
 ### Finding SEC-04: Strict Cryptographic Key & Algorithm Enforcement
 * **CVSS Score:** 9.1 (Critical) — `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N`
@@ -100,10 +100,18 @@ During the security audit and automated test suite creation, the following concr
 * **Remediation:** Configured `NimbusJwtDecoder` to strictly require `JWSAlgorithm.RS256` validated against the official IAM RSA public key.
 * **Verification:** `SecurityNegativeAuthIT.algNoneTokenIs401` and `tokenSignedWithWrongKeyIs401`.
 
+
+
+### Finding SEC-05 (R4-SEC-001): Hardcoded Database Credentials and Fallbacks in Integration Tests
+* **CVSS Score:** 7.5 (High) — `CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N`
+* **Vulnerability:** `SecurityNegativeAuthIT` defined default fallback database connection URLs and a hardcoded credential, violating OWASP ASVS V8.2.1 and allowing silent connection to unmanaged local databases.
+* **Remediation:** Completely removed all fallback URLs, usernames, and default passwords. The integration test strictly enforces external environment variables (`SCHEDULING_DB_URL`, `SCHEDULING_DB_USERNAME`, `SCHEDULING_DB_PASSWORD`) via `requiredEnv()`, failing immediately with `IllegalStateException` if unset.
+* **Verification:** `SecurityNegativeAuthIT.databaseProperties` and GitHub Actions CI Run `#39851770984`.
+
 ---
 
 ## 4. Trazabilidad
 
 - Architectural Decision: [05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md](../../05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md)
 - Quality & ASVS Audit: [11-quality/qa-report-r4-security-scheduling.md](../../11-quality/qa-report-r4-security-scheduling.md)
-- Automated Test Suite: `schedules-api/src/test/java/co/sena/scheduling/api/SecurityNegativeAuthIT.java`
+- Automated Test Suite: `schedules-api/src/test/java/co/sena/scheduling/api/SecurityNegativeAuthIT.java` (19 automated negative integration tests running in CI)

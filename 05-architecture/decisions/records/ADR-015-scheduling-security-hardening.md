@@ -23,7 +23,7 @@ A comprehensive defense-in-depth architecture was required to enforce asymmetric
 
 ## Decision
 
-We decide to implement an **asymmetric cryptographic JWT validation layer with fine-grained feature-based authorization (RBAC) and fail-closed scope enforcement** in `scheduling-service`, validated by a suite of 17 automated negative integration tests running in CI (`SecurityNegativeAuthIT`).
+We decide to implement an **asymmetric cryptographic JWT validation layer with fine-grained feature-based authorization (RBAC) and fail-closed scope enforcement** in `scheduling-service`, validated by a suite of 19 automated negative integration tests running in CI (`SecurityNegativeAuthIT`).
 
 Specifically:
 
@@ -61,7 +61,7 @@ Specifically:
 - **Elimination of Token Forgery:** Malformed, expired, foreign-issuer, and `alg: none` tokens are halted deterministically before reaching business logic.
 - **Auditing Non-Repudiation:** Audit metadata (`created_by`, `published_by`, `updated_by`) is strictly tied to verified JWT subjects, correlated with distributed `trace_id`.
 - **Information Leakage Prevention:** Foreign resource scanning (IDOR) is thwarted via `404 Not Found` masking.
-- **CI Regression Shield:** 17 negative integration tests guarantee automated verification on every Pull Request to `develop`.
+- **CI Regression Shield:** 19 negative integration tests guarantee automated verification on every Pull Request to `develop`.
 
 ### Negative / Trade-offs
 

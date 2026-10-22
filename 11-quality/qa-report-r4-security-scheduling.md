@@ -1,9 +1,11 @@
 # QA Security Audit & OWASP ASVS Level 1 Verification — scheduling-service
 
-> Evaluation Scope: `design-software-scheduling-service`  
+> Evaluation Scope: `design-software-scheduling-service` (Commit: `a2e2e69`, PR #17)  
+> Documentation Scope: `design-software-docs` (Branch: `docs/sch-r4-security-hardening`, PR #328)  
 > Author: Daniel Salazar Vargas (CC 1075790810) — ADSO 3145555  
-> Date: 2026-10-21  
+> Date: 2026-10-22  
 > Status: **CLOSED / 100% COMPLIANT**  
+> CI Workflow Execution: [GitHub Actions Run #39851770984](https://github.com/code-sena/design-software-scheduling-service/actions/runs/39851770984) (SUCCESS)  
 > Reference: Improvement Plan (Acta No. 02 - 2026, Criteria 11.b, 11.c, 11.d) — QA R4 Security Audit
 
 ---
@@ -78,6 +80,17 @@ mvn test -Dtest=SecurityNegativeAuthIT -Dsurefire.failIfNoSpecifiedTests=false
   2. Implemented test method `ownFichaScopeCannotReadForeignSchedule` in `SecurityNegativeAuthIT.java`, inserting a published schedule for `TEST_FICHA_ID` and issuing a query using a valid RSA-signed JWT with feature `SCH_VIEW_OWN:OWN_FICHA_AS_LEARNER` and `ficha_id` claim corresponding to a foreign ficha (`OTHER_FICHA_ID`). Verified `404 Not Found` (`SCHEDULE_NOT_FOUND`) response without disclosing existence or data.
   3. Total negative integration test count increased to **19**, with all tests executed and passing both locally and in the GitHub Actions CI pipeline.
 
+
+
+### R4-SEC-001 — Hardcoded Database Credentials and Fallback in Integration Tests
+- **Severity:** High (blocker for R4 sign-off)
+- **Status:** **CLOSED (RESOLVED)**
+- **Original Finding:** `SecurityNegativeAuthIT` defined default fallback connection values and a hardcoded password string (`DevApp2026local`), contradicting OWASP ASVS V8.2.1 and risking unauthorized execution against unmanaged local databases.
+- **Remediation Implemented:**
+  1. Completely removed all default connection URLs, usernames, and hardcoded passwords from `SecurityNegativeAuthIT.java`.
+  2. Implemented `requiredEnv(name)` method to enforce that `SCHEDULING_DB_URL`, `SCHEDULING_DB_USERNAME`, and `SCHEDULING_DB_PASSWORD` are strictly supplied via environment variables or JVM system properties. If any property is absent or blank, the test fails immediately with `IllegalStateException`.
+  3. Validated clean execution against GitHub Actions CI workflow (Run ID: [`39851770984`](https://github.com/code-sena/design-software-scheduling-service/actions/runs/39851770984), commit `a2e2e69cabd4ff7d7eeead52713cb6c56580e695`), where the ephemeral PostgreSQL service container supplies credentials securely through CI secrets/env.
+
 ---
 
 ## 4. OWASP ASVS v4.0.3 Level 1 Verification Checklist
@@ -125,7 +138,7 @@ The service was audited against the applicable Level 1 requirements of the OWASP
 | Requirement | ASVS Code | Description | Compliance Status | Evidence / Implementation |
 |---|:---:|---|:---:|---|
 | V8.1.1 | 8.1.1 | Cryptographic algorithms use approved standards | **COMPLIANT** | RSA 2048-bit with SHA-256 (RS256) used for all token signatures. |
-| V8.2.1 | 8.2.1 | Secrets and private keys are not hardcoded | **COMPLIANT** | Public keys dynamically retrieved from JWKS; no private keys in service. |
+| V8.2.1 | 8.2.1 | Secrets and private keys are not hardcoded | **COMPLIANT** | Public keys dynamically retrieved from JWKS; zero hardcoded DB/JWT credentials in codebase or test suites (R4-SEC-001 remediated via `requiredEnv`). |
 
 ### V10: Malicious Code and Error Handling
 | Requirement | ASVS Code | Description | Compliance Status | Evidence / Implementation |
