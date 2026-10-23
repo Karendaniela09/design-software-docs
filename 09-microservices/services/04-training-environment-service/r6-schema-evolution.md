@@ -2,7 +2,7 @@
 
 **Service:** Training Environment Service
 **Database change:** `maintenance.reason` → `maintenance.reason_detail`
-**Status:** Laboratory validation completed; institutional deployment remains out of scope.
+**Status:** DB laboratory validation completed; complete R6 service validation remains pending.
 
 ## Decision and scope
 
@@ -14,14 +14,14 @@ The migration uses an expand/backfill/contract sequence on the real `training_en
 |---|---|---|
 | EXPAND | `964_r6_maintenance_reason_expand.sql` | Adds nullable `reason_detail` and compatibility synchronization. |
 | BACKFILL | `965_r6_maintenance_reason_backfill.sql` | Copies existing values without losing legacy data. |
-| CONTRACT | `966_r6_reason_contract.sql` in `changelog-r6-contract.yaml` | Removes `reason` and makes `reason_detail` the required column. |
+| CONTRACT | `966_r6_reason_contract.sql` in `changelog-r6-contract.yaml` | Removes `reason`; the current SQL does not apply `NOT NULL` to `reason_detail`, so the documentation must not claim that constraint is implemented. |
 | Rollback | Versioned rollback scripts for 964, 965 and 966 | Restores the compatible schema and data path. |
 
 ## Compatibility and validation
 
-The Go service was validated against the expanded schema through maintenance reads and writes. The database checks covered legacy rows, backfill equality, writes through both compatibility paths, CONTRACT, and rollback. Four isolated Docker PostgreSQL laboratories were used: `develop`, `qa`, `staging`, and `main` (the latter is a simulated laboratory, not an institutional production environment).
+The database checks covered legacy rows, backfill equality, writes through both compatibility paths, CONTRACT, and rollback. Historical/local Go evidence exists, but no accessible Go v2 branch or PR was found in the reviewed refs and the available service still uses `maintenance.reason`. Four isolated Docker PostgreSQL laboratories were used: `develop`, `qa`, `staging`, and `main` (the latter is a simulated laboratory, not an institutional production environment).
 
-The reported result was successful for the isolated laboratories: CONTRACT applied, `rollbackCount` completed, the legacy column and synchronization objects were restored, and the test data remained consistent. This evidence does not claim a production deployment, continuous-traffic availability measurement, or validation against shared institutional environments.
+The reported DB result was successful for the isolated laboratories: CONTRACT applied, `rollbackCount` completed, the legacy column and synchronization objects were restored, and the test data remained consistent. This evidence does not close service compatibility, does not claim a production deployment, continuous-traffic availability measurement, or validation against shared institutional environments.
 
 ## Operational constraints
 

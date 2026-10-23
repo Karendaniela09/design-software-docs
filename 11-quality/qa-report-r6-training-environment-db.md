@@ -5,7 +5,7 @@
 **Review date:** 2026-10-22
 **Scope:** Liquibase schema evolution for `training_environment.maintenance`
 **Requirement:** R6 — schema evolution without service downtime
-**Status:** PASS for the documented Docker laboratories; institutional promotion is not claimed.
+**Status:** DB PASS for the documented Docker laboratories; complete R6 delivery is PENDING because the Go v2 consumer is not verifiable in the reviewed branches.
 
 ## 1. Executive summary
 
@@ -13,14 +13,14 @@ R6 changes the real domain table `training_environment.maintenance` from the leg
 
 The final laboratory run validated EXPAND, BACKFILL, CONTRACT, CONTRACT rollback, and full rollback of EXPAND/BACKFILL in four disposable Docker PostgreSQL databases. The laboratories were identified as `develop`, `qa`, `staging`, and simulated `main`; these labels do not represent official institutional environments.
 
-The result is accepted for local laboratory evidence. It does not claim a production deployment, a zero-downtime measurement under continuous institutional traffic, or approval to run CONTRACT on a shared database.
+The database result is accepted for local laboratory evidence only. The Go v2 branch is now published as `origin/feat/r6-service-reason-detail` with commits `e8c8d7c` and `9434a93`, but R6(c) remains pending until CI or an authorized PostgreSQL environment executes the integration test and records the result. This report also does not claim a production deployment, a zero-downtime measurement under continuous institutional traffic, or approval to run CONTRACT on a shared database.
 
 ## 2. Repositories and traceability
 
 | Repository | Responsibility | Reference |
 |---|---|---|
 | `design-software-training-environment-db` | Liquibase changesets, SQL migrations, changelogs, and rollbacks. | [DB PR #134](https://github.com/code-sena/design-software-training-environment-db/pull/134) |
-| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | Service implementation is documented in the service report. |
+| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | No accessible Go v2 branch/PR or verifiable `reason_detail` commit was found in the reviewed refs; the available service still uses `maintenance.reason`. |
 | `design-software-docker-infra` | Disposable Docker/PostgreSQL laboratory orchestration. | Used only for isolated local validation. |
 | `design-software-docs` | ADR, service report, and this QA report. | Current documentation branch. |
 
@@ -58,9 +58,9 @@ The original TEXT values were preserved while the new representation was populat
 The compatibility requirement was evaluated in two layers:
 
 1. **Database compatibility:** both columns coexisted during EXPAND/BACKFILL, synchronized writes were checked, and legacy reads remained possible.
-2. **Service compatibility:** the existing Go service was compiled and exercised against the expanded schema in the available laboratory scenarios. The final four-laboratory rerun focused on SQL/Liquibase CONTRACT and rollback; it did not repeat new HTTP Go traffic in that specific run.
+2. **Service compatibility:** historical/local HTTP evidence was reviewed, but it is not reproducible from an accessible Go v2 branch or PR in the reviewed refs. The available service still reads and writes `maintenance.reason`. The final four-laboratory rerun focused on SQL/Liquibase CONTRACT and rollback; it did not establish the delivered service compatibility required for R6(c).
 
-The service must be upgraded and verified before CONTRACT is enabled in a shared environment. The local Go v2 implementation is documented separately and must be coordinated with the database cutover; this report does not treat a local branch as an institutional deployment.
+The service must be upgraded and verified before CONTRACT is enabled, even in the acceptance path for the complete R6 delivery. A branch or PR with an accessible commit, PostgreSQL integration tests against EXPAND, and reproducible evidence is required. The current report does not treat historical/local Go evidence as a delivered service implementation.
 
 ## 6. CONTRACT validation
 
@@ -73,7 +73,7 @@ changelog/changelog-r6-contract.yaml
 The checks validated that:
 
 - `reason` was removed only at the deliberate CONTRACT stage.
-- `reason_detail` retained the migrated values and became the final required field.
+- `reason_detail` retained the migrated values after CONTRACT. The current SQL does not apply `NOT NULL` to this column; therefore this report does not claim that constraint.
 - The expected row counts and non-null counts remained stable.
 - No pre-CONTRACT data divergence remained.
 
@@ -98,7 +98,7 @@ The reported result was PASS in all four Docker laboratories. The rollback test 
 |---|---|---|
 | (a) Expand/contract on a real domain table | Changesets 964 and 966, independent CONTRACT changelog, preconditions, and schema checks. | **PASS — four isolated laboratories** |
 | (b) Test data and backfill | Legacy seed data, null handling, equality checks, compatibility writes, and row-count checks. | **PASS — four isolated laboratories** |
-| (c) Previous and new schema during migration | Coexistence of `reason` and `reason_detail`, synchronization checks, and available Go service compatibility validation. | **PASS for laboratory scope; final HTTP rerun not repeated** |
+| (c) Previous and new schema during migration | SQL coexistence and historical HTTP evidence; no accessible Go v2 branch/PR and current service still uses `reason`. | **PENDING for complete R6 delivery** |
 | (d) Rollback in four Docker environments | CONTRACT rollback plus EXPAND/BACKFILL rollback and post-rollback schema/data checks. | **PASS — 4/4 isolated laboratories** |
 | Institutional environments | Shared QA, staging, production, continuous traffic, and deployment window. | **NOT CLAIMED** |
 
@@ -113,7 +113,7 @@ The reported result was PASS in all four Docker laboratories. The rollback test 
 
 ## 10. Final decision
 
-**R6 passes for the submitted local Docker laboratory scope.** The evidence demonstrates the expand/backfill/contract flow and integral rollback in four isolated databases. The result must not be interpreted as approval for institutional deployment until the Go consumer cutover, backup procedure, deployment authorization, and shared-environment validation are completed.
+**DB passes for the submitted local Docker laboratory scope.** The evidence demonstrates the expand/backfill/contract flow and integral rollback in four isolated databases. **Complete R6 remains pending** until a verifiable Go v2 branch or PR is delivered and tested against EXPAND. The result must not be interpreted as approval for institutional deployment until the Go consumer cutover, backup procedure, deployment authorization, and shared-environment validation are completed.
 
 ## References
 
