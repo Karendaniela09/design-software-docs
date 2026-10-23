@@ -1,4 +1,4 @@
-# ADR-016: Scheduling Service Security Hardening and Cryptographic JWT Validation
+# ADR-015: Scheduling Service Security Hardening and Cryptographic JWT Validation
 
 **Status:** ACCEPTED  
 **Date:** 2026-10-18  
