@@ -22,6 +22,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [testing-strategy.md](./testing-strategy.md) | Estrategia de pruebas por nivel y tipo | 🟡 |
 | [code-review.md](./code-review.md) | Criterios y flujo para revisiones de código | 🟡 |
 | [qa-report-r4-security-scheduling.md](./qa-report-r4-security-scheduling.md) | Informe de auditoría de seguridad y verificación OWASP ASVS L1 para scheduling-service | 🟢 |
+| [qa-report-r4-security-iam.md](./qa-report-r4-security-iam.md) | Technical report and QA evidence for IAM R4 session revocation | 🟢 |
 | [qa-report-r1-document-service.md](./qa-report-r1-document-service.md) | Informe técnico y evidencias QA del Document Service | 🟡 |
 | [qa-report-r3-monitoring-service.md](./qa-report-r3-monitoring-service.md) | Informe técnico y evidencias QA de Monitoring Service R3 | 🟡 |
 | [qa-report-r5-audit.md](./qa-report-r5-audit.md) | Informe técnico y evidencias QA de Auditoría R5 | 🟡 |
