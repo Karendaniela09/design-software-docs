@@ -8,3 +8,4 @@
 - [ADR-015: Endurecimiento de seguridad de Scheduling](ADR-015-scheduling-security-hardening.md) — aceptada.
 - [ADR-016: Rendimiento reproducible de las consultas de Auditoría](ADR-016-audit-r2-performance-data.md) — propuesta.
 - [ADR-017: Evolución de esquema Training Environment R6](ADR-017-training-environment-r6-schema-evolution.md) — propuesta.
+- [ADR-018: Validación del estado de sesión en IAM R4](ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
