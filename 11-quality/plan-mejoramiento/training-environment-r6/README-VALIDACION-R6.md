@@ -1,7 +1,7 @@
 # Procedimiento de reproducción — R6 Training Environment DB
 
 > Fecha: 2026-10-22 · Autor: Juan Sebastián González Horta (`jsgh1`)  
-> Estado: procedimiento publicado; **la ejecución del changelog reubicado queda pendiente de evidencia**.
+> Estado: **ejecución final 4/4 completada en laboratorios locales el 22/10/2026**; procedimiento conservado para futuras reproducciones.
 
 Este procedimiento corresponde a la implementación del [PR DB #134](https://github.com/code-sena/design-software-training-environment-db/pull/134) y la documentación del [PR Docs #337](https://github.com/code-sena/design-software-docs/pull/337). **No ejecutar sobre bases compartidas, de QA institucional, staging o producción.**
 
@@ -60,7 +60,7 @@ Si las ramas ya existían localmente pero están atrasadas, realizar un **fast-f
 10. Ejecutar `rollbackCount 2` **contra el changelog principal** para revertir BACKFILL y EXPAND; ejecutar [`05_verify_expand_rollback.sql`](evidencias/pruebas-sql/05_verify_expand_rollback.sql). Comprobar que sigue `reason` con los motivos de prueba y no existe `reason_detail`.
 11. Exportar logs, SHA-256 de los scripts, SHA de los repositorios, versión Docker/Liquibase, recuentos y `RESULTADO_FINAL.txt`. Limpiar **únicamente** el proyecto Compose desechable y su volumen. Preservar logs de cualquier fallo.
 
-**IMPORTANTE:** los pasos 6 y 8 no se ejecutaron desde esta revisión. Se publican para su ejecución controlada; no equivalen a un resultado PASS.
+**Resultado posterior:** los pasos 6 y 8 sí fueron ejecutados el 22/10/2026 en cuatro laboratorios aislados; ver [los logs completos y su índice](evidencias/validacion-ruta-final/README.md). El procedimiento sigue siendo orientativo para nuevas reproducciones.
 
 ## 4. Consultas de control
 
@@ -116,7 +116,7 @@ EXISTS (
 | Integridad | Logs y hashes asociados al mismo commit |
 | Separación | Sin cambios en bases existentes ni contenedores ajenos |
 
-Guardar la nueva evidencia bajo `evidencias/validacion-ruta-final/` **solo después de ejecutar el laboratorio**. La [matriz específica de QA](matriz-qa-20261022.md) distingue las pruebas ya completadas con la ruta antigua de las pendientes con la ruta definitiva.
+La evidencia ejecutada se preserva en [evidencias/validacion-ruta-final](evidencias/validacion-ruta-final/README.md), con 75 archivos originales, recuentos y hashes. La [matriz específica de QA](matriz-qa-20261022.md) distingue las pruebas ya completadas con la ruta antigua de las pendientes con la ruta definitiva.
 
 ## 6. Dependencias de despliegue y límites
 
@@ -127,7 +127,7 @@ Guardar la nueva evidencia bajo `evidencias/validacion-ruta-final/` **solo despu
 
 ## 7. Referencias
 
-- [ADR-016 — evolución del esquema](../../../05-architecture/decisions/records/ADR-016-training-environment-r6-schema-evolution.md)
+- [ADR-017 — evolución del esquema](../../../05-architecture/decisions/records/ADR-017-training-environment-r6-schema-evolution.md)
 - [Matriz de QA por ambiente](matriz-qa-20261022.md)
 - [Evidencias anteriores](evidencias/20261019_160331/README.md)
 - [PR ENV DB #134](https://github.com/code-sena/design-software-training-environment-db/pull/134)

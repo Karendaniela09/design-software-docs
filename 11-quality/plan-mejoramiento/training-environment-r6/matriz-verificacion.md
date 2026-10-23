@@ -1,6 +1,6 @@
 # Matriz de verificación — Acta 02 R6
 
-> Estado: 🟡 En revisión | Última actualización: 2026-10-20  
+> Estado: 🟡 En revisión | Última actualización: 2026-10-22  
 > Autor: Juan Sebastián González Horta (`jsgh1`) | Equipo: Training Environment
 
 ## Contexto
@@ -22,10 +22,11 @@ Resumen de las pruebas efectuadas sobre los changesets y el flujo de mantenimien
 
 ## Verificación técnica final y observaciones de QA
 
-La prueba del 19/10/2026 contiene registros verificables de **aplicación de CONTRACT, comprobación SQL, rollback de CONTRACT y datos preservados en 4/4 laboratorios locales**, pero utiliza la ruta histórica `r6/contract/changelog.yaml`. **Pendiente:** repetir la ejecución y el rollback desde `changelog/changelog-r6-contract.yaml` con el código final del PR DB #134. Hasta tener nuevos logs, el cierre de esa validación no debe marcarse como PASS.
+La prueba anterior del 19/10/2026 registra CONTRACT y rollback **4/4 usando la ruta antigua** `r6/contract/changelog.yaml`. La ejecución adicional del **22/10/2026** confirma CONTRACT desde **`changelog/changelog-r6-contract.yaml`**, su rollback y la preservación de datos en **4/4 bases PostgreSQL aisladas**. Se contrastaron los 75 logs y los resultados SQL. No se han probado ambientes institucionales ni nueva ejecución HTTP Go en esa corrida.
 
 - [Matriz de QA con enlaces a los cuatro laboratorios](matriz-qa-20261022.md).
 - [Guía de reproducción y controles](README-VALIDACION-R6.md).
+- [Evidencias 4/4 desde ruta final, incluidos hashes y 75 logs](evidencias/validacion-ruta-final/README.md).
 
 ## Archivos de evidencia
 

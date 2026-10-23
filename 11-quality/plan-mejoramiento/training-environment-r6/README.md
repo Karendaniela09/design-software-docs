@@ -1,6 +1,6 @@
 # Training Environment — reto R6
 
-> Estado: 🟡 En revisión | Última actualización: 2026-10-20  
+> Estado: 🟡 En revisión | Última actualización: 2026-10-22  
 > Autor: Juan Sebastián González Horta (`jsgh1`) | Equipo: Training Environment
 
 ## Contexto
@@ -17,7 +17,8 @@ Documenté la evolución de `training_environment.maintenance.reason` hacia `rea
 | [Matriz de verificación](matriz-verificacion.md) | Criterios R6, evidencias y límites. |
 | [Evidencias](evidencias/README.md) | Salidas originales de las pruebas y capturas. |
 | [Reproducción técnica](README-VALIDACION-R6.md) | Secuencia y comandos para validar la ruta final. |
-| [Revisión QA 22/10](matriz-qa-20261022.md) | Logs 4/4 de CONTRACT, rollback y pendientes de validación final. |
+| [Revisión QA 22/10](matriz-qa-20261022.md) | Logs y criterios R6: final 4/4 con ruta definitiva; límites institucionales. |
+| [Ejecución final 4/4](evidencias/validacion-ruta-final/README.md) | Archivo completo de 75 logs, comprobaciones SQL, commits y SHA-256. |
 
 ## Referencias
 

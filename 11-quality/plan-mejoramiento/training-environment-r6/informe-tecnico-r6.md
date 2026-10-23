@@ -1,6 +1,6 @@
 # Informe técnico — evolución de esquema R6
 
-> Estado: 🟡 En revisión | Última actualización: 2026-10-20  
+> Estado: 🟡 En revisión | Última actualización: 2026-10-22  
 > Autor: Juan Sebastián González Horta (`jsgh1`) | Equipo: Training Environment
 
 ## Contexto
@@ -32,7 +32,9 @@ Los changesets 964 y 965 se registran desde el changelog principal. El 966 queda
 
 Los cuatro laboratorios anteriores incluyen `06-contract.liquibase.log.txt`, `07-contract-check.sql.log.txt`, `08-contract-rb.liquibase.log.txt` y `09-contract-rb-check.sql.log.txt` por ambiente; los mensajes Liquibase y la validación SQL posterior indican ejecución y rollback de CONTRACT con la **ruta anterior**. Se encuentran enlazados en la [matriz QA](matriz-qa-20261022.md).
 
-La **estructura final** del PR DB reubica CONTRACT en `changelog/changelog-r6-contract.yaml`. La aplicación y reversión de esa ruta aún requieren ejecución en una base temporal aislada, con registro de commits, hashes, recuentos y pruebas posteriores; véase [README de reproducción](README-VALIDACION-R6.md). No se atribuye un resultado a una ejecución no realizada.
+La **estructura final** del PR DB reubica CONTRACT en `changelog/changelog-r6-contract.yaml`. La aplicación y reversión de **esa ruta final se ejecutaron el 22/10/2026 en cuatro bases PostgreSQL 16 Docker aisladas**. Se verificó que los scripts funcionaban desde el commit DB `4640239879af14032abfcec10c0e641f20f607ff` y se guardaron hashes, recuentos SQL y salidas Liquibase: [índice y archivo completo de la nueva ejecución](evidencias/validacion-ruta-final/README.md).
+
+En cada laboratorio: 4 filas iniciales (3 motivos no nulos), 6 tras compatibilidad SQL v1/v2 y **0 divergencias**; CONTRACT 966 se aplicó desde `changelog/changelog-r6-contract.yaml`; el rollback reintrodujo `reason`, restauró trigger/función y conservó los datos; se revirtieron además 965/964. Esta **corrida nueva no incluye solicitudes HTTP Go**, mediciones de caída real ni bases institucionales. Procedimiento: [README de reproducción](README-VALIDACION-R6.md).
 
 ## Alcance y riesgos
 

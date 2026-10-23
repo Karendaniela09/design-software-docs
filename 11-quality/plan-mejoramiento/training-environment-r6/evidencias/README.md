@@ -1,16 +1,17 @@
 # Evidencias de pruebas R6
 
-> Estado: 🟡 En revisión | Última actualización: 2026-10-20  
+> Estado: 🟡 En revisión | Última actualización: 2026-10-22  
 > Autor: Juan Sebastián González Horta (`jsgh1`) | Equipo: Training Environment
 
 ## Contexto
 
-Salidas originales de los ensayos del 19 y 20 de octubre de 2026. Los nombres con hora corresponden a carpetas de ejecución locales. No se han convertido resultados de laboratorio en afirmaciones de despliegue institucional.
+Salidas originales de los ensayos del 19, 20 y 22 de octubre de 2026. Los nombres con hora corresponden a carpetas de ejecución locales. No se han convertido resultados de laboratorio en afirmaciones de despliegue institucional.
 
 ## Inventario
 
 | Carpeta | Contenido |
 |---|---|
+| [validacion-ruta-final](validacion-ruta-final/README.md) | Ejecución final del 22/10: CONTRACT y rollback 4/4 desde changelog definitivo, 75 logs y hashes. |
 | [20261019_160331](20261019_160331/README.md) | Cuatro bases, migración, CONTRACT y rollback. |
 | [20261019_181957](20261019_181957/README.md) | Pruebas con servicio Go y convivencia de escrituras. |
 | [20261019_200331](20261019_200331/README.md) | Verificación de rollback en cuatro bases Docker. |
@@ -21,7 +22,7 @@ Salidas originales de los ensayos del 19 y 20 de octubre de 2026. Los nombres co
 
 ## Trazabilidad para revisión de QA
 
-La [matriz por ambiente](../matriz-qa-20261022.md) enlaza los cuatro logs de CONTRACT y rollback bajo `20261019_160331/`. La [guía de reproducción](../README-VALIDACION-R6.md) identifica la prueba aún pendiente con la ruta final. Los nuevos resultados deberán almacenarse por separado, tras ejecutarlos: no se han añadido logs ficticios.
+La [matriz por ambiente](../matriz-qa-20261022.md) distingue los registros de CONTRACT/rollback con ruta antigua de la **nueva ejecución 4/4 con changelog definitivo**. Esta última tiene [índice y archivo integral verificado](validacion-ruta-final/README.md) y [guía de reproducción](../README-VALIDACION-R6.md). Los nuevos logs se recibieron tras una ejecución real; no se generaron resultados simulados.
 
 ## Capturas
 
