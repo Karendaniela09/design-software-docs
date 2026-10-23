@@ -17,7 +17,7 @@ The implementation is distributed across four repositories:
 - `design-software-docker-infra`: Liquibase service with the `r6-contract` profile.
 - `design-software-docs`: ADR, data model, decisions, and runbook.
 
-The previous report was removed from `design-software-monitoring-db/docs` because it was duplicated and outdated. The official documentation remains in `design-software-docs`; personal evidence is stored under `docs/plan-mejoramiento-R6`.
+The previous report was removed from `design-software-monitoring-db/docs` because it was duplicated and outdated. The official documentation remains in `design-software-docs`; personal execution evidence remains in the local delivery dossier.
 
 ## 2. Versions and commits
 
@@ -89,7 +89,7 @@ The isolated PostgreSQL CI workflow was prepared in `90de34a`; its remote result
 
 ## 5. Executed evidence
 
-Complete evidence is under [`docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6`](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6). Four ephemeral isolated PostgreSQL databases were used: DEV, QA, STAGING, and simulated PROD. None was a shared or real production database.
+The execution evidence is retained in the local delivery dossier. Four ephemeral isolated PostgreSQL databases were used: DEV, QA, STAGING, and simulated PROD. None was a shared or real production database.
 
 The four synchronization outputs reported:
 
@@ -158,12 +158,7 @@ All environments produced the normalized fingerprint `a65ed94bf0bc33bbddc036be66
 
 Evidence folders:
 
-- [Liquibase identity](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/01-liquibase-identidad)
-- [Final synchronization](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/02-sincronizacion-final)
-- [DEV rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-dev)
-- [QA rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-qa)
-- [STAGING rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-staging)
-- [Simulated PROD rollback](docs/plan-mejoramiento-R6/evidencias/correcciones-qa-r6/04-rollback-prod-simulada)
+Execution logs and hashes are available in the local delivery dossier for authorized review.
 
 ## 10. Technical references and scope statement
 
