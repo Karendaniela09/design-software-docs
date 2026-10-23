@@ -1,0 +1,21 @@
+R6(c) Go v2 integration test output
+===================================
+UTC: 2026-10-23T12:28:42.4836490Z
+Repository commit: 5356df5483c91582f27d836ce18c776b5a3a13be
+Branch: feat/r6-service-reason-detail
+Database: PostgreSQL 16 in Docker
+Docker Engine: 29.9.1
+Container: 90a775a89288d39ea9a5e2b41598024f0e1998ed1264c306613ac021aaeae6cb
+Connection: localhost:55432/env_db
+Integration mode: REQUIRE_POSTGRES_INTEGRATION=1
+
+Command:
+go test -count=1 -v ./internal/adapter/out/persistence -run 'TestPostgresMaintenanceRepository_'
+
+Output:
+=== RUN   TestPostgresMaintenanceRepository_HU006_CRUDFiltersAndTransactionalOutbox
+--- PASS: TestPostgresMaintenanceRepository_HU006_CRUDFiltersAndTransactionalOutbox (0.07s)
+=== RUN   TestPostgresMaintenanceRepository_HU018_TemporalValidation
+--- PASS: TestPostgresMaintenanceRepository_HU018_TemporalValidation (0.05s)
+PASS
+ok  github.com/code-sena/design-software-training-environment-service/internal/adapter/out/persistence  1.149s

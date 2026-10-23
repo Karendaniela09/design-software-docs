@@ -20,7 +20,7 @@ The database and Go v2 results are accepted for local laboratory evidence only. 
 | Repository | Responsibility | Reference |
 |---|---|---|
 | `design-software-training-environment-db` | Liquibase changesets, SQL migrations, changelogs, and rollbacks. | [DB PR #134](https://github.com/code-sena/design-software-training-environment-db/pull/134) |
-| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | `origin/feat/r6-service-reason-detail`, commit `8b100d1`, with PostgreSQL integration evidence under `evidencias/`. |
+| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | `origin/feat/r6-service-reason-detail`, commit `fd00fa3`; PostgreSQL integration evidence is stored canonically in [`11-quality/evidence/r6-training-environment/`](./evidence/r6-training-environment/). |
 | `design-software-docker-infra` | Disposable Docker/PostgreSQL laboratory orchestration. | Used only for isolated local validation. |
 | `design-software-docs` | ADR, service report, and this QA report. | Current documentation branch. |
 
@@ -60,7 +60,7 @@ The compatibility requirement was evaluated in two layers:
 1. **Database compatibility:** both columns coexisted during EXPAND/BACKFILL, synchronized writes were checked, and legacy reads remained possible.
 2. **Service compatibility:** the published Go v2 branch was tested against PostgreSQL 16 with EXPAND/BACKFILL applied. The maintenance integration tests passed and verified persistence through `reason_detail` plus the transactional outbox. The HTTP evidence remains historical support; the authoritative current evidence is the PostgreSQL test output committed with the service branch.
 
-The service must be upgraded and verified before CONTRACT is enabled in a shared environment. That requirement is satisfied for the laboratory scope by the published branch, PostgreSQL integration PASS, and reproducible evidence. Shared-environment authorization and Architecture approval remain separate governance conditions.
+The service must be upgraded and verified before CONTRACT is enabled in a shared environment. That requirement is satisfied for the laboratory scope by the published branch, PostgreSQL integration PASS, and reproducible evidence stored in Docs. Shared-environment authorization and Architecture approval remain separate governance conditions.
 
 ## 6. CONTRACT validation
 
