@@ -35,7 +35,7 @@ por `POST /api/v1/auth/login`, publicó su JWKS contractual y entregó
 | Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js`, `scripts/run-r2-k6.ps1`, `performance/results/{before,after}` | Cumplido el 2026-10-22: `after` p95 15.63 ms, 0 % de errores, 265 542 iteraciones, 100 % de checks y exit code 0. |
 | Tres `EXPLAIN (ANALYZE, BUFFERS)` antes y después | `performance/sql/r2-explain.sql`, `performance/sql/r2-seed.sql`, `scripts/run-r2-data.ps1` | Ejecutado en PostgreSQL 16 con fixture aislado de 200 002 filas. |
 | Índices Liquibase con rollback | Changeset `r2-audit-performance-query-indexes` y SQL de rollback en `design-software-audit-db` | Rollback `rollback-count 1` probado y los tres índices quedaron ausentes. |
-| Informe comparativo | Este documento y [ADR-015](../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Resúmenes JSON y Markdown separados en `before/` y `after/`. |
+| Informe comparativo | Este documento y [ADR-016](../05-architecture/decisions/records/ADR-016-audit-r2-performance-data.md) | Resúmenes JSON y Markdown separados en `before/` y `after/`. |
 
 ## Validación del entorno
 
@@ -312,7 +312,7 @@ de esos repositorios no se incluyen para no atribuirlos incorrectamente.
 
 ## Referencias
 
-- [ADR-015 — Rendimiento reproducible de las consultas de Auditoría](../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md)
+- [ADR-016 — Rendimiento reproducible de las consultas de Auditoría](../05-architecture/decisions/records/ADR-016-audit-r2-performance-data.md)
 - [Ficha técnica de audit-service](../09-microservices/services/09-audit-service/README.md)
 - `design-software-audit-service/.env.example`
 - `design-software-audit-service/.env.worker.example`

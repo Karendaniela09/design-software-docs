@@ -1,4 +1,4 @@
-# ADR-015: Rendimiento reproducible de las consultas de Auditoría
+# ADR-016: Rendimiento reproducible de las consultas de Auditoría
 
 **Estado:** ACCEPTED
 **Fecha:** 2026-10-21
