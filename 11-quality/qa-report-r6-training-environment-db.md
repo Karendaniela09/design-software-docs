@@ -5,7 +5,7 @@
 **Review date:** 2026-10-22
 **Scope:** Liquibase schema evolution for `training_environment.maintenance`
 **Requirement:** R6 — schema evolution without service downtime
-**Status:** DB PASS for the documented Docker laboratories; complete R6 delivery is PENDING because the Go v2 consumer is not verifiable in the reviewed branches.
+**Status:** R6 technically PASS for the documented local laboratory scope; formal approval remains pending QA/Architecture review.
 
 ## 1. Executive summary
 
@@ -13,14 +13,14 @@ R6 changes the real domain table `training_environment.maintenance` from the leg
 
 The final laboratory run validated EXPAND, BACKFILL, CONTRACT, CONTRACT rollback, and full rollback of EXPAND/BACKFILL in four disposable Docker PostgreSQL databases. The laboratories were identified as `develop`, `qa`, `staging`, and simulated `main`; these labels do not represent official institutional environments.
 
-The database result is accepted for local laboratory evidence only. The Go v2 branch is now published as `origin/feat/r6-service-reason-detail` with commits `e8c8d7c` and `9434a93`, but R6(c) remains pending until CI or an authorized PostgreSQL environment executes the integration test and records the result. This report also does not claim a production deployment, a zero-downtime measurement under continuous institutional traffic, or approval to run CONTRACT on a shared database.
+The database and Go v2 results are accepted for local laboratory evidence only. The Go v2 branch is published as `origin/feat/r6-service-reason-detail`; its maintenance integration tests passed against PostgreSQL 16 with EXPAND/BACKFILL applied, and the CONTRACT/rollback checks were recorded in the service evidence. This report does not claim a production deployment, a zero-downtime measurement under continuous institutional traffic, or authorization to run CONTRACT on a shared database. Formal approval remains pending the architect responsible.
 
 ## 2. Repositories and traceability
 
 | Repository | Responsibility | Reference |
 |---|---|---|
 | `design-software-training-environment-db` | Liquibase changesets, SQL migrations, changelogs, and rollbacks. | [DB PR #134](https://github.com/code-sena/design-software-training-environment-db/pull/134) |
-| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | No accessible Go v2 branch/PR or verifiable `reason_detail` commit was found in the reviewed refs; the available service still uses `maintenance.reason`. |
+| `design-software-training-environment-service` | Go consumer compatibility and maintenance API behavior. | `origin/feat/r6-service-reason-detail`, commit `8b100d1`, with PostgreSQL integration evidence under `evidencias/`. |
 | `design-software-docker-infra` | Disposable Docker/PostgreSQL laboratory orchestration. | Used only for isolated local validation. |
 | `design-software-docs` | ADR, service report, and this QA report. | Current documentation branch. |
 
@@ -58,9 +58,9 @@ The original TEXT values were preserved while the new representation was populat
 The compatibility requirement was evaluated in two layers:
 
 1. **Database compatibility:** both columns coexisted during EXPAND/BACKFILL, synchronized writes were checked, and legacy reads remained possible.
-2. **Service compatibility:** historical/local HTTP evidence was reviewed, but it is not reproducible from an accessible Go v2 branch or PR in the reviewed refs. The available service still reads and writes `maintenance.reason`. The final four-laboratory rerun focused on SQL/Liquibase CONTRACT and rollback; it did not establish the delivered service compatibility required for R6(c).
+2. **Service compatibility:** the published Go v2 branch was tested against PostgreSQL 16 with EXPAND/BACKFILL applied. The maintenance integration tests passed and verified persistence through `reason_detail` plus the transactional outbox. The HTTP evidence remains historical support; the authoritative current evidence is the PostgreSQL test output committed with the service branch.
 
-The service must be upgraded and verified before CONTRACT is enabled, even in the acceptance path for the complete R6 delivery. A branch or PR with an accessible commit, PostgreSQL integration tests against EXPAND, and reproducible evidence is required. The current report does not treat historical/local Go evidence as a delivered service implementation.
+The service must be upgraded and verified before CONTRACT is enabled in a shared environment. That requirement is satisfied for the laboratory scope by the published branch, PostgreSQL integration PASS, and reproducible evidence. Shared-environment authorization and Architecture approval remain separate governance conditions.
 
 ## 6. CONTRACT validation
 
@@ -98,7 +98,7 @@ The reported result was PASS in all four Docker laboratories. The rollback test 
 |---|---|---|
 | (a) Expand/contract on a real domain table | Changesets 964 and 966, independent CONTRACT changelog, preconditions, and schema checks. | **PASS — four isolated laboratories** |
 | (b) Test data and backfill | Legacy seed data, null handling, equality checks, compatibility writes, and row-count checks. | **PASS — four isolated laboratories** |
-| (c) Previous and new schema during migration | SQL coexistence and historical HTTP evidence; no accessible Go v2 branch/PR and current service still uses `reason`. | **PENDING for complete R6 delivery** |
+| (c) Previous and new schema during migration | SQL coexistence plus published Go v2 PostgreSQL integration PASS against EXPAND/BACKFILL. | **PASS — local laboratory scope** |
 | (d) Rollback in four Docker environments | CONTRACT rollback plus EXPAND/BACKFILL rollback and post-rollback schema/data checks. | **PASS — 4/4 isolated laboratories** |
 | Institutional environments | Shared QA, staging, production, continuous traffic, and deployment window. | **NOT CLAIMED** |
 
@@ -113,7 +113,7 @@ The reported result was PASS in all four Docker laboratories. The rollback test 
 
 ## 10. Final decision
 
-**DB passes for the submitted local Docker laboratory scope.** The evidence demonstrates the expand/backfill/contract flow and integral rollback in four isolated databases. **Complete R6 remains pending** until a verifiable Go v2 branch or PR is delivered and tested against EXPAND. The result must not be interpreted as approval for institutional deployment until the Go consumer cutover, backup procedure, deployment authorization, and shared-environment validation are completed.
+**R6 passes technically for the submitted local laboratory scope.** The evidence demonstrates the expand/backfill/contract flow, Go v2 compatibility against EXPAND/BACKFILL, and integral rollback in the isolated database evidence. The result must not be interpreted as approval for institutional deployment. The formal closure remains pending QA/Architecture review, deployment authorization, and any shared-environment validation required by governance.
 
 ## References
 
