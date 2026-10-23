@@ -75,7 +75,7 @@ reproducir el entorno después de clonar los repositorios.
 
 ## Referencias
 
-- [Informe R2 y matriz de criterios](../../../11-quality/r2-audit-rendimiento-datos.md)
+- [R2 technical report and acceptance criteria](../../../11-quality/qa-report-r2-audit-service.md)
 - [Ficha de audit-service](../../../09-microservices/services/09-audit-service/README.md)
 - `design-software-audit-db/01_ddl/10_indexes/002_add_audit_query_performance_indexes.sql`
 - `design-software-audit-db/05_rollbacks/01_ddl/10_indexes/002_add_audit_query_performance_indexes.rollback.sql`

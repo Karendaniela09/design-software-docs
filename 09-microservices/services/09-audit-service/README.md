@@ -39,4 +39,4 @@ Registro append-only de auditoría y consulta de eventos auditables.
 
 El contrato OpenAPI canónico está en `design-software-audit-service/api/openapi/audit.yaml`.
 El worker consume AMQP y persiste auditoría idempotente.
-La evidencia R2 de rendimiento y datos está en [el informe del plan de mejoramiento](../../../11-quality/plan-mejoramiento/r2-audit-rendimiento-datos.md).
+R2 performance and data evidence is documented in the [technical report](../../../11-quality/qa-report-r2-audit-service.md).

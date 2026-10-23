@@ -9,5 +9,4 @@ Seguimiento documental de planes individuales.
 
 ## Contenido
 
-- [R3: observabilidad de Monitoring](r3-observabilidad/README.md).
-- [R2: rendimiento y datos de audit-service](r2-audit-rendimiento-datos.md).
+- [R2: Audit Service performance and data technical report](../qa-report-r2-audit-service.md).

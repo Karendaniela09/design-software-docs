@@ -10,10 +10,10 @@
 
 This note defines the service-level implementation and evidence for R2. It is
 the companion to [ADR-016 — Reproducible Audit Query Performance](../../../05-architecture/decisions/records/ADR-016-audit-r2-performance-data.md)
-and to the preserved developer report
-[`r2-audit-rendimiento-datos.md`](../../../11-quality/r2-audit-rendimiento-datos.md).
+and to the detailed R2 technical report
+[`qa-report-r2-audit-service.md`](../../../11-quality/qa-report-r2-audit-service.md).
 
-The developer report remains the source of the detailed execution narrative.
+The technical report remains the source of the detailed execution narrative.
 This note organizes the service design, data flow, controls and evidence
 according to the documentation standard without replacing that report.
 
