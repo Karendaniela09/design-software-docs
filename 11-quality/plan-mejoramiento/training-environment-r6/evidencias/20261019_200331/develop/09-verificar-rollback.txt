@@ -1,5 +1,0 @@
-﻿DO
-                                resultado
--------------------------------------------------------------------------
- PASS COMPOSE OFICIAL LOCAL: R6 rollback sin perdida de filas ni razones
-(1 row)

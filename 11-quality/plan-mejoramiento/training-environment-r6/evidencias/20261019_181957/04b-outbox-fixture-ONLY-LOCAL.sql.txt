@@ -1,5 +1,0 @@
-﻿CREATE TABLE
-          result
----------------------------
- LOCAL_OUTBOX_FIXTURE_ONLY
-(1 row)

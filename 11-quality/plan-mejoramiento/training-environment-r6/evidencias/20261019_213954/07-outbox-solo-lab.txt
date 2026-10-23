@@ -1,5 +1,0 @@
-﻿CREATE TABLE
-        resultado
--------------------------
- OUTBOX_SOLO_LABORATORIO
-(1 row)

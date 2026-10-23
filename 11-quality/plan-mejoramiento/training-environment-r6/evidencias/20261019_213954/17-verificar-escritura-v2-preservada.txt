@@ -1,5 +1,0 @@
-﻿DO
-      resultado
-----------------------
- DATOS_V2_PRESERVADOS
-(1 row)

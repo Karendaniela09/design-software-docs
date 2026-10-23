@@ -1,5 +1,0 @@
-﻿DO
-   result
--------------
- BACKFILL_OK
-(1 row)

@@ -1,5 +1,0 @@
-﻿DO
-                   result
----------------------------------------------
- R6 rollback CONTRACT OK (datos preservados)
-(1 row)

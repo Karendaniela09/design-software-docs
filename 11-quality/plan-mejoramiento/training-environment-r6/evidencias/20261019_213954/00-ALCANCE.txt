@@ -1,6 +1,0 @@
-﻿Proyecto local: r6contract-9649bd29
-SOLO pruebas locales, no cuatro ambientes remotos.
-Compose original usado sin editar y con .env propio fuera del proyecto.
-Tablas auxiliares: outbox minimo SOLO en DB desechable porque la API lo requiere.
-Orden: baseline -> R6 -> v2 -> CONTRACT -> v2 HTTP -> rollback CONTRACT -> v1 HTTP -> rollback R6.
-Sin GitHub, sin SRD, sin reutilizar volumenes existentes.

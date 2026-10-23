@@ -1,5 +1,0 @@
-﻿DO
-            result
--------------------------------
- ROLLBACK_PRESERVED_V2_DATA_OK
-(1 row)

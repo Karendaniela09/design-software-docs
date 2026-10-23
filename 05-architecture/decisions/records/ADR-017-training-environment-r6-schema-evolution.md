@@ -40,6 +40,6 @@ Las verificaciones locales probaron migraciones, sincronización y rollbacks en 
 ## Referencias
 
 - [PR #134: implementación de la migración](https://github.com/code-sena/design-software-training-environment-db/pull/134).
-- [Informe técnico](../../../11-quality/plan-mejoramiento/training-environment-r6/informe-tecnico-r6.md).
-- [Matriz y evidencias de validación](../../../11-quality/plan-mejoramiento/training-environment-r6/matriz-verificacion.md).
+- [Technical implementation report](../../../09-microservices/services/04-training-environment-service/r6-schema-evolution.md).
+- [QA verification report](../../../11-quality/qa-report-r6-training-environment-db.md).
 - Acta 02, ADSO 3145555, numeral 13 (R6).

@@ -1,7 +1,0 @@
-﻿ESTADO=PASS
-FECHA=20261019_200331
-AMBIENTES_APROBADOS=develop,qa,staging,main
-SOLO COPIAS LOCALES, NO ENTORNOS OFICIALES/REMOTOS
-NO se ha probado convivencia API en este script (ver ensayo R6 de HTTP previo).
-NO se ejecuta CONTRACT en este script.
-NO toca el repositorio DB original ni SRD ni GitHub.

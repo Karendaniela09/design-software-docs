@@ -1,1 +1,0 @@
-﻿Estructura y marcadores verificados. No se ejecutan despliegues reales.

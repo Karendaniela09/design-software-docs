@@ -1,1 +1,0 @@
-PASS_R6_RUTA_FINAL 4/4 - SOLO SQL/Liquibase en laboratorios aislados
