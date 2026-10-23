@@ -21,6 +21,13 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 |---------|-------------|--------|
 | [testing-strategy.md](./testing-strategy.md) | Estrategia de pruebas por nivel y tipo | 🟡 |
 | [code-review.md](./code-review.md) | Criterios y flujo para revisiones de código | 🟡 |
+| [qa-report-r4-security-scheduling.md](./qa-report-r4-security-scheduling.md) | Informe de auditoría de seguridad y verificación OWASP ASVS L1 para scheduling-service | 🟢 |
+| [qa-report-r4-security-iam.md](./qa-report-r4-security-iam.md) | Technical report and QA evidence for IAM R4 session revocation | 🟢 |
+| [qa-report-r1-document-service.md](./qa-report-r1-document-service.md) | Informe técnico y evidencias QA del Document Service | 🟡 |
+| [qa-report-r3-monitoring-service.md](./qa-report-r3-monitoring-service.md) | Informe técnico y evidencias QA de Monitoring Service R3 | 🟡 |
+| [qa-report-r5-audit.md](./qa-report-r5-audit.md) | Informe técnico y evidencias QA de Auditoría R5 | 🟡 |
+| [qa-report-r2-audit-service.md](./qa-report-r2-audit-service.md) | Technical report and QA acceptance evidence for Audit R2 performance and data | 🟢 |
+| [qa-report-r6-monitoring-db.md](./qa-report-r6-monitoring-db.md) | Informe técnico y evidencias QA de la migración R6 de Monitoring DB | 🟡 |
 
 ## Plantillas
 
@@ -35,4 +42,4 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 - Umbral de cobertura exacto y su gate automatizado en CI: pendiente de cerrar junto con [ci-cd.md](../10-devops/ci-cd.md).
 - Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.
 
-- [Plan de mejoramiento R3 de Monitoring](./plan-mejoramiento/README.md).
+- [QA R6 Training Environment DB](./qa-report-r6-training-environment-db.md).

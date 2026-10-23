@@ -207,3 +207,10 @@ de tokens validos.
   de infraestructura donde el descubrimiento de servicios aun no esta disponible), el secreto
   compartido por configuracion sigue disponible como mecanismo de respaldo manual, gestionado
   por config (no hardcodeado), documentado pero no es el camino primario.
+
+---
+
+## Seguridad IAM R4: decisión arquitectónica propuesta
+
+- [ADR-018: Validación del estado de sesión al obtener el usuario actual](../../../05-architecture/decisions/records/ADR-018-iam-session-revocation-r4.md) — **PROPOSED**.
+- Alcance: rutas de IAM que invocan `GetCurrentUser`; la revocación inmediata en servicios que verifican JWT/JWKS sin consultar IAM sigue sin demostrarse.

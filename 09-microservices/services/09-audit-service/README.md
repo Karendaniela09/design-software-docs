@@ -1,6 +1,6 @@
 # audit-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-21
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -39,3 +39,4 @@ Registro append-only de auditoría y consulta de eventos auditables.
 
 El contrato OpenAPI canónico está en `design-software-audit-service/api/openapi/audit.yaml`.
 El worker consume AMQP y persiste auditoría idempotente.
+R2 performance and data evidence is documented in the [technical report](../../../11-quality/qa-report-r2-audit-service.md).

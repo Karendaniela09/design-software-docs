@@ -36,11 +36,19 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-012](./records/ADR-012-training-environment-r3-observability.md) | Observabilidad integral en Training Environment (OpenTelemetry, RED, PostgreSQL, Grafana) | ACCEPTED |
 | [ADR-013](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) | Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring | PROPOSED |
 | [ADR-014](./records/ADR-014-audit-r5-contract-compatibility.md) | Compatibilidad ejecutable de contratos del dominio de Auditoría | ACCEPTED |
-| [ADR-015](./records/ADR-015-actors-security-hardening.md) | Seguridad y control de acceso para actors-service (OAuth2 RS256, mTLS, RBAC) | PROPOSED |
+| [ADR-015](./records/ADR-015-scheduling-security-hardening.md) | Scheduling service security hardening and cryptographic JWT validation | ACCEPTED |
+| [ADR-016](./records/ADR-016-audit-r2-performance-data.md) | Rendimiento reproducible de las consultas de Auditoría | PROPOSED |
+| [ADR-017](./records/ADR-017-training-environment-r6-schema-evolution.md) | Evolución de maintenance.reason a reason_detail — Training Environment R6 | PROPOSED |
+| [ADR-018](./records/ADR-018-iam-session-revocation-r4.md) | Validación del estado de sesión y límites de revocación en IAM R4 | PROPOSED |
+| [ADR-019](./records/ADR-019-actors-security-hardening.md) | Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC | PROPOSED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
 - [ADR-012: Observabilidad de Training Environment para R3](./records/ADR-012-training-environment-r3-observability.md) — aceptada.
 - [ADR-013: Migración progresiva de TEXT a JSONB en planes de mejoramiento de Monitoring](./records/ADR-013-monitoring-r6-text-jsonb-migration.md) — propuesta, pendiente de aprobación.
 - [ADR-014: Compatibilidad ejecutable de contratos del dominio de Auditoría](./records/ADR-014-audit-r5-contract-compatibility.md) — aceptada; decisión final de R5.
-- [ADR-015: Seguridad y control de acceso para actors-service](./records/ADR-015-actors-security-hardening.md) — propuesta.
+- [ADR-015: Scheduling service security hardening and cryptographic JWT validation](./records/ADR-015-scheduling-security-hardening.md) — aceptada.
+- [ADR-016: Rendimiento reproducible de las consultas de Auditoría](./records/ADR-016-audit-r2-performance-data.md) — propuesta, pendiente de revisión arquitectónica.
+- [ADR-017: Evolución gradual del motivo de mantenimiento (Training Environment R6)](./records/ADR-017-training-environment-r6-schema-evolution.md) — propuesta, pendiente de revisión.
+- [ADR-018: Validación del estado de sesión en IAM R4](./records/ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
+- [ADR-019: Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC](./records/ADR-019-actors-security-hardening.md) — propuesta (PROPOSED).
