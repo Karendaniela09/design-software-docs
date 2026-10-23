@@ -10,7 +10,8 @@ plan de mejoramiento. La fuente ejecutable está repartida por responsabilidad:
 `design-software-audit-service` contiene el escenario k6 y los scripts,
 `design-software-audit-db` contiene la migración Liquibase y
 `design-software-docker-infra` orquesta el entorno local. No se versionan
-contraseñas, tokens, archivos `.env` ni resultados dependientes de una máquina.
+contraseñas, tokens ni archivos `.env`. Los resultados SQL y k6 se conservan
+solo después de sanitizarlos y deben leerse junto con el exit code registrado.
 
 ## Alcance
 
@@ -31,7 +32,7 @@ por `POST /api/v1/auth/login`, publicó su JWKS contractual y entregó
 
 | Criterio R2 | Entrega versionada | Estado verificable |
 |-------------|-------------------|--------------------|
-| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js`, `scripts/run-r2-k6.ps1`, `performance/results/{before,after}` | Cumplido el 2026-10-22: `after` p95 46.46 ms, 0 % de errores, 235 611 iteraciones y 100 % de checks. |
+| Carga k6: 50 VUs, 5 min, p95 < 300 ms, errores < 1 % | `design-software-audit-service/performance/k6/audit-query.js`, `scripts/run-r2-k6.ps1`, `performance/results/{before,after}` | Cumplido el 2026-10-22: `after` p95 15.63 ms, 0 % de errores, 265 542 iteraciones, 100 % de checks y exit code 0. |
 | Tres `EXPLAIN (ANALYZE, BUFFERS)` antes y después | `performance/sql/r2-explain.sql`, `performance/sql/r2-seed.sql`, `scripts/run-r2-data.ps1` | Ejecutado en PostgreSQL 16 con fixture aislado de 200 002 filas. |
 | Índices Liquibase con rollback | Changeset `r2-audit-performance-query-indexes` y SQL de rollback en `design-software-audit-db` | Rollback `rollback-count 1` probado y los tres índices quedaron ausentes. |
 | Informe comparativo | Este documento y [ADR-015](../05-architecture/decisions/records/ADR-015-audit-r2-performance-data.md) | Resúmenes JSON y Markdown separados en `before/` y `after/`. |
@@ -77,12 +78,12 @@ las contraseñas y el token fueron efímeros y no se imprimieron ni versionaron.
 Las dos corridas usaron exactamente 50 VUs durante 5 minutos, el mismo fixture
 de 200 002 filas y la misma mezcla de lista, detalle y exportación:
 
-| Fase | p95 HTTP | Errores audit | Checks | Iteraciones | Resultado |
-|------|----------|----------------|--------|-------------|-----------|
-| `before` (sin los tres índices R2) | 1 487.17 ms | 0.00 % | 15 111 / 15 111 | 15 110 | No cumple p95 |
-| `after` (con los tres índices R2) | 46.46 ms | 0.00 % | 235 612 / 235 612 | 235 611 | Cumple |
+| Fase | p95 HTTP | Errores audit | Checks | Iteraciones | Exit code k6 | Resultado |
+|------|----------|----------------|--------|-------------|----------------|-----------|
+| `before` (sin los tres índices R2) | 1 075.20 ms | 0.00 % | 17 964 / 17 964 | 17 963 | 99 | No cumple p95 |
+| `after` (con los tres índices R2) | 15.63 ms | 0.00 % | 265 543 / 265 543 | 265 542 | 0 | Cumple |
 
-El p95 disminuyó 96.88 % y el volumen de iteraciones completadas aumentó 15.59
+El p95 disminuyó 98.55 % y el volumen de iteraciones completadas aumentó 14.78
 veces. En ambas fases todos los endpoints devolvieron 200, por lo que la mejora
 no depende de omitir rutas ni de aceptar errores.
 
@@ -94,14 +95,26 @@ repetirse si cambian el motor, recursos Docker o la forma del fixture.
 
 | Consulta representada | Antes | Después | Efecto observado |
 |-----------------------|-------|---------|------------------|
-| Listado por centro y tipo de evento | incremental sort; 0.373 ms | index scan ordenado; 0.703 ms | Ambos sub-milisegundo; el plan optimizado evita el sort principal y la diferencia puntual es ruido de ejecución. |
-| Listado por servicio origen | parallel sequential scan + sort; 116.178 ms | index scan ordenado; 0.545 ms | 99.53 % menos tiempo; elimina scan completo y sort. |
-| Exportación por centro (160 002 filas) | incremental sort; 236.239 ms | index scan ordenado; 129.685 ms | 45.10 % menos tiempo; elimina incremental sort. |
+| Listado por centro y tipo de evento | incremental sort; 0.276 ms | index scan ordenado; 0.293 ms | Ambos sub-milisegundo; el plan optimizado evita el sort principal y la diferencia puntual es ruido de ejecución. |
+| Listado por servicio origen | parallel sequential scan + sort; 69.563 ms | index scan ordenado; 0.217 ms | 99.69 % menos tiempo; elimina scan completo y sort. |
+| Exportación por centro (160 002 filas) | incremental sort; 136.727 ms | index scan ordenado; 84.088 ms | 38.50 % menos tiempo; elimina incremental sort. |
 
 Después de `rollback-count 1`, la comprobación `to_regclass` devolvió
 `t | t | t`: los tres índices R2 estaban ausentes. El script los reaplica y
 finaliza actualizando el esquema completo para no dejar el entorno a medio
 estado.
+
+### Identificación de la ejecución de cierre
+
+- Ventana local: 2026-10-22, zona `America/Bogota`.
+- PostgreSQL 16.15; Docker 29.7.2; Docker Compose 5.5.0; k6 0.54.0.
+- `audit-service`: `fix/audit-r2-performance-data` en `19529e8`.
+- `audit-db`: `fix/audit-r2-performance-data` en `2e13a4b`.
+- `docker-infra`: `fix/audit-r2-performance-data` en `6316f88`.
+- `docs`: `fix/audit-r2-performance-data` (este informe de cierre).
+- `iam-service`: `develop` en `6987e0f`; `iam-db`: `develop` en `a1e01a4`.
+- Las correcciones de QA quedaron registradas en commits de `audit-service`,
+  `docker-infra` y `docs`, en sus ramas `fix` correspondientes.
 
 ## Implementación técnica
 
@@ -122,7 +135,8 @@ el workflow R5:
    planes y comprueba el rollback antes de dejar el esquema actualizado.
 5. `scripts/run-r2-k6.ps1` invoca el servicio `audit-k6`, crea siempre
    `performance/results/before/` y `performance/results/after/`, guarda el JSON
-   de la fase y produce `summary.md`.
+   sanitizado de la fase, agrega `r2_validation` con el exit code y la
+   evaluación de cada criterio, y produce `summary.md`.
 6. k6 incluye el retorno de `setup()` en `setup_data`; el script elimina esa
    propiedad antes de conservar la evidencia para que el Bearer token no quede
    versionado.
@@ -206,6 +220,18 @@ La aceptación automática de `after` exige p95 `< 300 ms`, tasa de
 prueba una ejecución nueva: debe revisarse la salida del comando, su exit code
 y la actualización de los archivos `after`.
 
+En el formato nativo de `--summary-export`, los booleanos de
+`metrics.*.thresholds` indican si el umbral fue vulnerado: `false` equivale a
+PASS y `true` a FAIL. El bloque `r2_validation` evita depender de esa semántica
+contraintuitiva y debe coincidir con `summary.md`; para `after`, además, el
+campo `k6_exit_code` debe ser `0` y `accepted` debe ser `true`.
+
+Las rutas relativas dependen de la disposición del checkout. En este workspace
+el repositorio de infraestructura está bajo `docker-infra/` y las bases bajo
+`database/`, por lo que `.env.example` usa `../../design-software-audit-service`,
+`../../database` y `../..`. En un checkout plano, los valores equivalentes son
+`../design-software-audit-service`, `..` y `..`, respectivamente.
+
 ## Repositorios involucrados
 
 | Repositorio | Uso en el flujo | Modificación de esta entrega |
@@ -279,7 +305,7 @@ de esos repositorios no se incluyen para no atribuirlos incorrectamente.
 | AC | Estado | Evidencia |
 |----|--------|-----------|
 | 50 VUs por cinco minutos | Cumplido | Ambas corridas ejecutaron 50 VUs durante 5 minutos. |
-| p95 < 300 ms y errores < 1 % | Cumplido | `after`: p95 46.46 ms y 0.00 % de errores con IAM real. |
+| p95 < 300 ms y errores < 1 % | Cumplido | `after`: p95 15.63 ms, 0.00 % de errores y exit code 0 con IAM real. |
 | Tres planes antes y después | Cumplido | Tabla de resultados y script reproducible. |
 | Changeset y rollback probado | Cumplido | Changeset, rollback SQL y verificación de ausencia de los tres índices. |
 | Informe antes y después | Cumplido | Este informe conserva cifras, alcance y limitación de la carga. |
