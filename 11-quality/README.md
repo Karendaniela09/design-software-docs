@@ -25,6 +25,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [qa-report-r1-document-service.md](./qa-report-r1-document-service.md) | Informe técnico y evidencias QA del Document Service | 🟡 |
 | [qa-report-r3-monitoring-service.md](./qa-report-r3-monitoring-service.md) | Informe técnico y evidencias QA de Monitoring Service R3 | 🟡 |
 | [qa-report-r5-audit.md](./qa-report-r5-audit.md) | Informe técnico y evidencias QA de Auditoría R5 | 🟡 |
+| [qa-report-r2-audit-service.md](./qa-report-r2-audit-service.md) | QA report and acceptance matrix for Audit R2 performance and data | 🟢 |
 | [qa-report-r6-monitoring-db.md](./qa-report-r6-monitoring-db.md) | Informe técnico y evidencias QA de la migración R6 de Monitoring DB | 🟡 |
 
 ## Plantillas
