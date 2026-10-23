@@ -156,6 +156,6 @@ The `design-software-scheduling-service` has been thoroughly verified against al
 
 ## 6. Related References
 
-- Architectural Decision: [ADR-015: Scheduling Service Security Hardening and Cryptographic JWT Validation](../05-architecture/decisions/records/ADR-015-scheduling-security-hardening.md)
+- Architectural Decision: [ADR-016: Scheduling Service Security Hardening and Cryptographic JWT Validation](../05-architecture/decisions/records/ADR-016-scheduling-security-hardening.md)
 - Microservice Security Model: [09-microservices/services/05-scheduling-service/security.md](../09-microservices/services/05-scheduling-service/security.md)
 - Operations Runbook: [09-microservices/services/05-scheduling-service/runbook.md](../09-microservices/services/05-scheduling-service/runbook.md)
