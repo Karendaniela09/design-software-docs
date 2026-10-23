@@ -128,4 +128,4 @@ Se decide implementar una solución de observabilidad integral y estandarizada e
 - [ADR-008: Observabilidad — OpenTelemetry + Grafana (LGTM)](./ADR-008-observability-opentelemetry.md)
 - [09-microservices/services/04-training-environment-service/README.md](../../../09-microservices/services/04-training-environment-service/README.md)
 - [PR #19 en code-sena/design-software-training-environment-service](https://github.com/code-sena/design-software-training-environment-service/pull/19)
-- [Informe técnico Reto R3](../../../09-microservices/services/04-training-environment-service/informe-tecnico-r3.md)
+- [R3 technical report](../../../11-quality/qa-report-r3-training-enviroment-service.md)

@@ -481,3 +481,44 @@ redis-cli TTL "scheduling:readmodel:environment:<uuid-ambiente>"
 | Worker detenido y no se recupera con reinicio | 20 min | Escalar a tech lead; revisar si hay corrupción en el read model de Redis | @tech-lead |
 | Workflow colgado con impacto en periodo de matrícula | Inmediato | Escalar a tech lead; evaluar terminación manual del workflow | @tech-lead |
 | Cualquier componente no resuelto en 30 min | — | Escalar a responsable del proyecto | @project-owner |
+
+---
+
+## Security Verification & Negative Integration Tests (R4 Hardening)
+
+### Cryptographic Architecture & Scope Boundary
+- **Runtime / Staging / Production:** `scheduling-service` verifies RS256 token signatures against IAM's public keys via the JWKS endpoint (`IAM_JWKS_URI=http://iam-service:8001/.well-known/jwks.json`, exposed through Edge Gateway at `/iam/api/v1/auth/.well-known/jwks.json`).
+- **Automated CI Integration Suite (`SecurityNegativeAuthIT`):** The automated suite runs hermetically against Spring Security's real `SecurityFilterChain` and `NimbusJwtDecoder` with an isolated 2048-bit RSA key pair and valid `sena-iam-service` issuer. This verifies complete RS256 signature enforcement, `alg: none` rejection, key tampering defense, and granular claim/scope rules without requiring an external `iam-service` container during CI.
+
+### Health & Cryptographic Endpoint Probing (Runtime / Gateway)
+Verify service health and cryptographic key availability through the Traefik Edge Gateway:
+
+```bash
+# 1. Verify Scheduling service health
+curl -s http://localhost:18080/scheduling/actuator/health
+# Expected: {"status":"UP","groups":["liveness","readiness"]}
+
+# 2. Verify IAM RSA public keys (JWKS)
+curl -s http://localhost:18080/iam/api/v1/auth/.well-known/jwks.json
+# Expected: JSON Web Key Set with "kid": "iam-rsa-1"
+```
+
+### Running Automated Security Negative Integration Tests
+Execute the 19 automated negative authentication and authorization tests in `schedules-api`:
+
+```bash
+mvn test -Dtest=SecurityNegativeAuthIT -Dsurefire.failIfNoSpecifiedTests=false
+```
+
+Expected output:
+```text
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+Key vectors tested:
+- Unsigned tokens (`alg: none`) and invalid signatures rejected with HTTP 401.
+- Expired tokens and foreign issuers rejected with HTTP 401.
+- Missing `SCH_*` features rejected with HTTP 403.
+- Foreign training center and instructor IDOR queries rejected with HTTP 404.
+- Malformed or unsupported scopes rejected fail-closed with HTTP 403.
