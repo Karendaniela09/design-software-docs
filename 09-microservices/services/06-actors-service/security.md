@@ -120,7 +120,7 @@ During the security audit and automated test suite creation, the following vulne
 
 ## 4. Traceability
 
-- Architectural Decision: [05-architecture/decisions/records/ADR-019-actors-security-hardening.md](../../05-architecture/decisions/records/ADR-019-actors-security-hardening.md)
-- Quality Assurance Report: [11-quality/qa-report-r4-security-actors.md](../../11-quality/qa-report-r4-security-actors.md)
+- Architectural Decision: [05-architecture/decisions/records/ADR-019-actors-security-hardening.md](../../../05-architecture/decisions/records/ADR-019-actors-security-hardening.md)
+- Quality Assurance Report: [11-quality/qa-report-r4-security-actors.md](../../../11-quality/qa-report-r4-security-actors.md)
 - Automated Test Suite: `actors-adapters/src/test/java/co/sena/actors/adapter/in/rest/SecurityNegativeTests.java` (16 tests)
 - Backend Pull Request: [code-sena/design-software-actors-service#27](https://github.com/code-sena/design-software-actors-service/pull/27)

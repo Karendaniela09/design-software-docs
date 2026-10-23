@@ -113,8 +113,8 @@ flowchart TD
 
 ## References
 
-- [09-microservices/services/06-actors-service/security.md](../../09-microservices/services/06-actors-service/security.md)
-- [11-quality/qa-report-r4-security-actors.md](../../11-quality/qa-report-r4-security-actors.md)
-- [09-microservices/services/06-actors-service/decisions.md](../../09-microservices/services/06-actors-service/decisions.md)
+- [09-microservices/services/06-actors-service/security.md](../../../09-microservices/services/06-actors-service/security.md)
+- [11-quality/qa-report-r4-security-actors.md](../../../11-quality/qa-report-r4-security-actors.md)
+- [09-microservices/services/06-actors-service/decisions.md](../../../09-microservices/services/06-actors-service/decisions.md)
 - OWASP Application Security Verification Standard (ASVS v4.0.3) Level 1
 - Backend Implementation PR: [code-sena/design-software-actors-service#27](https://github.com/code-sena/design-software-actors-service/pull/27)
