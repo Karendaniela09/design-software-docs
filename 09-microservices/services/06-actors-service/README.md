@@ -88,6 +88,17 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 - `KAFKA_BOOTSTRAP_SERVERS`
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 
+## Documentación técnica
+
+- [Data Model](./data-model.md)
+- [Decisiones](./decisions.md)
+- [Eventos](./events.md)
+- [Runbook](./runbook.md)
+- [Seguridad y STRIDE (R4)](./security.md)
+- [Decisión Arquitectónica (ADR-019)](../../../05-architecture/decisions/records/ADR-019-actors-security-hardening.md)
+- [Reporte QA de Seguridad R4](../../../11-quality/qa-report-r4-security-actors.md)
+
 ## Notas
 
 Integra con academic-management para información de fichas/competencias.
+
