@@ -1,6 +1,6 @@
 # Modelo de datos — iam-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24 (HU-IAM-019: seeds sintéticos, sin cambio de schema)
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 > Ver diseño RBAC completo en [rbac-design.md](./rbac-design.md)
 
@@ -270,3 +270,9 @@ Al inicializar el sistema se insertan:
 | `role_feature` | ~120 asignaciones (ver matriz en [rbac-design.md](./rbac-design.md)) |
 | `user` | 1 usuario SYSTEM_ADMIN con `first_name` y `last_name` por variable de entorno |
 | `user_role` | 1 asignación SYSTEM_ADMIN → GLOBAL |
+
+> El hash de `admin@sena.edu.co` (seed `seed-demo-iam-001`) es ficticio: con ese usuario no se puede iniciar sesión.
+
+### Usuarios sintéticos (solo `develop` y `qa`, HU-IAM-019)
+
+El changeset `hu-iam-019-seed-synthetic-users-002` (`02_dml/04_patches`, `context: "dev,qa"`, rollback espejo) inserta **7 usuarios en `user` y 7 asignaciones en `user_role`**, uno por cada rol de `role`, con nombres ficticios, correo `synthetic.<rol>@example.test`, `actor_type` según el rol (`USER`, `INSTRUCTOR` o `LEARNER`), ID fijo `5e000000-0000-4000-8000-0000000000NN` y `password_hash = '!unprovisioned-synthetic-user'` (no es BCrypt: nadie puede entrar hasta que el despliegue provea las contraseñas). **No cambia el schema.** La lista completa, la selección por context y el procedimiento de provisión de contraseñas están en [10-devops/environments.md](../../../10-devops/environments.md#datos-sintéticos-develop-y-qa); el procedimiento operativo, en el [runbook](./runbook.md#provisionar-las-contraseñas-de-los-usuarios-sintéticos-develop-y-qa).

@@ -1,6 +1,6 @@
 # Runbook — iam-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-08-28 (HU-IAM-012)
+> Estado: 🟢 Estable | Última actualización: 2026-10-24 (HU-IAM-019)
 > Puerto: `8080` interno (contenedor), **no expuesto al host** — se accede vía edge Traefik en `/iam/*` (ADR-007) | SLO: 99.9 % uptime | Criticidad: P0 (servicio de entrada — ningún otro servicio autentica sin él)
 
 > Esta versión reemplaza el borrador previo (2026-06-20), que documentaba un diseño no
@@ -163,6 +163,25 @@ WHERE email = 'usuario@ejemplo.com' AND is_active = true;
 
 > Si `is_active = false` la cuenta está desactivada (no es un bloqueo por intentos); reactivarla requiere
 > `SYSTEM_ADMIN` o `CENTER_DIRECTOR` con scope sobre el centro del usuario (HU-IAM-005).
+
+---
+
+### Provisionar las contraseñas de los usuarios sintéticos (develop y qa)
+
+Solo en `develop` y `qa` (HU-IAM-019). Los 7 usuarios `synthetic.<rol>@example.test` nacen con un hash inutilizable: hasta este paso, el login responde `IAM_INVALID_CREDENTIALS` para todos. Las contraseñas **no** están en ningún repositorio; se generan en el despliegue y se entregan por un canal seguro.
+
+```bash
+# 1. Contraseñas aleatorias en variables del proceso (12-72 bytes cada una; nunca en un archivo versionado)
+for v in SYSTEM_ADMIN CENTER_DIRECTOR COORDINATOR AREA_LEADER INSTRUCTOR LEARNER ADMIN_STAFF; do
+  export "SYNTHETIC_PASSWORD_$v=$(openssl rand -base64 24)"
+done
+
+# 2. Ejecutar el script de iam-db contra la base IAM del ambiente (psql 15+; las variables van por nombre)
+psql -X -q -d "$IAM_DB_DSN" -f design-software-iam-db/scripts/provision-synthetic-passwords.sql
+echo "exit=$?"   # 0 = 7 usuarios con hash BCrypt verificado; 3 = una guardia falló y no se cambió nada
+```
+
+Cuando falla, el mensaje dice la causa: base equivocada (sin schema IAM), usuarios sintéticos ausentes (la base no recibió los contexts `dev`/`qa`, p. ej. `staging`/`main`), variables sin definir (las nombra) o contraseña fuera de 12-72 bytes. Repetir el script rota las contraseñas y limpia bloqueos por intentos fallidos. Detalle, variante con `docker compose` y garantías: [10-devops/environments.md](../../../10-devops/environments.md#datos-sintéticos-develop-y-qa).
 
 ---
 

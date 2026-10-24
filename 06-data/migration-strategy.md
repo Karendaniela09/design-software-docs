@@ -1,6 +1,6 @@
 # Estrategia de migraciones (Liquibase)
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Datos
 
 Estándar transversal de cómo se versiona y despliega el esquema de base de datos de cada servicio. Complementa a [modeling-conventions.md](./modeling-conventions.md) (§7 estructura DDL) y a [local-setup.md](../10-devops/local-setup.md).
@@ -28,6 +28,11 @@ Estándar transversal de cómo se versiona y despliega el esquema de base de dat
 
 - Van en `02_dml/` y deben ser **idempotentes**: usar `INSERT ... ON CONFLICT DO NOTHING` (o `MERGE`) para poder re-ejecutarse sin fallar.
 - Separar **datos de catálogo** (semilla real de negocio) de **datos de prueba** (que no deben ir a `staging`/`main`); estos últimos se aíslan con `context`/`labels` de Liquibase.
+- **Datos sintéticos de prueba** (decisión del dueño, 2026-10-24: `develop` y `qa` se prueban con datos sintéticos; HU-IAM-019):
+  - Van en `02_dml/04_patches` con `context: "dev,qa"` y las labels `seed,synthetic,test,<hu>`. Es el context de datos de prueba que ya usan los `-db` (`hu-ref-018-jwt-fixture-001`); no se crean contexts nuevos por HU. El changeset es el mismo en los cuatro ambientes: el ambiente solo decide, al desplegar, si pasa `dev`/`qa` en `--contexts`.
+  - Nombres y correos ficticios (`@example.test`), IDs fijos reconocibles, e **ninguna contraseña en el repositorio**: el seed deja un hash inutilizable y la contraseña real se provee al desplegar con un script que la lee de variables de entorno (ver [environments.md](../10-devops/environments.md#datos-sintéticos-develop-y-qa)).
+  - **Liquibase aplica todos los changesets cuando `update` no recibe `--contexts`.** Cada `include` del changelog maestro lleva `contextFilter: <carpeta>` (`01_ddl`, `02_dml`, `03_dcl`, `04_tcl`) combinado con AND con el context del changeset, por eso un despliegue que filtra debe pasar también esos cuatro contexts. `staging`/`main` deben desplegarse con el filtro explícito (sin `dev`/`qa`).
+  - Seeds sintéticos o de prueba vigentes en `iam-db`: `hu-iam-019-seed-synthetic-users-002` (7 usuarios, uno por rol), `hu-ref-018-jwt-fixture-001` (2 usuarios para JWT/RBAC de parámetros).
 
 ## Rollbacks
 
