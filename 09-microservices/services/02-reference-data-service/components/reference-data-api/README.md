@@ -29,7 +29,7 @@ Exponer la jerarquía institucional (geográfica y organizativa) y los catálogo
 
 ## Escalado, salud y observabilidad
 - **Sin estado** (stateless): escala horizontalmente por réplicas tras el gateway.
-- Endpoint de salud `GET /health` (liveness/readiness); readiness verifica la conexión a BD.
+- Endpoints de salud del contrato: `GET /api/v1/health/live` (alias `GET /api/v1/health`) y `GET /api/v1/health/ready`; readiness verifica la conexión a BD.
 - Logs estructurados con `request_id`; métricas RED por endpoint (ver [13-operations/observability.md](../../../../../13-operations/observability.md)).
 - Datos de baja volatilidad → candidato a caché de lectura (ver [ADR/roadmap]).
 

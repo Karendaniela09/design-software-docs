@@ -381,7 +381,7 @@ ORDER BY ficha_count DESC;
 Validar cada `training_center_id` contra `reference-data-service`:
 
 ```bash
-curl -s http://reference-data-service:8002/training-centers/<training_center_id> | jq '.is_active'
+curl -s http://reference-data-service:8002/api/v1/training-centers/<training_center_id> | jq '.is_active'
 ```
 
 Si el centro fue desactivado en `reference-data-service` pero las fichas aún están activas en este servicio, escalar al coordinador académico para definir la acción de negocio (no modificar unilateralmente).

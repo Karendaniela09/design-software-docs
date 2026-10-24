@@ -22,8 +22,13 @@ Nota IAM: los controladores principales implementan interfaces generadas desde `
 - Stack: Go
 - Deployables: reference-data-api
 
+Nota reference-data: las operaciones del contrato (`reference-data.yaml`, `servers: /api/v1`) se sirven bajo `/api/v1` (ADR-022 §3), registradas desde `internal\adapter\in\http\hierarchy\hierarchy.go` con el prefijo de `cmd\reference-data-api\main.go`: `/api/v1/macroregions`, `/microregions`, `/departments`, `/municipalities`, `/training-centers`, `/institutional-units`, `/catalogs` (con `/details`), `/parameters` y `/reports/active-catalog`. Las rutas sin prefijo responden `404`. Los health se sirven bajo `/api/v1` y se mantienen tambien en la raiz como sondas de infraestructura.
+
 | Metodo | Ruta | Fuente |
 |---|---|---|
+| GET | `/api/v1/health` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
+| GET | `/api/v1/health/live` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
+| GET | `/api/v1/health/ready` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
 | GET | `/health` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
 | GET | `/health/live` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |
 | GET | `/health/ready` | `.\design-software-reference-data-service\cmd\reference-data-api\main.go` |

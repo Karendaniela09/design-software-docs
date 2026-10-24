@@ -1,6 +1,6 @@
 # Runbook — reference-data-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 
 ---
 
@@ -11,6 +11,8 @@
 | `/health` | GET | `200 { "status": "ok" }` | < 200 ms |
 | `/health/db` | GET | `200 { "db": "ok" }` | < 500 ms |
 | `/health/cache` | GET | `200 { "redis": "ok" }` | < 100 ms |
+
+> **Actualización HU-REF-031 (2026-10-24).** El servicio Go implementado sirve el contrato bajo `/api/v1` y expone `GET /api/v1/health/live` (alias `GET /api/v1/health`) y `GET /api/v1/health/ready` (200 si PostgreSQL responde, 503 si no). Las mismas rutas siguen en la raíz (`/health`, `/health/live`, `/health/ready`) para sondas de contenedor; el edge no las enruta (solo `/reference-data/api/`). `/health/db` y `/health/cache` de la tabla de arriba no existen en la implementación actual: deuda de este runbook, que describe el diseño previsto (Redis, Kafka) y está pendiente de reescritura.
 
 **SLO:** 99.5 % de disponibilidad en horario hábil (lunes–viernes 06:00–22:00 COT).
 
@@ -48,6 +50,9 @@ curl -s http://localhost:8002/health/cache | jq .
 | `LOG_LEVEL` | Nivel de log (`debug`/`info`/`warn`/`error`) | `info` |
 | `EVENT_TOPIC` | Topic Kafka/Broker de salida | `reference-data-events` |
 | `BROKER_URL` | URL del message broker | `kafka:9092` |
+| `IAM_JWT_ISSUER` | Emisor (`iss`) esperado en el JWT de IAM (implementado; obligatorio) | `https://iam.example` |
+| `IAM_JWKS_URL` | URL del JWKS de IAM (implementado; obligatorio). `https`, o `http` solo hacia loopback o un host de `REFERENCE_DATA_JWKS_HTTP_ALLOWED_HOSTS` | `http://iam-api:8080/api/v1/auth/.well-known/jwks.json` |
+| `REFERENCE_DATA_JWKS_HTTP_ALLOWED_HOSTS` | Hosts exactos, separados por comas, que pueden servir el JWKS por `http` desde la red interna (sin esquema, puerto ni comodines). Vacía: solo `https` o loopback. No relaja firma, emisor ni expiración (HU-REF-031) | `iam-api` |
 
 Variables ausentes al arrancar producen fallo inmediato con log `FATAL: missing required env var`.
 
