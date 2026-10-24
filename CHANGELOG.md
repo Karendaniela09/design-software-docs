@@ -24,6 +24,12 @@
   - la verificación de la regla de oro (docs → backlog → código) antes de aprobar.
 - Índices de ADR actualizados y nota en ADR-007.
 
+### Added — CI del repo docs (HU-SHELL-013)
+
+- `.github/workflows/docs-ci.yml`: workflow que corre en cada PR hacia `main` y valida solo lo que cambia el PR: (1) título del PR con Conventional Commits (`docs|fix|chore|refactor`), (2) enlaces relativos de los `.md` agregados o modificados, (3) unicidad de número de ADR, incluido el choque con ADR de otros PR abiertos (caso ADR-020), (4) números de documento de identidad en las líneas agregadas (el número se enmascara en el reporte) y (5) lint OpenAPI de `07-api/contracts/openapi/*.yaml` con `redocly.yaml`, que falla solo por errores nuevos. No usa secretos
+- `scripts/ci/`: scripts Python (biblioteca estándar) que ejecuta el workflow y que se pueden correr en local; incluye `README.md`. Es una carpeta raíz nueva autorizada por la HU
+- `10-devops/ci-cd.md`: controles de Conventional Commits (título del PR) y validación de documentación marcados como implementados, con una fila por control nuevo. Siguen sin ser obligatorios: marcar el check como requerido en el ruleset lo decide el dueño (D7)
+
 ### Changed — pdf-renderer-worker (HU-DOC-004)
 
 - `09-microservices/services/07-document-service/components/pdf-renderer-worker/contract.md` y `README.md`: alineados con la implementación. El worker consume `document-generation-queue`, publica `document.document.generated` y `document.version.created` en el topic `document-events`, es idempotente por `correlation_id` y aplica reintentos con backoff y DLQ `pdf-renderer.dlq`. Los eventos internos `document.render.*` del catálogo no se usan en esta implementación
