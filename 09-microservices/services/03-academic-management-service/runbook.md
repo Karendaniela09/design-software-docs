@@ -1,6 +1,6 @@
 # Runbook — academic-management-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 
 ---
 
@@ -47,6 +47,22 @@ curl -s http://localhost:8003/health/db | jq .
 **Nota:** Este servicio no usa Redis. No hay variables de caché. El rendimiento depende directamente de la disponibilidad de `academic_db` y de la latencia hacia `reference-data-service` (consultado en modo síncrono para validar `training_center_id` al abrir fichas).
 
 Variables ausentes al arrancar producen fallo inmediato con log `FATAL: missing required env var`.
+
+---
+
+## Imagen de despliegue
+
+> HU-ACAD-019 ([docs#361](https://github.com/code-sena/design-software-docs/issues/361)), escenario 3.
+
+El servicio se empaqueta con `deploy/Dockerfile.api` (convención de [ADR-006](../../../05-architecture/decisions/records/ADR-006-polyglot-stack-strategy.md)). Se construye desde la raíz del repo `design-software-academic-management-service`:
+
+```bash
+docker build -f deploy/Dockerfile.api -t academic-management-service:local .
+```
+
+- **Build multi-etapa.** Maven 3.9 con Temurin 17 compila los tres módulos (`academic-core`, `academic-adapters`, `academic-management-api`) y genera el jar ejecutable de Spring Boot. La imagen final es `eclipse-temurin:17-jre` y corre con el usuario sin privilegios `10001`.
+- **Puerto interno 8080** ([ADR-007](../../../05-architecture/decisions/records/ADR-007-edge-gateway-and-port-convention.md)). La imagen fija `SERVER_PORT=8080`, que sobrescribe el `server.port: 8003` de `application.yml`. El `8003` es el puerto al correr el jar sin contenedor, como en los ejemplos de este runbook; detrás del edge el servicio se alcanza por el puerto 8080 de su contenedor.
+- **Misma imagen en los cuatro ambientes** ([ADR-022](../../../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md) §6). La imagen no lleva secretos ni valores de ambiente: la base de datos, el broker y IAM entran como variables de entorno al arrancar. Los nombres exactos que lee el servicio están en `academic-management-api/src/main/resources/application.yml`.
 
 ---
 
