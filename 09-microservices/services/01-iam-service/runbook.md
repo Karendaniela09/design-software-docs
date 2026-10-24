@@ -78,6 +78,7 @@ un valor adivinable.
 | `IAM_JWT_ISSUER` | Sí | `https://iam.design-software.local` | Claim `iss` de los tokens emitidos; los verificadores downstream lo validan. |
 | `IAM_JWT_KEY_ID` | No (default `iam-rsa-1`) | `iam-rsa-2026-08` | `kid` publicado en JWKS para esta clave. |
 | `IAM_JWT_PREVIOUS_PUBLIC_KEY` / `IAM_JWT_PREVIOUS_KEY_ID` | No | — | Solo durante una ventana de rotación (DEC-008): clave pública saliente + su `kid`, para que JWKS siga publicando ambas hasta que expiren los tokens firmados con la anterior (≤ 15 min). |
+| `IAM_REFRESH_COOKIE_PATH` | No (default `/iam/api/v1/auth`) | `/iam/api/v1/auth` | `Path` con que se emite la cookie `refresh_token` (HU-IAM-018, ADR-023 §6). Es la ruta **pública** del edge, que quita el prefijo `/iam` antes de llegar al servicio; el default ya es el del edge y no hay motivo para cambiarlo por ambiente. `Secure`, `HttpOnly` y `SameSite=Strict` no se configuran. |
 | `SPRING_RABBITMQ_HOST` | No* | `rabbitmq` | Host del broker. **Si no está seteada, el outbox relay queda apagado** (no publica; los eventos se acumulan en `identity.outbox`) — no es un fallo de arranque. |
 | `SPRING_RABBITMQ_USERNAME` / `SPRING_RABBITMQ_PASSWORD` | Solo si `SPRING_RABBITMQ_HOST` está seteada | `app` / `app` | Credenciales del broker (perfil `broker`/`iam` de docker-infra). |
 | `SPRING_RABBITMQ_PORT` / `SPRING_RABBITMQ_VIRTUAL_HOST` | No | `5672` / `/` | Solo si se desvían de los defaults de Spring AMQP. |

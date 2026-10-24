@@ -1,6 +1,6 @@
 # Secuencia — Login + emisión de JWT (`iam-service`)
 
-> Estado: 🟢 Listo | Última actualización: 2026-08-28
+> Estado: 🟢 Listo | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 > Alcance: flujo construido y probado en `develop` (Java / Spring). Fuente de comportamiento: [authentication.md](../../../07-api/authentication.md), [DEC-001](../../../09-microservices/services/01-iam-service/decisions.md) y [data-model del iam-service](../../../09-microservices/services/01-iam-service/data-model.md).
 
@@ -41,7 +41,7 @@ sequenceDiagram
         Svc->>DB: INSERT audit_login (result = SUCCESS)
         Svc->>DB: INSERT identity.outbox (event = iam.session.started, payload en columna data)
         Svc-->>API: TokenPair (access, refresh)
-        API-->>Cliente: 200 OK { access_token, refresh_token }
+        API-->>Cliente: 200 OK { access_token, ... } + Set-Cookie: refresh_token (HttpOnly; Secure; SameSite=Strict)
     end
 ```
 

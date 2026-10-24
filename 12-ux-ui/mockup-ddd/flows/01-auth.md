@@ -20,7 +20,7 @@ halts_registrados: ninguno
 ## Pantalla 1 — Login
 
 - **Ruta:** `/login` · **Rol:** anónimo · **HU:** autenticación (HU de acceso)
-- **Endpoint:** `POST /api/v1/auth/login` → `TokenResponse { access_token, refresh_token, expires_in, user{ id, email, full_name, roles[], training_center_id, features[] } }`
+- **Endpoint:** `POST /api/v1/auth/login` → `TokenResponse { access_token, token_type, expires_in, user{ id, email, full_name, roles[], training_center_id, features[] } }`; el refresh token ya no va en el cuerpo: viaja en la cookie `refresh_token` (`Set-Cookie`, `HttpOnly`; HU-IAM-018, ADR-023 §6)
 - **Datos/errores del contrato:** `INVALID_CREDENTIALS` (401), `ACCOUNT_LOCKED` (401), `ACCOUNT_INACTIVE` (401), `RATE_LIMIT_EXCEEDED` (429).
 - **MFE:** `iam-mfe` ([micro-frontends.md](../micro-frontends.md))
 

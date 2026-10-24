@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Changed — Refresh token en cookie `HttpOnly` (HU-IAM-018)
+
+- `07-api/contracts/openapi/iam.yaml`, `07-api/authentication.md` y `09-microservices/services/01-iam-service/components/iam-api/contract.md`: concretan ADR-023 §6. **Cambio de contrato incompatible**, decidido por ese ADR:
+  - `POST /auth/login` entrega el refresh token solo en `Set-Cookie` (`refresh_token`, `HttpOnly; Secure; SameSite=Strict; Path=/iam/api/v1/auth`) y el cuerpo ya no trae `refresh_token`;
+  - `POST /auth/refresh` no tiene cuerpo: lee la cookie y devuelve un access token nuevo. Sin cookie responde 401 `TOKEN_INVALID`;
+  - `POST /auth/logout` revoca la sesión y borra la cookie (`Max-Age=0`);
+  - el esquema `RefreshRequest` desaparece y `TokenResponse` pierde `refresh_token`.
+- `09-microservices/services/01-iam-service/runbook.md`: variable `IAM_REFRESH_COOKIE_PATH` (default `/iam/api/v1/auth`, la ruta pública del edge).
+- `08-uml/diagrams/source/login-jwt.md` y `12-ux-ui/mockup-ddd/flows/01-auth.md`: la respuesta de login ya no muestra `refresh_token` en el cuerpo.
+- El mismo cambio va en `design-software-shared-contracts` (`openapi/iam.yaml`) y en la copia fijada de `design-software-iam-service`.
+
 ### Changed — Revalidación arquitectónica HU-REF-020/R1 (2026-10-24)
 
 - Reconciliado main en la rama del PR #340 conservando los ADR, índices e informes de los otros dominios. Las propuestas de Reference Data antes citadas como ADR-012/013 pasan a ADR-020/021: los números anteriores ya están ocupados en main. Historial y equivalencia documentados; estados PROPOSED sin alterar decisiones ajenas.

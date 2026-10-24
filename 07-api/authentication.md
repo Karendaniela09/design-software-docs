@@ -1,8 +1,9 @@
 # Estrategia de Autenticación y Autorización
 
-> Estado: 🟢 Implementado (HU-IAM-010) | Última actualización: 2026-08-27
+> Estado: 🟢 Implementado (HU-IAM-010; refresh en cookie `HttpOnly`: HU-IAM-018) | Última actualización: 2026-10-24
 > Relacionado: [iam-service/rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md),
-> [iam-service/decisions.md](../09-microservices/services/01-iam-service/decisions.md) (DEC-008)
+> [iam-service/decisions.md](../09-microservices/services/01-iam-service/decisions.md) (DEC-008),
+> [ADR-023](../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md) §6 (almacenamiento de la sesión)
 
 ## Resumen
 
@@ -22,8 +23,10 @@ Cliente                  API Gateway              iam-service
    │                         │                        │ Verifica email + password
    │                         │                        │ Calcula features del usuario
    │                         │◀───────────────────────│
-   │◀──access_token + ───────│                        │
+   │◀──access_token (cuerpo)─│                        │
+   │   + Set-Cookie:         │                        │
    │   refresh_token         │                        │
+   │   (HttpOnly)            │                        │
    │                         │                        │
    ├──GET /schedules─────────▶│                        │
    │  Bearer: access_token   │                        │
@@ -127,19 +130,30 @@ La clave pública se expone en `GET /auth/.well-known/jwks.json` (estándar JWKS
 
 ## Renovación del token (Refresh Flow)
 
-El cliente usa `POST /auth/refresh` con el `refresh_token`. iam-service emite un nuevo
-`access_token` con los features recalculados (por si el rol cambió). El `refresh_token` no rota.
+El refresh token viaja **solo en una cookie** (HU-IAM-018, [ADR-023](../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md) §6). Nunca va en el cuerpo de una respuesta ni de una petición.
+
+| Operación | Qué hace con la cookie `refresh_token` |
+|-----------|----------------------------------------|
+| `POST /auth/login` | La emite en `Set-Cookie` con `HttpOnly; Secure; SameSite=Strict; Path=/iam/api/v1/auth` y `Max-Age` de 7 días. El cuerpo trae `access_token`, `token_type`, `expires_in` y `user`, sin `refresh_token`. |
+| `POST /auth/refresh` | Sin cuerpo. Lee la cookie y emite un `access_token` nuevo con los features recalculados (por si el rol cambió). Vuelve a emitir la misma cookie con `Max-Age` igual al tiempo que le queda a la sesión. El refresh token no rota. |
+| `POST /auth/logout` | Revoca la sesión (la de la cookie y la del `sid` del access token, si vienen) y borra la cookie con `Max-Age=0` y los mismos atributos. |
+
+El `Path` es el **público**: el edge quita el prefijo `/iam` ([ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md)), así que iam-service recibe `/api/v1/auth/...` pero emite la cookie con `Path=/iam/api/v1/auth`, la ruta que ve el navegador. Es configurable en el servicio (`IAM_REFRESH_COOKIE_PATH`) y su valor por defecto es el del edge; `Secure`, `HttpOnly` y `SameSite` no se configuran: son iguales en los 4 ambientes.
+
+Si la cookie no viene (o viene vacía), `refresh` responde 401 `TOKEN_INVALID`. Si el refresh token es desconocido, venció o fue revocado, responde 401 `TOKEN_REVOKED`. En el cable, estos dos códigos propios de IAM llevan el prefijo del dominio: `IAM_TOKEN_INVALID` e `IAM_TOKEN_REVOKED`.
 
 TTL refresh_token: 7 días. Si expira, el usuario debe hacer login nuevamente.
 
 ---
 
-## Almacenamiento recomendado en cliente web
+## Almacenamiento en cliente web
 
 | Token | Almacenamiento | Razón |
 |-------|---------------|-------|
-| `access_token` | Memoria (JS) | Protege contra XSS; se pierde al recargar la página |
-| `refresh_token` | `HttpOnly` cookie (`Secure`, `SameSite=Strict`) | Protege contra XSS y CSRF simultáneamente |
+| `access_token` | Memoria (JS) | Protege contra XSS; se pierde al recargar la página y se recupera con un `refresh` silencioso |
+| `refresh_token` | Cookie `HttpOnly; Secure; SameSite=Strict; Path=/iam/api/v1/auth` | El JavaScript no la lee (XSS); el navegador solo la envía al propio origen (CSRF). Es de primera parte porque el edge da origen único (ADR-022) |
+
+`Secure` exige HTTPS en todo ambiente desplegado, DEV incluido; en local funciona porque los navegadores tratan `http://localhost` como contexto seguro. No hay modo alterno por ambiente.
 
 ---
 
@@ -169,7 +183,8 @@ Cuando scheduling-service llama a actors-service, propaga el JWT original del us
 | Sin header Authorization | 401 | `MISSING_TOKEN` |
 | Token malformado o firma inválida | 401 | `TOKEN_INVALID` |
 | Token expirado | 401 | `TOKEN_EXPIRED` |
-| Refresh token revocado | 401 | `TOKEN_REVOKED` |
+| `POST /auth/refresh` sin la cookie `refresh_token` (o vacía) | 401 | `TOKEN_INVALID` |
+| Refresh token revocado, vencido o desconocido | 401 | `TOKEN_REVOKED` |
 | Feature no presente en JWT | 403 | `INSUFFICIENT_PERMISSIONS` |
 | Feature presente pero scope insuficiente | 403 | `SCOPE_VIOLATION` |
 

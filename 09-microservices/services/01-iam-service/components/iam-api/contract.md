@@ -26,7 +26,7 @@ halts_registrados: ninguno
 
 # Contrato — iam-api
 
-> Estado: 🟢 Aceptado | Última actualización: 2026-08-27
+> Estado: 🟢 Aceptado | Última actualización: 2026-10-24
 
 > **Fuente de verdad (normativa):** el spec OpenAPI 3.1 en
 > [`07-api/contracts/openapi/iam.yaml`](../../../../../07-api/contracts/openapi/iam.yaml).
@@ -64,10 +64,14 @@ Login con email y contraseña. No requiere token.
 ```
 
 **Response 200:**
+```http
+HTTP/1.1 200 OK
+Set-Cookie: refresh_token=Zm9vYmFy...; Path=/iam/api/v1/auth; Max-Age=604800; Expires=...; Secure; HttpOnly; SameSite=Strict
+Content-Type: application/json
+```
 ```json
 {
   "access_token": "eyJhbGci...",
-  "refresh_token": "eyJhbGci...",
   "token_type": "Bearer",
   "expires_in": 900,
   "user": {
@@ -82,26 +86,32 @@ Login con email y contraseña. No requiere token.
 ```
 
 El `access_token` lleva pre-calculados los features del usuario. TTL: 15 min.
-El `refresh_token` tiene TTL: 7 días.
+
+El refresh token (TTL: 7 días) viaja **solo** en la cookie `refresh_token` de `Set-Cookie` y **ya no está en el cuerpo** (HU-IAM-018, [ADR-023](../../../../../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md) §6). Atributos de la cookie, iguales en los 4 ambientes: `HttpOnly; Secure; SameSite=Strict; Path=/iam/api/v1/auth`. El `Path` es el público: el edge quita el prefijo `/iam` ([ADR-022](../../../../../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md)), así que el servicio recibe `/api/v1/auth/...` pero emite la cookie con la ruta que ve el navegador; se configura con `IAM_REFRESH_COOKIE_PATH` (ver [runbook](../../runbook.md)).
 
 ### `POST /auth/refresh`
 
-Renueva el access_token usando el refresh_token. No requiere Authorization header.
+Renueva el access_token usando la cookie `refresh_token`. No requiere Authorization header ni cuerpo.
 
-**Request:**
-```json
-{ "refresh_token": "eyJhbGci..." }
-```
+**Request:** sin cuerpo. El navegador envía `Cookie: refresh_token=...` por sí solo.
 
-**Response 200:** igual a `/auth/login` pero sin cambiar el `refresh_token`.
+**Response 200:** igual a la de `/auth/login`: `access_token`, `token_type`, `expires_in` y `user` con los features recalculados. El refresh token no rota; la respuesta vuelve a emitir la misma cookie con `Max-Age` igual al tiempo que le queda a la sesión.
+
+**Response 401:**
+- Sin la cookie, o vacía: `TOKEN_INVALID` (en el cable, `IAM_TOKEN_INVALID`).
+- Refresh token desconocido, vencido o revocado: `TOKEN_REVOKED` (en el cable, `IAM_TOKEN_REVOKED`).
 
 ### `POST /auth/logout`
 
-Revoca el refresh_token activo.
+Revoca la sesión y borra la cookie `refresh_token`. Idempotente.
 
-**Headers:** `Authorization: Bearer <access_token>`
+**Headers:** `Authorization: Bearer <access_token>` o la cookie `refresh_token` (basta una; si vienen las dos, se revoca cada sesión). Sin ninguna de las dos válida, responde 401.
 
-**Response 204:** sin body.
+**Response 204:** sin body. Siempre trae el borrado de la cookie:
+```http
+HTTP/1.1 204 No Content
+Set-Cookie: refresh_token=; Path=/iam/api/v1/auth; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Strict
+```
 
 ### `GET /auth/me`
 
@@ -373,8 +383,8 @@ Aplica el **envelope estándar de la plataforma** ([guidelines §7](../../../../
 | `ACCOUNT_LOCKED` | 401 | Cuenta bloqueada temporalmente |
 | `ACCOUNT_INACTIVE` | 401 | Cuenta desactivada |
 | `TOKEN_EXPIRED` | 401 | Access token expirado |
-| `TOKEN_REVOKED` | 401 | Refresh token revocado |
-| `TOKEN_INVALID` | 401 | Token malformado o firma inválida |
+| `TOKEN_REVOKED` | 401 | Refresh token revocado, vencido o desconocido (en el cable, `IAM_TOKEN_REVOKED`) |
+| `TOKEN_INVALID` | 401 | Token malformado o firma inválida; también `POST /auth/refresh` sin la cookie `refresh_token` (en el cable, `IAM_TOKEN_INVALID`) |
 | `INSUFFICIENT_PERMISSIONS` | 403 | No tiene el feature requerido |
 | `SCOPE_VIOLATION` | 403 | Tiene el feature pero no el scope (intenta acceder a datos de otro centro) |
 | `USER_NOT_FOUND` | 404 | Usuario no encontrado |
