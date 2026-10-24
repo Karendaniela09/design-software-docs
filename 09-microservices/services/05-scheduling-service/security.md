@@ -1,7 +1,7 @@
 # Security Architecture & STRIDE Threat Model — scheduling-service
 
 > Status: 🟢 Implemented & Verified | Date: 2026-10-18  
-> Author: Daniel Salazar Vargas (CC 1075790810) — ADSO 3145555  
+> Author: Daniel Salazar Vargas — ADSO 3145555  
 > Domain: SCHEDULING  
 > Reference: Improvement Plan (Acta No. 02 - 2026, Individual Challenge R4)
 

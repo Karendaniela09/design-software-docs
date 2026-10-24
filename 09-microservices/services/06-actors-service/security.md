@@ -1,7 +1,7 @@
 # Security Architecture & STRIDE Threat Model — actors-service
 
 > Status: 🟢 Implemented & Verified | Date: 2026-10-21 (Updated: 2026-10-23)  
-> Author: Laura Vanessa Pérez Perdomo (CC 1075228306 · `@vanessaperdomo`) — ADSO 3145555  
+> Author: Laura Vanessa Pérez Perdomo (`@vanessaperdomo`) — ADSO 3145555  
 > Domain: ACTORS  
 > Reference: Improvement Plan (Acta No. 02 - 2026, Individual Challenge R4)
 

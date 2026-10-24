@@ -2,7 +2,7 @@
 
 > Evaluation Scope: `design-software-actors-service` (Commit: `7cc9ec1`, PR #27)  
 > Documentation Scope: `design-software-docs` (Branch: `docs/act-r4-security-hardening`, PR #342)  
-> Author: Laura Vanessa Pérez Perdomo (CC 1075228306) — ADSO 3145555  
+> Author: Laura Vanessa Pérez Perdomo — ADSO 3145555  
 > Date: 2026-10-21 (Updated: 2026-10-23)  
 > Status: **CLOSED / 100% COMPLIANT**  
 > Reference: Improvement Plan (Acta No. 02 - 2026, Criteria 11.b, 11.c, 11.d) — QA R4 Security Audit  

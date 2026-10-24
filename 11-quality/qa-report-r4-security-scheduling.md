@@ -2,7 +2,7 @@
 
 > Evaluation Scope: `design-software-scheduling-service` (Commit: `a2e2e69`, PR #17)  
 > Documentation Scope: `design-software-docs` (Branch: `docs/sch-r4-security-hardening`, PR #328)  
-> Author: Daniel Salazar Vargas (CC 1075790810) — ADSO 3145555  
+> Author: Daniel Salazar Vargas — ADSO 3145555  
 > Date: 2026-10-22  
 > Status: **CLOSED / 100% COMPLIANT**  
 > CI Workflow Execution: [GitHub Actions Run #39851770984](https://github.com/code-sena/design-software-scheduling-service/actions/runs/39851770984) (SUCCESS)  
