@@ -63,6 +63,19 @@ $env:ALERT_WORKER_MODE="relay"
 python -m apps.alert_worker.main
 ```
 
+## Imágenes de contenedor
+
+Cada deployable tiene su Dockerfile en `deploy/` ([ADR-006](../../../05-architecture/decisions/records/ADR-006-polyglot-stack-strategy.md)):
+
+| Componente | Dockerfile | Proceso |
+|------------|------------|---------|
+| `monitoring-api` | `deploy/Dockerfile.api` | `uvicorn apps.api.main:app` en el puerto `8000`. |
+| `alert-worker` | `deploy/Dockerfile.worker` | `python -m apps.alert_worker.main`. `ALERT_WORKER_MODE=consumer` (por defecto) consume eventos AMQP; `relay` publica el Outbox. |
+
+Las dos imágenes parten de `python:3.11-slim`, instalan las dependencias fijadas en `requirements-runtime.lock` y después el paquete con `--no-deps`, de modo que API y worker corren con las mismas versiones. El worker no abre ningún puerto HTTP. Sin `DATABASE_URL` o sin `AMQP_URL` el proceso falla al arrancar; no hay valores por defecto. El modo `relay` es un contenedor aparte del modo `consumer`: se levanta con la misma imagen y `ALERT_WORKER_MODE=relay`.
+
+> Hasta que `monitoring-service` incorpore `deploy/Dockerfile.worker` (PR #7), el compose de `docker-infra` ejecuta el worker y el relay con la imagen del API (`extends: monitoring-api` más `command`). El comportamiento es el mismo; solo cambia la imagen.
+
 ## Migraciones
 
 Aplicar los changelogs de `design-software-monitoring-db` antes de levantar API/worker. Validar que existan:

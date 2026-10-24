@@ -48,6 +48,10 @@
 - Alineado con la implementación: header `X-Correlation-Id`, `404 TEMPLATE_NOT_FOUND` y `503` en `generate`, `409 DOCUMENT_NOT_AVAILABLE` y `503 STORAGE_UNAVAILABLE` en `download-url`, `sort` permitido en el listado, `mime_type` nullable mientras el documento no tiene archivo, `owner_service` hasta 100 caracteres y acceso por scope (`GLOBAL` / `TRAINING_CENTER`)
 - `09-microservices/services/07-document-service`: `data-model.md` (columna `training_center_id`, `storage_key` y `mime_type` nullable, índices), `events.md` (`correlation_id` en el mensaje de `document-generation-queue`) y `components/document-api/contract.md`
 
+### Added — Imagen del alert-worker de monitoring (HU-INT-MON-004)
+
+- `09-microservices/services/08-monitoring-service/runbook.md`: sección "Imágenes de contenedor" con el Dockerfile de cada deployable (`deploy/Dockerfile.api`, `deploy/Dockerfile.worker`), el proceso que ejecuta cada uno, los modos `consumer` y `relay` del worker y la base común (`python:3.11-slim` con `requirements-runtime.lock`).
+
 ### Added — Estándar transversal de estados parametrizables y auditoría (ADR-004)
 
 **Estándar autoritativo:**
