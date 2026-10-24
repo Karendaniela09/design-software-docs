@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+### Added — Decisiones D1, D2 y D3 de la ruta de cierre
+
+- `05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md` (D3, ACCEPTED). Fija:
+  - un solo origen por ambiente, el edge;
+  - tres familias de rutas con prioridad: `/<dominio>/api/` al servicio, `/mfe/<dominio>/` a los remotes y el resto al shell;
+  - la tabla de los 10 dominios, versionada como proveedor de archivo de Traefik;
+  - la base de API relativa en los MFE y el retiro de los proxies por micro del shell;
+  - el mismo código, imágenes, tabla y manifest en los 4 ambientes: solo cambian los datos y los valores del ambiente.
+  Concreta ADR-007 §4 y ajusta su §1.
+- `05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md` (D2, ACCEPTED). Fija:
+  - el login y la sesión son del web-shell, con `/login` fuera de `AppShell`;
+  - `frontend-platform` como único cliente de sesión;
+  - los remotes reciben el cliente HTTP por `remote-props` y no hacen login;
+  - el almacenamiento es igual en los 4 ambientes desde `develop`: access token en memoria y refresh token en cookie `HttpOnly`, `Secure`, `SameSite=Strict`. Esto exige que iam-service emita la cookie y saque el `refresh_token` del cuerpo, un cambio de contrato.
+- `00-governance/git-conventions.md`, nueva sección "Revisión y aprobación de PR" (D1). Registra:
+  - lo que exige el ruleset `protect-parent-branches` y los 9 repos sin ruleset activo;
+  - los aprobadores: los arquitectos `Andrey31072` y `Juan282007`, y delivery `MariaOyola`. Bastan 2 aprobaciones, y en los repos con `CODEOWNERS` al menos una tiene que ser de un arquitecto;
+  - 2 desarrolladores del dominio como revisión no bloqueante;
+  - el bypass del dueño;
+  - la verificación de la regla de oro (docs → backlog → código) antes de aprobar.
+- Índices de ADR actualizados y nota en ADR-007.
+
 ### Changed — pdf-renderer-worker (HU-DOC-004)
 
 - `09-microservices/services/07-document-service/components/pdf-renderer-worker/contract.md` y `README.md`: alineados con la implementación. El worker consume `document-generation-queue`, publica `document.document.generated` y `document.version.created` en el topic `document-events`, es idempotente por `correlation_id` y aplica reintentos con backoff y DLQ `pdf-renderer.dlq`. Los eventos internos `document.render.*` del catálogo no se usan en esta implementación

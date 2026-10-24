@@ -1,6 +1,6 @@
 # Convenciones de Git
 
-> Estado: 🟢 Estable | Última actualización: 2026-08-01
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Por definir
 
 El ecosistema tiene **dos modelos de ramas** según el tipo de repositorio. Ambos usan Pull Requests y Conventional Commits.
@@ -171,6 +171,38 @@ refactor(00-governance): split contribution rules by topic
 - Los commits deben ser pequeños y trazables.
 - Si se documentan varios microservicios, usar un commit por microservicio cuando sea posible.
 - No mezclar cambios funcionales de varias secciones sin razón clara.
+
+## Revisión y aprobación de PR
+
+> Decisión **D1** de la ruta de cierre (2026-10-24).
+
+### Lo que exige GitHub hoy
+
+El ruleset `protect-parent-branches` protege `develop`, `qa`, `staging` y `main` en los repos de código, y `main` en este repo. Exige:
+
+- **2 aprobaciones** por PR.
+- **Revisión de CODEOWNERS**, en los repos que tienen `.github/CODEOWNERS`.
+- Todos los hilos de revisión resueltos.
+- Las aprobaciones se descartan si llega un push nuevo al PR.
+- Sin borrado de la rama y sin `force-push`.
+
+**Sin ruleset activo** (verificado 2026-10-24): `web-shell`, `design-system`, `shared-contracts`, `notification-db`, `web-bff`, `mobile-bff`, `mobile-shell`, `e2e` y `hu-log`. En esos repos la regla se cumple por disciplina hasta que se les active.
+
+### A quién se pide revisión
+
+| Rol | Quién | ¿Aprueba? |
+|---|---|---|
+| Arquitectos | `Andrey31072`, `Juan282007` | **Sí.** Ambos están en `design-software-develop`, el team que es CODEOWNER en los `-db`, los `-service` y `docker-infra`. |
+| Delivery | `MariaOyola` (María) | **Sí.** |
+| Desarrolladores del dominio | Al menos 2 | No. Es revisión de conocimiento y de trazabilidad. |
+
+- Se pide aprobación a los tres aprobadores y **bastan 2**.
+- En los repos con `CODEOWNERS`, **al menos una de las dos tiene que ser de un arquitecto**, porque delivery no es CODEOWNER.
+- Los demás repos no tienen `CODEOWNERS`: MFE, shell, `frontend-platform`, `design-system`, `shared-contracts`, BFF, mobile, `notification-db`, `e2e`, `hu-log` y `pages`. En ellos vale cualquier par de aprobadores.
+
+- El **dueño del proyecto** (`ariel5253`, team `design-software-bypass`) puede saltarse la regla. Aun así, también en los cambios sencillos, se pide la revisión de la tabla para que quede trazabilidad.
+- Antes de aprobar se verifica la regla de oro: el cambio está en docs (decisión o documento) y en el backlog (HU en Project #3). Si no lo está y aporta, primero se hace docs, luego backlog, y recién ahí se mergea.
+- Nadie aprueba su propio PR. Si el autor es uno de los aprobadores, aprueban los otros dos.
 
 ## Hotfix en main
 

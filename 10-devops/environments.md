@@ -1,6 +1,6 @@
 # Ambientes
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Los ambientes del sistema de Gestión de Horarios SENA, cómo se configuran y qué reglas rigen en cada uno. Complementa a [00-governance/git-conventions.md](../00-governance/git-conventions.md), a [local-setup.md](./local-setup.md) y a [06-data/migration-strategy.md](../06-data/migration-strategy.md).
@@ -38,6 +38,8 @@ Cada ambiente aísla sus recursos por puerto para poder coexistir en la misma m�
 | `iam-api` (y cualquier `-api` de dominio) | **no expuesto** — solo vía edge | | | |
 
 El detalle operativo de bring-up de estos puertos vive en [local-setup.md](./local-setup.md).
+
+Detrás del edge, las rutas por dominio (`/<dominio>/api/` → servicio, `/mfe/<dominio>/` → remote, el resto → shell) están en [ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md).
 
 ---
 

@@ -10,3 +10,5 @@
 - [ADR-017: Evolución de esquema Training Environment R6](ADR-017-training-environment-r6-schema-evolution.md) — propuesta.
 - [ADR-018: Validación del estado de sesión en IAM R4](ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
 - [ADR-019: Endurecimiento de seguridad de Actors](ADR-019-actors-security-hardening.md) — propuesta.
+- [ADR-022: Tabla de rutas del edge por dominio y origen único para el frontend](ADR-022-edge-routing-table-by-domain.md) — aceptada.
+- [ADR-023: El web-shell es dueño del login y de la sesión](ADR-023-web-shell-owns-login-and-session.md) — aceptada.

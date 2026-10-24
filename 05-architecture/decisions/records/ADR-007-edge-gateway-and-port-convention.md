@@ -5,6 +5,8 @@
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, DevOps
 
+> Concretada por [ADR-022](./ADR-022-edge-routing-table-by-domain.md): la tabla de rutas por dominio, el orden de prioridad frente a la SPA y el proveedor de archivo en lugar de labels (ajusta el §1).
+
 ---
 
 ## Contexto

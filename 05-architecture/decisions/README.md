@@ -41,6 +41,8 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-017](./records/ADR-017-training-environment-r6-schema-evolution.md) | Evolución de maintenance.reason a reason_detail — Training Environment R6 | PROPOSED |
 | [ADR-018](./records/ADR-018-iam-session-revocation-r4.md) | Validación del estado de sesión y límites de revocación en IAM R4 | PROPOSED |
 | [ADR-019](./records/ADR-019-actors-security-hardening.md) | Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC | PROPOSED |
+| [ADR-022](./records/ADR-022-edge-routing-table-by-domain.md) | Tabla de rutas del edge por dominio y origen único para el frontend | ACCEPTED |
+| [ADR-023](./records/ADR-023-web-shell-owns-login-and-session.md) | El web-shell es dueño del login y de la sesión | ACCEPTED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
@@ -52,3 +54,5 @@ cp 05-architecture/decisions/_template-adr.md \
 - [ADR-017: Evolución gradual del motivo de mantenimiento (Training Environment R6)](./records/ADR-017-training-environment-r6-schema-evolution.md) — propuesta, pendiente de revisión.
 - [ADR-018: Validación del estado de sesión en IAM R4](./records/ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
 - [ADR-019: Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC](./records/ADR-019-actors-security-hardening.md) — propuesta (PROPOSED).
+- [ADR-022: Tabla de rutas del edge por dominio y origen único para el frontend](./records/ADR-022-edge-routing-table-by-domain.md) — aceptada (ACCEPTED).
+- [ADR-023: El web-shell es dueño del login y de la sesión](./records/ADR-023-web-shell-owns-login-and-session.md) — aceptada (ACCEPTED).
