@@ -24,6 +24,10 @@
   - la verificación de la regla de oro (docs → backlog → código) antes de aprobar.
 - Índices de ADR actualizados y nota en ADR-007.
 
+### Changed — ADR-001 aceptado (RabbitMQ como broker de mensajes)
+
+- `05-architecture/decisions/records/ADR-001-message-broker.md`: pasa de PROPOSED a ACCEPTED (2026-10-24), aprobado por el dueño del proyecto. Motivos: 9 de 10 servicios ya usan RabbitMQ, la infraestructura solo tiene RabbitMQ y el volumen de eventos es bajo. Se actualiza el registro en `05-architecture/decisions/README.md`.
+
 ### Added — CI del repo docs (HU-SHELL-013)
 
 - `.github/workflows/docs-ci.yml`: workflow que corre en cada PR hacia `main` y valida solo lo que cambia el PR: (1) título del PR con Conventional Commits (`docs|fix|chore|refactor`), (2) enlaces relativos de los `.md` agregados o modificados, (3) unicidad de número de ADR, incluido el choque con ADR de otros PR abiertos (caso ADR-020), (4) números de documento de identidad en las líneas agregadas (el número se enmascara en el reporte) y (5) lint OpenAPI de `07-api/contracts/openapi/*.yaml` con `redocly.yaml`, que falla solo por errores nuevos. No usa secretos

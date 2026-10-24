@@ -1,8 +1,9 @@
 # ADR-001: Selección del broker de mensajes
 
-**Estado:** PROPOSED
-**Fecha:** 2026-06-17
+**Estado:** ACCEPTED (2026-10-24)
+**Fecha:** 2026-06-17 (propuesta) · 2026-10-24 (aceptación)
 **Autores:** Jesús Ariel González Bonilla (Arquitecto)
+**Aprobado por:** el dueño del proyecto (ariel5253), 2026-10-24
 **Equipos involucrados:** Arquitectura, DevOps, Backend
 
 ---
@@ -60,6 +61,16 @@ El patrón de consumo se modela así:
 | AWS SQS + SNS | Acopla el diseño a AWS desde el MVP; el proyecto aún no define nube; SNS+SQS para fan-out funciona pero el ordenamiento (FIFO) tiene límites de throughput |
 | Redis Streams | Redis ya se usa para caché; reutilizarlo como broker mezcla responsabilidades y compromete la durabilidad de eventos críticos de auditoría |
 | Comunicación síncrona (sin broker) | Viola el principio de desacoplamiento; haría que `scheduling-service` dependa síncronamente de monitoring y audit, aumentando el acoplamiento y los puntos de fallo |
+
+## Aceptación (2026-10-24)
+
+El dueño del proyecto aprueba esta decisión: **RabbitMQ es el broker de mensajes del sistema**. Motivos que respaldan la aceptación:
+
+- **Ya es el broker en uso:** 9 de los 10 servicios publican y consumen por RabbitMQ.
+- **La infraestructura solo tiene RabbitMQ:** `docker-infra` no despliega otro broker; adoptar uno distinto exigiría infraestructura, operación y contratos nuevos.
+- **El volumen de eventos es bajo:** el análisis original (decenas de eventos por minuto por centro) sigue vigente y está muy por debajo del punto donde Kafka aporta ventajas de throughput.
+
+Consecuencia: un servicio que publique en otro broker (por ejemplo el PR abierto `design-software-actors-service#29`, que usa Kafka) se alinea con RabbitMQ y con los exchanges por dominio descritos arriba. Esta aceptación no modifica la decisión ni los riesgos ya documentados.
 
 ## Referencias
 
