@@ -35,7 +35,7 @@ Variables operativas esperadas:
 | `READINESS_TIMEOUT_SECONDS` | Timeout de chequeos `/ready`. |
 | `OTEL_ENABLED` | Habilita instrumentación OpenTelemetry. |
 | `OTEL_SERVICE_NAME` | Nombre de servicio en trazas y métricas. |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Endpoint OTLP HTTP del Collector. |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Base del endpoint OTLP **HTTP** del Collector (`http://otel-collector:4318`); el servicio le agrega `/v1/traces`, `/v1/metrics` y `/v1/logs`. No apuntarla a `:4317` (gRPC): ver [local-setup](../../../10-devops/local-setup.md#gotchas-de-observabilidad--deploy). |
 | `DEPLOYMENT_ENVIRONMENT` | Atributo OTel del ambiente. |
 | `LOG_LEVEL` | Nivel de logs JSON. |
 | `ALERT_WORKER_MODE` | `consumer` o `relay`. |

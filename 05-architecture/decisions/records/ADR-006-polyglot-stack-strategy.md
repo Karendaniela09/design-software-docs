@@ -1,7 +1,7 @@
 # ADR-006: Estrategia polyglot fit-driven y estructura hexagonal por stack
 
 **Estado:** ACCEPTED (2026-08-14)
-**Fecha:** 2026-08-14 (rev. 2)
+**Fecha:** 2026-08-14 (rev. 3, 2026-10-24: nombres de directorio del árbol Python)
 **Autores:** Jesús Ariel González Bonilla (PM + Arquitecto)
 **Equipos involucrados:** Arquitectura, Backend, Frontend, Formación (aprendices SENA)
 
@@ -53,6 +53,7 @@ adapter/      in/ (http, amqp) · out/ (persistence, messaging, client)
 <entrypoints> uno por componente desplegable: solo bootstrap + wiring
 ```
 Regla (Grep-verificable, cualquier stack): `entrypoint → adapter → application → domain`.
+En Python, `in/` y `out/` se llaman `inbound/` y `outbound/` (ver la nota bajo el árbol Python).
 
 ### 4. SDD (spec-driven) y TDD
 
@@ -119,12 +120,14 @@ design-software-notification-service/
 ```
 design-software-monitoring-service/
 ├── pyproject.toml / poetry.lock
-├── src/monitoring/{domain/{model,event,service}, application/{usecase,port/in,port/out}  (port=Protocols),
-│                   adapter/{in/http(FastAPI+Pydantic),in/amqp,out/persistence(SQLAlchemy→monitoring_db),out/messaging,out/client(httpx)}}
+├── src/monitoring/{domain/{model,event,service}, application/{usecase,port/{inbound,outbound}}  (port=Protocols),
+│                   adapter/{inbound/{http(FastAPI+Pydantic),amqp},outbound/{persistence(SQLAlchemy→monitoring_db),messaging,client(httpx)}}}
 ├── apps/{api/main.py, alert_worker/main.py}   (entrypoints = contenedores)
 ├── deploy/Dockerfile.api · Dockerfile.worker
 └── contracts/ (datamodel-code-generator) · tests/ (pytest)
 ```
+
+> **Python: `inbound/` y `outbound/`, no `in/` y `out/`.** `in` es una palabra reservada de Python, así que `from monitoring.adapter.in.http import ...` y `port.in` son un `SyntaxError` al importar. Por eso, en este stack, los directorios que en Go, Java y Node/TS se llaman `in/` y `out/` se llaman `inbound/` y `outbound/` (es el árbol que tiene `design-software-monitoring-service`). La regla de dependencia no cambia. Corrección de la rev. 3: la rev. 2 mostraba `in/` y `out/` también para Python.
 
 ### Node/TS (BFF · `src/` + `apps/`) — dominio delgado, mayormente agregación
 

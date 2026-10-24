@@ -30,6 +30,11 @@
 - `scripts/ci/`: scripts Python (biblioteca estándar) que ejecuta el workflow y que se pueden correr en local; incluye `README.md`. Es una carpeta raíz nueva autorizada por la HU
 - `10-devops/ci-cd.md`: controles de Conventional Commits (título del PR) y validación de documentación marcados como implementados, con una fila por control nuevo. Siguen sin ser obligatorios: marcar el check como requerido en el ruleset lo decide el dueño (D7)
 
+### Fixed — Lecciones del golden template Python (monitoring-service#1, HU-MON-F1)
+
+- `05-architecture/decisions/records/ADR-006-polyglot-stack-strategy.md` (rev. 3): el árbol Python usa `inbound/` y `outbound/` en lugar de `in/` y `out/`, porque `in` es palabra reservada de Python (`SyntaxError` al importar). Es una corrección de nombres de directorio; no cambia la decisión ni se crea un ADR.
+- `10-devops/local-setup.md`, `04-requirements/non-functional.md` (NFR-OBS-06), `11-quality/code-review.md` y el runbook de monitoring: en Python el protocolo OTLP lo decide el exportador que se importa (`grpc` → `:4317`, `http` → `:4318` con `/v1/<señal>`); `monitoring` usa `http/protobuf` en `:4318`.
+
 ### Changed — pdf-renderer-worker (HU-DOC-004)
 
 - `09-microservices/services/07-document-service/components/pdf-renderer-worker/contract.md` y `README.md`: alineados con la implementación. El worker consume `document-generation-queue`, publica `document.document.generated` y `document.version.created` en el topic `document-events`, es idempotente por `correlation_id` y aplica reintentos con backoff y DLQ `pdf-renderer.dlq`. Los eventos internos `document.render.*` del catálogo no se usan en esta implementación

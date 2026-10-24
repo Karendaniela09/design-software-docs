@@ -67,7 +67,7 @@
 | NFR-OBS-03 | Métricas RED por endpoint | Rate, Errors, Duration |
 | NFR-OBS-04 | Trazas distribuidas | OpenTelemetry → Jaeger/Tempo · **✅ Evidencia dev**: trazas de `iam` visibles en Tempo |
 | NFR-OBS-05 | Auditoría de acciones de negocio | audit-service consume todos los eventos |
-| NFR-OBS-06 | Exportación OTLP por stack | Cada stack exporta a su colector según su runtime: **Java** (`iam`) por **OTLP/HTTP en `:4318`** (`http/protobuf`); **Go** (`notification`) por **OTLP/gRPC en `:4317`** · **✅ Evidencia dev** |
+| NFR-OBS-06 | Exportación OTLP por stack | Cada stack exporta a su colector según su runtime: **Java** (`iam`) por **OTLP/HTTP en `:4318`** (`http/protobuf`); **Go** (`notification`) por **OTLP/gRPC en `:4317`**; **Python** (`monitoring`) por **OTLP/HTTP en `:4318`** (el exportador que se importa decide el protocolo; ver [local-setup](../10-devops/local-setup.md#gotchas-de-observabilidad--deploy)) · **✅ Evidencia dev** |
 | NFR-OBS-07 | Sondas de salud diferenciadas | Split **`/health`** (liveness) vs **`/ready`** (readiness con dependencias: BD + broker); un servicio no queda `ready` hasta que sus dependencias respondan · **✅ Evidencia dev** en `iam` |
 
 ## 7. Usabilidad
