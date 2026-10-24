@@ -1,6 +1,6 @@
 # Runbook — training-environment-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 
 ---
 
@@ -10,6 +10,8 @@
 |----------|--------------------|-----|
 | `GET http://training-environment-api:8004/health` | `200 { "status": "ok" }` | < 200 ms |
 | `GET http://training-environment-api:8004/health/ready` | `200` cuando `env_db` es accesible | < 500 ms |
+
+> **Rutas.** La operación `health` del contrato (`training-environment.yaml`, `servers: /api/v1`) es `GET /api/v1/health` (por el edge, `/training-environment/api/v1/health`); `GET /health` en la raíz sigue siendo la sonda de infraestructura y responde lo mismo. El resto de las operaciones del servicio cuelgan de `/api/v1` y las rutas sin prefijo responden `404` (HU-ENV-020, ADR-022 §3).
 
 Respuesta esperada de `/health`:
 

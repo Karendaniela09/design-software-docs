@@ -1,6 +1,6 @@
 # training-environment-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-24
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -23,33 +23,36 @@ Ambientes de formación, tipos, inventario, reglas de disponibilidad, mantenimie
 
 ## API detectada
 
+Las operaciones del contrato ([`training-environment.yaml`](../../../07-api/contracts/openapi/training-environment.yaml), `servers: /api/v1`) se sirven bajo `/api/v1`, como fija [ADR-022 §3](../../../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md); detrás del edge la ruta pública es `/training-environment/api/v1/<recurso>`. Las rutas sin prefijo (`/environment-types`, `/training-environments`, `/reservations`, `/reports/...`) responden `404`. `GET /health` se mantiene también en la raíz como sonda de infraestructura (el edge enruta los health que no cuelgan de `/api/` con una regla de ruta exacta, ADR-022 §1) y `/metrics`, que no forma parte del contrato, queda en la raíz.
+
 | Metodo | Ruta | Fuente |
 |---|---|---|
-| GET | `/environment-types` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
-| POST | `/environment-types` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
-| GET | `/environment-types/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
-| GET | `/health` | `.\design-software-training-environment-service\cmd\training-environment-api\main.go` |
+| GET | `/api/v1/environment-types` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
+| POST | `/api/v1/environment-types` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
+| GET | `/api/v1/environment-types/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\handler.go` |
+| GET | `/api/v1/health` | `.\design-software-training-environment-service\internal\adapter\in\http\router.go` |
+| GET | `/health` | `.\design-software-training-environment-service\internal\adapter\in\http\router.go` |
 | GET | `/metrics` | `.\design-software-training-environment-service\cmd\training-environment-api\main.go` |
-| GET | `/reports/environment-utilization` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_utilization_handler.go` |
-| GET | `/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
-| POST | `/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
-| DELETE | `/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
-| GET | `/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
-| PATCH | `/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
-| GET | `/training-environments` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| POST | `/training-environments` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| DELETE | `/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| GET | `/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| PATCH | `/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| PUT | `/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
-| GET | `/training-environments/{id}/availability-rules` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
-| POST | `/training-environments/{id}/availability-rules` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
-| DELETE | `/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
-| GET | `/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
-| PUT | `/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
-| GET | `/training-environments/{id}/maintenance` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
-| POST | `/training-environments/{id}/maintenance` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
-| GET | `/training-environments/{id}/maintenance/{maintenance_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
+| GET | `/api/v1/reports/environment-utilization` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_utilization_handler.go` |
+| GET | `/api/v1/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
+| POST | `/api/v1/reservations` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
+| DELETE | `/api/v1/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
+| GET | `/api/v1/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
+| PATCH | `/api/v1/reservations/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\reservation_handler.go` |
+| GET | `/api/v1/training-environments` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| POST | `/api/v1/training-environments` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| DELETE | `/api/v1/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| GET | `/api/v1/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| PATCH | `/api/v1/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| PUT | `/api/v1/training-environments/{id}` | `.\design-software-training-environment-service\internal\adapter\in\http\environment_handler.go` |
+| GET | `/api/v1/training-environments/{id}/availability-rules` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
+| POST | `/api/v1/training-environments/{id}/availability-rules` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
+| DELETE | `/api/v1/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
+| GET | `/api/v1/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
+| PUT | `/api/v1/training-environments/{id}/availability-rules/{rule_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\availability_rule_handler.go` |
+| GET | `/api/v1/training-environments/{id}/maintenance` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
+| POST | `/api/v1/training-environments/{id}/maintenance` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
+| GET | `/api/v1/training-environments/{id}/maintenance/{maintenance_id}` | `.\design-software-training-environment-service\internal\adapter\in\http\maintenance_handler.go` |
 
 ## Configuración
 
