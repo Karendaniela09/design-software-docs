@@ -1,6 +1,6 @@
 # notification-api
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Stack: Go
 
 ## Tipo de componente
@@ -21,10 +21,15 @@ No calcula alertas ni accede a `monitoring_db`.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `POST` | `/notifications` | Solicita una notificación. |
-| `GET` | `/notifications/{id}` | Consulta una notificación. |
-| `GET` | `/health` | Liveness. |
-| `GET` | `/ready` | Readiness (DB). |
+| `POST` | `/api/v1/notifications` | Solicita una notificación. |
+| `GET` | `/api/v1/notifications/{id}` | Consulta una notificación. |
+| `GET` | `/api/v1/health` | Liveness (como lo lista el contrato). |
+| `GET` | `/api/v1/ready` | Readiness (DB) (como lo lista el contrato). |
+| `GET` | `/health` | Liveness, también en la raíz: el edge enruta `/notification/health` como ruta exacta. |
+| `GET` | `/ready` | Readiness (DB), también en la raíz: el edge enruta `/notification/ready` como ruta exacta. |
+
+Las rutas de negocio solo existen bajo `/api/v1` (el `servers` del contrato; ADR-022 §3). Por el edge se
+llaman como `/notification/api/v1/...`. Sin el prefijo `/api/v1` responden `404`.
 
 ## Arquitectura
 

@@ -120,7 +120,7 @@ Un error permanente (p. ej. `event_type` no soportado) no se reintenta; el mensa
 Ningún servicio invoca `notification-worker` directamente. Para notificar:
 
 - publica un evento de dominio soportado, o
-- usa `POST /notifications` mediante el contrato público.
+- usa `POST /api/v1/notifications` mediante el contrato público.
 
 ## Referencias
 

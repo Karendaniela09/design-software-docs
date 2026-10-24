@@ -1,17 +1,24 @@
 # Runbook — notification-service
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 
 ## Componentes
 
 | Componente | Puerto | Health | Readiness |
 |------------|--------|--------|-----------|
-| `notification-api` | `8080` por defecto | `GET /health` | `GET /ready` (DB) |
+| `notification-api` | `8080` por defecto | `GET /health` y `GET /api/v1/health` | `GET /ready` y `GET /api/v1/ready` (DB) |
 | `notification-worker` | `8081` por defecto para health server | `GET /health` | `GET /ready` (DB + broker) |
+
+`notification-api` sirve las rutas del contrato bajo `/api/v1` (el `servers` del contrato, ADR-022 §3). `/health` y `/ready`
+siguen también en la raíz porque el edge enruta `/notification/health` y `/notification/ready` como rutas exactas y quita el
+prefijo `/notification`. Las rutas de negocio sin `/api/v1` responden `404`. El health server del worker no es parte del
+contrato y no cambia.
 
 ```bash
 curl -sf http://localhost:8080/health
+curl -sf http://localhost:8080/api/v1/health
 curl -sf http://localhost:8080/ready | jq .
+curl -sf http://localhost:8080/api/v1/ready | jq .
 curl -sf http://localhost:8081/ready | jq .
 ```
 
@@ -52,7 +59,7 @@ curl -sf http://localhost:8081/ready | jq .
 ### Solicitud manual
 
 ```bash
-curl -i -X POST http://localhost:8080/notifications \
+curl -i -X POST http://localhost:8080/api/v1/notifications \
   -H 'Content-Type: application/json' \
   -d '{
     "recipient_id": "3a286fa0-3fdb-48d5-baf2-0dfd0199a542",
@@ -68,7 +75,7 @@ Esperado contractualmente: `202 Accepted`. El body no está garantizado por el O
 ### Consulta puntual
 
 ```bash
-curl -i http://localhost:8080/notifications/<UUID>
+curl -i http://localhost:8080/api/v1/notifications/<UUID>
 ```
 
 ## P0 — Base de datos no disponible

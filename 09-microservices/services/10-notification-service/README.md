@@ -1,6 +1,6 @@
 # notification-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-24
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -26,11 +26,15 @@ Envío, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
 | Metodo | Ruta | Fuente |
 |---|---|---|
 | GET | `/health` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
+| GET | `/api/v1/health` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
 | GET | `/health` | `.\design-software-notification-service\cmd\notification-worker\main.go` |
-| POST | `/notifications` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
-| GET | `/notifications/{id}` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
+| POST | `/api/v1/notifications` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
+| GET | `/api/v1/notifications/{id}` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
 | GET | `/ready` | `.\design-software-notification-service\cmd\notification-worker\main.go` |
 | GET | `/ready` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
+| GET | `/api/v1/ready` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
+
+Las rutas de `notification-api` siguen el `servers: /api/v1` del contrato (ADR-022 §3, HU-NOTIF-010); `/health` y `/ready` también responden en la raíz porque el edge los enruta como rutas exactas. El health server del worker queda en la raíz.
 
 ## Configuración
 
