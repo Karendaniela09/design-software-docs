@@ -41,5 +41,6 @@ El servicio `reference-data-service` es el propietario de la jerarquía instituc
 | `parameterization.event_inbox` | PK VARCHAR(100)+UUID; SHA-256 CHAR(64); processed_at TIMESTAMPTZ | `r1-reference-inbox-projection-001` | Deduplicación por consumidor/evento; [modelo del servicio](../09-microservices/services/02-reference-data-service/data-model.md) |
 | `parameterization.event_projection` | PK VARCHAR(80)+UUID; payload JSONB; fecha TIMESTAMPTZ; contador BIGINT positivo | `r1-reference-inbox-projection-001` | Efecto persistente operativo e inspección del consumo; mismo modelo canónico |
 | Grants inbox/projection | Permisos de reference_writer/reference_reader | `r1-reference-inbox-projection-grants-001` | Mínimo privilegio sin DELETE del historial de deduplicación |
+| Revoke inbox/projection | Permisos sobrantes de reference_writer/reference_reader | `r1-reference-inbox-projection-grants-002` | Quita los privilegios heredados de los grants globales para que lo efectivo sea lo documentado |
 
 Estado: diseño documentado antes del código; ejecución y revisión del changeset en el macroproyecto pendientes. El índice global no duplica todos los campos: el modelo del servicio contiene la definición completa, rollback y límites de retención.

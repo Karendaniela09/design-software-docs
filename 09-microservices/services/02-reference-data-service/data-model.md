@@ -187,6 +187,8 @@ PK `(aggregate_type,aggregate_id)`. Read model técnico, no una segunda tabla de
 
 Changeset **`r1-reference-inbox-projection-grants-001`**, SQL `03_dcl/01_grants/004_grant_inbox_projection.sql`: `reference_writer` SELECT/INSERT en inbox y SELECT/INSERT/UPDATE en proyección; `reference_reader` SELECT en proyección. No conceder DELETE de deduplicación al flujo de aplicación.
 
+Changeset **`r1-reference-inbox-projection-grants-002`**, SQL `03_dcl/01_grants/005_revoke_inbox_projection_extra.sql`: revoca lo que los grants globales de `001_grants.sql` y los default privileges de `parameterization` dejaban de más. Quita UPDATE/DELETE de inbox y DELETE de proyección a `reference_writer`, y SELECT de inbox a `reference_reader`. Con esto, los privilegios efectivos son exactamente los descritos arriba. Su rollback los vuelve a conceder.
+
 El rollback revoca los grants y elimina las dos tablas nuevas en el orden inverso, sin tocar negocio/outbox histórico. Es destructivo para la memoria de deduplicación: detener el consumidor y coordinar el replay antes de ejecutarlo. R1 no exige demostrar la evolución sin caída de cuatro ambientes (reto R6 de otro responsable). El 22/10 se verificó el rollback de los dos changesets R1 y su reaplicación únicamente en una base nueva aislada; no se ejecutó sobre la demostración ni develop compartido. Ver [evidencia actualizada](../../../11-quality/reference-data-hu-ref-020-r1-validation.md).
 
 No depurar inbox mientras puedan reentregarse eventos incluidos en su ventana de replay. Política de archivo/retención queda pendiente de decisión operativa; no introducir TTL que permita duplicar efectos.
