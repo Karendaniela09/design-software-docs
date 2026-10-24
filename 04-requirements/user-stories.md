@@ -341,3 +341,24 @@ Criterios verificados:
 - [functional.md](./functional.md) · [non-functional.md](./non-functional.md) · [traceability-matrix.md](./traceability-matrix.md)
 - [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
 - [03-product/product-backlog.md](../03-product/product-backlog.md)
+
+## HU-REF-020 — Integración E2E real con IAM
+
+> Responsable: Valery Sinai Trujillo Quintero | Épica: EP-REF | Issue: [docs#250](https://github.com/code-sena/design-software-docs/issues/250).
+> Estado de esta adaptación: En progreso; pendiente de validación/merge en los repositorios originales. No se declara Done·Dev por los resultados de las copias personales.
+
+**Como** equipo de integración, **quiero** levantar el flujo real entre Reference Data e IAM **para** autenticar y autorizar operaciones reproducibles sin ajustes locales no versionados.
+
+| Criterio | Aceptación exigida |
+|---|---|
+| E1 | IAM inicia con JDK 21, reactor Maven raíz y migraciones oficiales; esquema validado |
+| E2 | Usuarios/roles/campos de seguridad reproducibles en la base de validación; cambios de IAM en su repositorio responsable |
+| E3 | Login de administrador emite JWT real con issuer/sub/exp y roles/features esperados |
+| E4 | Reference Data verifica firma y feature real por endpoint; administrador GET/POST/PUT 200/201/200; aprendiz 403; token ausente/malformado/firma alterada 401 |
+| Integración visual | El remote real carga dentro del shell, crea/edita/consulta un parámetro persistente y respeta permisos del IAM real; sin sesión fija del BFF |
+
+DoR: repositorio responsable y variables de integración identificados. DoD: tests reales en verde, docs sincronizados, revisión QA/Arquitectura y PR fusionados a develop; board/hu-log actualizados por un responsable con permisos. Esta HU no implica cerrar las historias de otros aprendices.
+
+### R1 de Reference Data — complemento individual de ingeniería
+
+R1 es el reto asignado, no una HU nueva ni un reemplazo del ID HU-REF-020. Se exige outbox transaccional, consumidor idempotente con tabla de deduplicación, backoff exponencial, DLQ/replay y caos automatizado con cero pérdidas/efectos duplicados en el escenario medido. El efecto se define como actualización de la proyección operativa. Véanse [ADR-021](../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md) y [casos de prueba](../11-quality/reference-data-hu-ref-020-r1-validation.md).

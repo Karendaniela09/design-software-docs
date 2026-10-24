@@ -18,6 +18,17 @@ cp 05-architecture/decisions/_template-adr.md \
    05-architecture/decisions/records/ADR-NNN-titulo-corto.md
 ```
 
+## Equivalencias de numeración (Reference Data, PR #340)
+
+Las propuestas de Reference Data citadas como ADR-012 y ADR-013 en la revalidación QA del PR #340 se registran ahora como **ADR-020 y ADR-021**. Durante la integración de main, los identificadores 012 y 013 ya estaban asignados a Training Environment y Monitoring. Se conserva su historial en Git y se actualizan los enlaces de la propuesta, sin alterar los ADR de esos dominios.
+
+| Identificador de la revisión previa | Identificador vigente | Estado |
+|---|---|---|
+| ADR-012 de Reference Data | [ADR-020](./records/ADR-020-reference-data-iam-e2e-integration.md) | PROPOSED |
+| ADR-013 de Reference Data | [ADR-021](./records/ADR-021-reference-data-resilient-messaging.md) | PROPOSED |
+
+La renumeración no equivale a aceptación. Arquitectura debe ratificar las responsabilidades y resolver los puntos abiertos de ambas propuestas.
+
 ## Registro
 
 | ADR | Título | Estado |
@@ -41,6 +52,8 @@ cp 05-architecture/decisions/_template-adr.md \
 | [ADR-017](./records/ADR-017-training-environment-r6-schema-evolution.md) | Evolución de maintenance.reason a reason_detail — Training Environment R6 | PROPOSED |
 | [ADR-018](./records/ADR-018-iam-session-revocation-r4.md) | Validación del estado de sesión y límites de revocación en IAM R4 | PROPOSED |
 | [ADR-019](./records/ADR-019-actors-security-hardening.md) | Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC | PROPOSED |
+| [ADR-020](./records/ADR-020-reference-data-iam-e2e-integration.md) | Integración real Reference Data/IAM/web-shell | PROPOSED |
+| [ADR-021](./records/ADR-021-reference-data-resilient-messaging.md) | Inbox, retry, DLQ y replay de Reference Data | PROPOSED |
 | [ADR-022](./records/ADR-022-edge-routing-table-by-domain.md) | Tabla de rutas del edge por dominio y origen único para el frontend | ACCEPTED |
 | [ADR-023](./records/ADR-023-web-shell-owns-login-and-session.md) | El web-shell es dueño del login y de la sesión | ACCEPTED |
 
@@ -54,5 +67,7 @@ cp 05-architecture/decisions/_template-adr.md \
 - [ADR-017: Evolución gradual del motivo de mantenimiento (Training Environment R6)](./records/ADR-017-training-environment-r6-schema-evolution.md) — propuesta, pendiente de revisión.
 - [ADR-018: Validación del estado de sesión en IAM R4](./records/ADR-018-iam-session-revocation-r4.md) — propuesta (PROPOSED).
 - [ADR-019: Actors service security hardening, OAuth2 RS256, mTLS, and fine-grained RBAC](./records/ADR-019-actors-security-hardening.md) — propuesta (PROPOSED).
+- [ADR-020: Integración real Reference Data, IAM y web-shell](./records/ADR-020-reference-data-iam-e2e-integration.md) — propuesta (PROPOSED); antes ADR-012 de Reference Data en el PR #340.
+- [ADR-021: Mensajería resiliente e inbox idempotente de Reference Data](./records/ADR-021-reference-data-resilient-messaging.md) — propuesta (PROPOSED); antes ADR-013 de Reference Data en el PR #340.
 - [ADR-022: Tabla de rutas del edge por dominio y origen único para el frontend](./records/ADR-022-edge-routing-table-by-domain.md) — aceptada (ACCEPTED).
 - [ADR-023: El web-shell es dueño del login y de la sesión](./records/ADR-023-web-shell-owns-login-and-session.md) — aceptada (ACCEPTED).

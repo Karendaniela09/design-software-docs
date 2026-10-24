@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Changed — Revalidación arquitectónica HU-REF-020/R1 (2026-10-24)
+
+- Reconciliado main en la rama del PR #340 conservando los ADR, índices e informes de los otros dominios. Las propuestas de Reference Data antes citadas como ADR-012/013 pasan a ADR-020/021: los números anteriores ya están ocupados en main. Historial y equivalencia documentados; estados PROPOSED sin alterar decisiones ajenas.
+- ADR-020: responsabilidades de sesión/cliente/features, custodia de dependencias privadas CI, alcance real de runners y orden de integración propuesto. ADR-021: ownership/permanencia de inbox/proyección/grants, operación de RabbitMQ, replay y retención/reconstrucción sin purgas no aprobadas.
+- Evidencia sincronizada por HEAD y enlaces: CI propio Frontend Platform SUCCESS; CI completo shell SUCCESS en e91a2c0, con conflicto posterior que exige revalidar si cambia HEAD; MFE con 71 tests locales y CI propio bloqueado por SHELL_DEPS_TOKEN. DB #81 e IAM DB #80 publicados; PR originales aún abiertos.
+- Referencias de HU/modelos/eventos/runbook y matrices alineadas con ADR-020/021. Seis preguntas de gobernanza quedan ABIERTAS, sin imponer aceptación, responsables nominales, plazos de retención ni política de producción.
+
+
+### Added — HU-REF-020 y R1 de Reference Data (docs-first, 2026-10-20)
+
+- Integración con main: conservar documentación de Monitoring/Document y renumerar los ADR propios a ADR-020/021 (antes ADR-012/013, números ya ocupados en main) para evitar duplicidad con los ADR existentes.
+
+- Evidencia local contra los numerales 6/7/8 del acta: tres capturas saneadas en assets/images (falta la captura del estado con broker caído, pendiente de la autora), métricas de seis eventos/doce reenvíos y fragmentos de salida de pruebas; indexadas desde Calidad y README.
+
+- ADR-020/021 PROPOSED: integración real IAM/web-shell mediante fachada y React Context, inbox transaccional, retry 1/2/4, DLQ y replay.
+- Historia/trazabilidad docs#250, modelo/diccionario con changesets nuevos de inbox/proyección y grants mínimos, eventos/runbook y planes de DevOps/Calidad.
+- Código adaptado en siete ramas locales desde develop; ejecución propia PASS con IAM real, migraciones, R1 completo y tres escenarios Chromium. QA/Arquitectura y PR/merge originales siguen pendientes por permisos de escritura. No se acredita Done·Dev por las copias personales ni se duplican ADR/informes en repositorios de código.
+
 ### Added — Decisiones D1, D2 y D3 de la ruta de cierre
 
 - `05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md` (D3, ACCEPTED). Fija:

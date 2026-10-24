@@ -50,3 +50,7 @@ Este repositorio es la fuente de verdad documental del proyecto y **vive siempre
 - [Definition of Done](./00-governance/definition-of-done.md)
 - [CHANGELOG](./CHANGELOG.md)
 - [CODEOWNERS](./.github/CODEOWNERS)
+
+## Evidencias visuales
+
+- [Índice de imágenes](./assets/images/README.md): capturas saneadas de las pruebas del macroproyecto.

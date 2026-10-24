@@ -314,3 +314,16 @@ Después de invalidar, la próxima consulta a ese catálogo recargará el valor 
 - Resultado de `/health`, `/health/db`, `/health/cache`
 - Catálogo(s) afectados si aplica
 - Servicios consumidores impactados (los que leen de este servicio: todos los demás)
+
+## HU-REF-020 / R1 — validación aislada del macroproyecto
+
+La configuración de integración se define en [el plan de DevOps](../../../10-devops/reference-data-integration.md), y las políticas de fallo/replay en [ADR-021](../../../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md). Esos enlaces son la fuente vigente para esta entrega; los ejemplos anteriores de Redis/Kubernetes no acreditan que esos componentes se hayan ejecutado.
+
+- Preparar IAM con JDK 21/reactor raíz, migraciones y fixtures guardadas en la BD de validación.
+- Esperar readiness real de IAM y Reference Data; no sustituirlo por un tiempo fijo.
+- Ejecutar la suite de JWT, transacciones, retry/DLQ y Chromium. Guardar SHA, logs saneados y capturas sin secretos en docs.
+- En caos, detener solo el broker del proyecto de prueba. La operación HTTP guarda negocio y outbox; al reiniciar el servicio y recuperar broker se verifica inbox/proyección.
+- Antes de replay, corregir la causa y limitar el lote; el CLI de `cmd/reference-data-replay` confirma la transferencia antes de retirar de DLQ. No borrar inbox para forzar el reprocesamiento.
+- No aplicar fixtures ni scripts de caos sobre la BD/broker compartidos. No ejecutar rollback de inbox con el consumidor activo ni afirmar R6/HA.
+
+Estado: procedimiento especificado; completar evidencia de ejecución original y revisión de QA/Arquitectura en [Calidad](../../../11-quality/reference-data-hu-ref-020-r1-validation.md).

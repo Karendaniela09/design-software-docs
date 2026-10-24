@@ -153,3 +153,40 @@ independientes por servicio). Se convierten a **`VARCHAR + CHECK`** vía changes
 `remediation-reference-960` (no se modifica ningún changeset corrido), conservando el mismo
 conjunto de valores: `unit_type IN ('ACADEMIC','ADMINISTRATIVE','MIXED')`,
 `value_type IN ('integer','string','boolean','json')`.
+
+## R1 — inbox transaccional y proyección operativa (2026-10-20)
+
+Diseño propuesto en [ADR-021](../../../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md); migración validada en entorno aislado y publicada en [DB #81](https://github.com/code-sena/design-software-reference-data-db/pull/81), pendiente de revisión/merge en develop. Reutiliza `parameterization.outbox_event` de HU-REF-019. No se modifican changesets históricos.
+
+### `parameterization.event_inbox`
+
+| Columna | Tipo | Nulo | Propósito |
+|---|---|---|---|
+| `consumer_name` | VARCHAR(100) | No | Consumidor lógico; con event_id forma la PK |
+| `event_id` | UUID | No | Identidad original del evento |
+| `payload_sha256` | CHAR(64) | No | Detecta reuso del ID con otro contenido |
+| `processed_at` | TIMESTAMPTZ | No | Timestamp de inserción, DEFAULT NOW() |
+
+PK compuesta `(consumer_name,event_id)`; registro técnico append-only, sin estado de negocio. El insert se confirma en la misma transacción que el efecto. Changeset **`r1-reference-inbox-projection-001`**, SQL `01_ddl/03_tables/004_create_event_inbox_projection.sql`.
+
+### `parameterization.event_projection`
+
+| Columna | Tipo | Nulo | Propósito |
+|---|---|---|---|
+| `aggregate_type` | VARCHAR(80) | No | Tipo técnico del agregado, parte de PK |
+| `aggregate_id` | UUID | No | Identificador, parte de PK |
+| `last_event_type` | VARCHAR(120) | No | Último tipo aplicado |
+| `last_payload` | JSONB | No | Payload del evento más reciente |
+| `last_occurred_at` | TIMESTAMPTZ | No | Fecha del hecho, UTC |
+| `applied_events` | BIGINT | No | DEFAULT 1; CHECK > 0; cuenta eventos distintos, no entregas |
+| `updated_at` | TIMESTAMPTZ | No | Última actualización de la proyección |
+
+PK `(aggregate_type,aggregate_id)`. Read model técnico, no una segunda tabla de catálogos ni un agregado de negocio. No necesita FK al catálogo para conservar independencia de la proyección. Pertenece al mismo changeset DDL.
+
+### Grants, rollback y retención
+
+Changeset **`r1-reference-inbox-projection-grants-001`**, SQL `03_dcl/01_grants/004_grant_inbox_projection.sql`: `reference_writer` SELECT/INSERT en inbox y SELECT/INSERT/UPDATE en proyección; `reference_reader` SELECT en proyección. No conceder DELETE de deduplicación al flujo de aplicación.
+
+El rollback revoca los grants y elimina las dos tablas nuevas en el orden inverso, sin tocar negocio/outbox histórico. Es destructivo para la memoria de deduplicación: detener el consumidor y coordinar el replay antes de ejecutarlo. R1 no exige demostrar la evolución sin caída de cuatro ambientes (reto R6 de otro responsable). El 22/10 se verificó el rollback de los dos changesets R1 y su reaplicación únicamente en una base nueva aislada; no se ejecutó sobre la demostración ni develop compartido. Ver [evidencia actualizada](../../../11-quality/reference-data-hu-ref-020-r1-validation.md).
+
+No depurar inbox mientras puedan reentregarse eventos incluidos en su ventana de replay. Política de archivo/retención queda pendiente de decisión operativa; no introducir TTL que permita duplicar efectos.

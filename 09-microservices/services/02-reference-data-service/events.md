@@ -141,7 +141,7 @@ Todos los eventos publicados por este servicio siguen el envelope estandar del s
 | Topic principal | `reference-data-events` |
 | Dead-letter queue | `reference-data-events.dlq` |
 | Reintentos antes de DLQ | 3 |
-| Backoff entre reintentos | exponencial: 1 s, 5 s, 30 s |
+| Backoff histórico entre reintentos | 1 s, 5 s, 30 s; no es una progresión exponencial. R1 propone 1 s, 2 s, 4 s (sección siguiente) |
 | Retencion en DLQ | 7 dias |
 | Alertas | Alerta Slack/PagerDuty si DLQ > 0 mensajes en ventana de 5 min |
 
@@ -166,3 +166,22 @@ DEL catalog:MODALITY
 ```
 
 Los consumidores no deben asumir que su cache local esta actualizada si no han procesado todos los eventos pendientes en `reference-data-events`.
+
+## R1 — consumo y recuperación de la proyección (diseño 2026-10-20)
+
+La política anterior describe la DLQ heredada; R1 no redefine esa cola. Según [ADR-021](../../../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md), se conserva el envelope/contrato publicado y los tipos `reference.catalog.updated` y `reference.training_center.created`; no se añade un evento de negocio nuevo.
+
+| Recurso | Política propuesta |
+|---|---|
+| Consumidor | `reference-data.projection.v1`, ACK manual y QoS 1 |
+| Cola principal | quorum durable `reference-data.projection` |
+| Retry | quorum `.retry.1000`, `.retry.2000`, `.retry.4000` con TTL 1/2/4 s; dead-lettering at-least-once y overflow reject-publish |
+| DLQ de R1 | `reference-data.projection.dlq`, durable y sin expiración automática; exchange `reference-data.projection.dlx` |
+| DLQ heredada | `reference-data-events.dlq`, se conserva para compatibilidad; su TTL no se modifica |
+| Efecto | Proyección técnica de eventos, no inserción repetida del catálogo ni implementación de otros consumidores |
+| Deduplicación | `(consumer_name,event_id)` más hash de tipo + JSON compactado; ID igual/contenido distinto se rechaza |
+| Replay | Conservar ID/cuerpo; reset de intentos; confirmar publicación antes de ACK; límite operativo |
+
+Se valida event_id UUID, source, version, fecha RFC3339Nano y agregado esperado. El publicador de outbox conserva la identidad/fecha persistidas. `published` solo indica entrega al broker o DLQ. Los retries agotados llegan a la DLQ después de un intento inicial y tres reintentos. Si no se puede confirmar la transferencia, se reencola.
+
+La cola y las tablas fueron validadas sobre código original en el entorno aislado y en el CI del shell sobre los SHA documentados; la integración compartida requiere los merges pendientes. [Matriz de pruebas](../../../11-quality/reference-data-hu-ref-020-r1-validation.md).

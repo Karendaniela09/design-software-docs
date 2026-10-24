@@ -55,3 +55,14 @@ Todas las rutas del contrato (`servers: /api/v1`, ver [`reference-data.yaml`](..
 ## Notas
 
 Servicio base para catálogos consumidos por otros dominios.
+
+## Integración HU-REF-020 y reto R1 — docs primero
+
+Esta adaptación está en revisión; no se declara Done·Dev antes de los PR originales y las validaciones. Se reutilizan las pantallas, seguridad y outbox de la base existente. IAM conserva su esquema/usuarios y su propio servicio; los ajustes de seguridad de pruebas pertenecen a iam-db, no al micro de Reference Data.
+
+- [ADR-020: integración real](../../../05-architecture/decisions/records/ADR-020-reference-data-iam-e2e-integration.md).
+- [ADR-021: resiliencia](../../../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md).
+- [Modelo y changesets de R1](./data-model.md), [eventos](./events.md), [runbook](./runbook.md).
+- [Plan de ejecución](../../../10-devops/reference-data-integration.md), [criterios y evidencia](../../../11-quality/reference-data-hu-ref-020-r1-validation.md).
+
+Los ADR/informes viven solo en docs; los PR de código los referencian sin duplicarlos.

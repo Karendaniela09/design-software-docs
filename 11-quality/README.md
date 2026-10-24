@@ -44,3 +44,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 - Selección del set de prueba para los servicios que **aún no** tienen capa de aplicación: se decidirá por stack (Java o Go, según ADR-006) al iniciar su construcción.
 
 - [QA R6 Training Environment DB](./qa-report-r6-training-environment-db.md).
+
+## Validación Reference Data
+
+- [reference-data-hu-ref-020-r1-validation.md](./reference-data-hu-ref-020-r1-validation.md): revalidación al 2026-10-24. Frontend Platform y Web Shell tienen CI aprobado sobre los SHA documentados; MFE mantiene CI propio pendiente por SHELL_DEPS_TOKEN. Los ADR-020/021 siguen PROPOSED y los PR originales requieren revisión/merge.

@@ -199,3 +199,12 @@ Enlaza los criterios funcionales (CF-*) de [problem-framing.md](../03-product/pr
 - [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
 - [03-product/product-backlog.md](../03-product/product-backlog.md) · [03-product/problem-framing.md](../03-product/problem-framing.md)
 - ADRs: [001](../05-architecture/decisions/records/ADR-001-message-broker.md) · [002](../05-architecture/decisions/records/ADR-002-scheduling-read-models.md) · [003](../05-architecture/decisions/records/ADR-003-object-storage.md) · [004](../05-architecture/decisions/records/ADR-004-status-parametrization-and-audit-standard.md)
+
+## Trazabilidad HU-REF-020 y reto individual R1
+
+| Entrega | Requisitos | Servicio / repositorios | Tracker | Decisión | Gate actual |
+|---|---|---|---|---|---|
+| HU-REF-020, EP-REF | RF-IAM-01, RF-REF-02/03; autenticación/autorización real | reference-data-service, iam-db, reference-data-mfe, web-shell, frontend-platform, docker-infra | [docs#250](https://github.com/code-sena/design-software-docs/issues/250) | [ADR-020](../05-architecture/decisions/records/ADR-020-reference-data-iam-e2e-integration.md) | En progreso; PASS local y CI del shell en SHA probado; CI propio MFE, revisión de Arquitectura y merges pendientes |
+| R1 Reference Data | NFR-REC-03; outbox/deduplicación/retry/DLQ/caos | reference-data-service, reference-data-db, docker-infra | Reto del plan individual, relacionado con docs#250; no se inventa una HU nueva | [ADR-021](../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md) | En progreso; PASS local y CI del shell en SHA probado; CI propio MFE, revisión de Arquitectura y merges pendientes |
+
+La trazabilidad se completa con [casos y evidencia](../11-quality/reference-data-hu-ref-020-r1-validation.md). Los resultados en repositorios personales no acreditan Done·Dev en code-sena. El board Project #3 sigue siendo la fuente del estado vivo.

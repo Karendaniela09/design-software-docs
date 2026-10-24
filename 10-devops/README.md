@@ -37,3 +37,7 @@ Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambi
 - La **topología de despliegue** (qué corre y dónde) está en [05-architecture/deployment.md](../05-architecture/deployment.md).
 - El **flujo de ramas y Conventional Commits** que gobierna la promoción está en [00-governance/git-conventions.md](../00-governance/git-conventions.md).
 - El **riesgo de secretos versionados** en `.env.*` se detalla en [05-architecture/security-threat-model.md](../05-architecture/security-threat-model.md) §Secretos.
+
+## Integración Reference Data
+
+- [reference-data-integration.md](./reference-data-integration.md): secuencia docs-first, repositorios responsables y ejecución/revisión de HU-REF-020 y R1 en el macroproyecto; en revisión.
