@@ -88,6 +88,12 @@
 
 - `05-architecture/decisions/records/ADR-001-message-broker.md`: pasa de PROPOSED a ACCEPTED (2026-10-24), aprobado por el dueño del proyecto. Motivos: 9 de 10 servicios ya usan RabbitMQ, la infraestructura solo tiene RabbitMQ y el volumen de eventos es bajo. Se actualiza el registro en `05-architecture/decisions/README.md`.
 
+### Changed — Tabla de rutas del edge y perfiles de dominio (HU-SHELL-009)
+
+- `10-devops/local-setup.md`: sección "Edge: tabla de rutas por dominio" (las tres familias con su prioridad, los 10 dominios con su servicio y puerto, qué cambia respecto del enrutado por labels, los servicios del frontend que define el perfil `edge`, qué da por supuesto de HU-ACT-020, cómo verificar con `scripts/edge-smoke.sh` y cómo agregar un dominio); perfiles `academic`, `reference` y `training` con sus dependencias (HU-ACAD-019, HU-REF-031, HU-ENV-020); tabla de perfiles completada con `actors`, `scheduling`, `document`, `audit` y `monitoring`; el perfil `edge` pasa a traer `traefik`, `web-shell-static` y los 9 `<dominio>-mfe-static` (variable `FRONTEND_REPOS_DIR`); el gotcha del socket de Docker Desktop queda resuelto por el proveedor de archivo.
+- `10-devops/environments.md`: "Estado real" de `develop` actualizado (10 dominios detrás del edge con una sola tabla de archivo, igual en los 4 ambientes) y enlace a la sección nueva.
+- `10-devops/frontend-images.md`: la sección de compose ya no dice que los servicios `*-static` faltan en `docker-infra`; remite a `docker-compose.yml` (perfil `edge`).
+
 ### Added — CI del repo docs (HU-SHELL-013)
 
 - `.github/workflows/docs-ci.yml`: workflow que corre en cada PR hacia `main` y valida solo lo que cambia el PR: (1) título del PR con Conventional Commits (`docs|fix|chore|refactor`), (2) enlaces relativos de los `.md` agregados o modificados, (3) unicidad de número de ADR, incluido el choque con ADR de otros PR abiertos (caso ADR-020), (4) números de documento de identidad en las líneas agregadas (el número se enmascara en el reporte) y (5) lint OpenAPI de `07-api/contracts/openapi/*.yaml` con `redocly.yaml`, que falla solo por errores nuevos. No usa secretos

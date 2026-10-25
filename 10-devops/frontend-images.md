@@ -76,7 +76,7 @@ Otras formas de pasar el contexto:
 - **Git** (reproducible, sin clones al lado; los repos privados piden `GIT_AUTH_TOKEN`):
   `--build-context design-system=https://github.com/code-sena/design-software-design-system.git#develop`.
 
-El ejemplo de compose usa los nombres de servicio que fija la tabla del edge. Esos servicios (`web-shell-static` y los nueve `<dominio>-mfe-static`) **aún no están en el `docker-compose.yml` de `docker-infra`**; agregarlos es un cambio de ese repo.
+El ejemplo de compose usa los nombres de servicio que fija la tabla del edge. Esos servicios (`web-shell-static` y los nueve `<dominio>-mfe-static`) están en el `docker-compose.yml` de `docker-infra`, en el perfil `edge`: `docker compose --profile edge --profile <dominio> up -d --build`. `FRONTEND_REPOS_DIR` (default `..`) apunta a la carpeta donde están clonados los repos del frontend, junto con `design-software-design-system` y `design-software-frontend-platform`.
 
 ## Verificación local
 

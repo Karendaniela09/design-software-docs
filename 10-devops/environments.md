@@ -19,8 +19,8 @@ Cada ambiente es también una **rama protegida**: no se trabaja directamente sob
 Promoción: **`develop → qa → staging → main`**. El detalle del flujo de ramas (ramas `hu-*` por ambiente, `release/*` hacia `main`) está en [git-conventions.md](../00-governance/git-conventions.md).
 
 > **Estado real (difiere por ambiente):**
-> - **`develop`** ya corre **capa de aplicación**: perfiles de docker-compose que levantan `iam-api` (Java) y `notification` (api + worker, Go) sobre la BD compartida, con **edge Traefik** (`/iam/*` + StripPrefix, ADR-007) y **stack de observabilidad** (OTel → Tempo/Grafana, ADR-008).
-> - **`qa` / `staging` / `main`** materializan **solo la capa de datos** (PostgreSQL 16 en contenedor + migraciones Liquibase por módulo). Los perfiles de aplicación **aún no están promovidos** a estos ambientes — son parte del estado objetivo (ver [05-architecture/deployment.md](../05-architecture/deployment.md)).
+> - **`develop`** ya corre **capa de aplicación**: perfiles de docker-compose por dominio (`iam`, `actors`, `scheduling`, `academic`, `reference`, `training`, `document`, `audit`, `notification`, `monitoring`) sobre la BD compartida, con **edge Traefik** que enruta los 10 dominios con **una sola tabla de archivo** (`/<dominio>/api/` → servicio, `/mfe/<dominio>/` → remote, el resto → shell; [ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md)) y **stack de observabilidad** (OTel → Tempo/Grafana, ADR-008). Los perfiles `academic`, `reference` y `training` ya están en el compose, pero sus contenedores arrancan solo cuando llegan HU-ACAD-019, HU-REF-031 y HU-ENV-020 en el repo de cada servicio; los estáticos del shell y de los MFE llegan con HU-SHELL-011 (detalle en [local-setup.md](./local-setup.md#edge-tabla-de-rutas-por-dominio-adr-022-hu-shell-009)).
+> - **`qa` / `staging` / `main`** materializan **solo la capa de datos** (PostgreSQL 16 en contenedor + migraciones Liquibase por módulo). Los perfiles de aplicación **aún no están promovidos** a estos ambientes — son parte del estado objetivo (ver [05-architecture/deployment.md](../05-architecture/deployment.md)). La tabla de rutas del edge (`traefik/dynamic.yml`) es **el mismo archivo en los cuatro ambientes**; por ambiente solo cambian los datos y los valores inyectados (dominio, TLS, secretos).
 
 ---
 
@@ -39,7 +39,7 @@ Cada ambiente aísla sus recursos por puerto para poder coexistir en la misma m�
 
 El detalle operativo de bring-up de estos puertos vive en [local-setup.md](./local-setup.md).
 
-Detrás del edge, las rutas por dominio (`/<dominio>/api/` → servicio, `/mfe/<dominio>/` → remote, el resto → shell) están en [ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md).
+Detrás del edge, las rutas por dominio (`/<dominio>/api/` → servicio, `/mfe/<dominio>/` → remote, el resto → shell) están decididas en [ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md) y descritas, con la tabla de dominios y cómo verificarlas, en [local-setup.md](./local-setup.md#edge-tabla-de-rutas-por-dominio-adr-022-hu-shell-009).
 
 ---
 

@@ -3,7 +3,7 @@
 > Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
-Cómo levantar la base de datos del proyecto y aplicar las migraciones de cada módulo en local. Complementa a [migration-strategy.md](../06-data/migration-strategy.md).
+Cómo levantar la base de datos del proyecto y aplicar las migraciones de cada módulo en local, y cómo levantar los servicios de dominio detrás del edge. Complementa a [migration-strategy.md](../06-data/migration-strategy.md). Las rutas del edge están decididas en [ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md).
 
 ## Prerrequisitos
 
@@ -65,14 +65,22 @@ Aplicar primero `reference-data` (catálogos e institucional) e `iam` (identidad
 
 Además de `tooling` (migraciones), el compose tiene un perfil por servicio de dominio ya desplegado. Un
 servicio puede pertenecer a más de un perfil en la lista `profiles:` — así, `traefik` y `rabbitmq` se traen
-solos al levantar el perfil del dominio que los necesita, sin tener que enumerar `--profile edge` o
-`--profile broker` a mano.
+solos al levantar el perfil del dominio que los necesita, sin tener que enumerar `--profile broker` a
+mano. El frontend (shell y remotes) no va en esos perfiles: se pide con `--profile edge`.
 
 | Perfil | Qué levanta | Build context (portable) |
 |--------|-------------|---------------------------|
 | `notification` | `notification-api` + `notification-worker` + `rabbitmq`/`mailhog` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-notification-service` |
-| `iam` | `iam-api` + `rabbitmq` (eventos `iam-events`) + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-iam-service` |
-| `edge` | Solo `traefik`, si se necesita levantarlo sin ningún dominio | — |
+| `iam` | `iam-api` + `actors-api` + `rabbitmq` (eventos `iam-events`) + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-iam-service` |
+| `actors` | `actors-api` + `rabbitmq` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-actors-service` |
+| `scheduling` | `scheduling-api` + `iam-api` (JWKS) + `rabbitmq` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-scheduling-service` |
+| `academic` | `academic-api` + `iam-api` (JWKS) + `rabbitmq` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-academic-management-service` |
+| `reference` | `reference-data-api` + `iam-api` (JWKS) + `rabbitmq` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-reference-data-service` |
+| `training` | `training-api` + `iam-api` (JWKS) + `rabbitmq` + `traefik` (edge) | `${BACKEND_REPOS_DIR:-../../backend}/design-software-training-environment-service` |
+| `document` | `document-api` + `document-template-api` + renderer + dispatcher + `minio` + `rabbitmq` + `traefik` (edge). Necesita `iam` para autenticar | `${BACKEND_REPOS_DIR:-../../backend}/design-software-document-service` |
+| `audit` | `audit-query-api` + `audit-worker` + `rabbitmq` + `traefik` (edge). Necesita `iam` para autenticar | `${AUDIT_SERVICE_DIR:-../../design-software-audit-service}` |
+| `monitoring` | Stack local R3 de `monitoring-api` con su propio nginx (`monitoring-edge`, `:15000`); **no** trae `traefik`. Para ver `/monitoring/...` por el edge, agregar `--profile edge` | `${BACKEND_REPOS_DIR:-../../backend}/design-software-monitoring-service` |
+| `edge` | `traefik` + el frontend que sirve: `web-shell-static` y los 9 `<dominio>-mfe-static` (HU-SHELL-011). Se suma a cualquier perfil de dominio: `--profile edge --profile iam`. Los perfiles de dominio solos traen `traefik` pero no el frontend (`/` y `/mfe/...` responden `502`) | `${FRONTEND_REPOS_DIR:-..}/design-software-web-shell` y `design-software-<dominio>-mfe`, más `design-system` y `frontend-platform` como contextos de build con nombre |
 | `observability` | Collector OTel + Tempo + Prometheus + Loki + Grafana (ADR-008) | — |
 
 `BACKEND_REPOS_DIR` (default `../../backend`) apunta a la carpeta con los repos de backend clonados junto a
@@ -134,6 +142,85 @@ docker compose --env-file .env.develop --profile notification --profile observab
 - **MailHog:** captura el correo saliente del worker para inspección local (no envía a destinatarios reales).
 - **Acceso:** igual que iam, solo por el edge Traefik; los `-api` no se exponen al host.
 
+### Levantar los dominios nuevos (perfiles `academic`, `reference`, `training`)
+
+Estos tres perfiles se agregaron con HU-SHELL-009. Cada uno trae `postgres`, `rabbitmq`, `iam-api` (los servicios validan el JWT contra su JWKS) y el edge, y **construye desde el Dockerfile del repo del servicio** (`BACKEND_REPOS_DIR`), no desde copias locales.
+
+```bash
+# Un dominio
+docker compose --env-file .env.develop --profile academic up -d --build
+
+# Varios a la vez
+docker compose --env-file .env.develop --profile academic --profile reference --profile training up -d --build
+
+# Los dominios con servicio en el compose, detrás del edge
+docker compose --env-file .env.develop \
+  --profile iam --profile actors --profile scheduling --profile academic --profile reference \
+  --profile training --profile document --profile audit --profile notification up -d --build
+```
+
+Antes de levantar, aplicar el schema del módulo (`liquibase-academic`, `liquibase-reference`, `liquibase-training`, perfil `tooling`) y crear el usuario de aplicación (`create-app-user.sh`), igual que para `iam`.
+
+**Dependencias que viven en el repo de cada servicio** (el compose es válido hoy, pero el contenedor corre solo cuando llega la HU de ese repo):
+
+| Perfil | Qué falta | HU |
+|--------|-----------|----|
+| `academic` | `deploy/Dockerfile.api`. Hoy el repo solo tiene `deploy/Dockerfile.r3-test`, que corre un test y no un servicio. | HU-ACAD-019 |
+| `reference` | Validador JWKS configurable. Hoy solo acepta `http` en loopback, así que `reference-data-api` en su propio contenedor (ya no comparte la red de `iam-api`) termina al arrancar con `jwks url must use https outside local loopback`. | HU-REF-031 |
+| `training` | El `Dockerfile.environment-api` usa Go 1.25 contra `go.mod` 1.26 y no compila. | HU-ENV-020 |
+
+---
+
+## Edge: tabla de rutas por dominio (ADR-022, HU-SHELL-009)
+
+El navegador habla con **un solo origen por ambiente, el edge**. Las rutas viven en un archivo, [`traefik/dynamic.yml`](https://github.com/code-sena/design-software-docker-infra/blob/develop/traefik/dynamic.yml) de `docker-infra` (proveedor de archivo de Traefik), y es **la misma tabla en `develop`, `qa`, `staging` y `main`** (ADR-022 §4 y §6): se revisa en un PR y se promueve por el mismo git-flow que el resto. Los servicios ya no llevan labels de Traefik y el edge no usa el socket de Docker.
+
+Tres familias, en este orden de prioridad (en Traefik gana el número mayor):
+
+| Prioridad | Regla | Destino | Ejemplo |
+|-----------|-------|---------|---------|
+| 30 | `PathPrefix(/<dominio>/api/)` | El servicio del dominio, con `stripPrefix /<dominio>` | `/scheduling/api/v1/schedules` → `scheduling-api:8080/api/v1/schedules` |
+| 30 | `Path` exactos `/<dominio>/health`, `/<dominio>/ready` y `/<dominio>/actuator/health` | El servicio, con `stripPrefix /<dominio>` | `/iam/ready` → `iam-api:8080/ready` |
+| 20 | `PathPrefix(/mfe/<dominio>/)` | `<dominio>-mfe-static`, con `stripPrefix /mfe/<dominio>` | `/mfe/iam/remoteEntry.js` → `iam-mfe-static:8080/remoteEntry.js` |
+| 10 | `PathPrefix(/)`, todo lo demás | `web-shell-static` | `/iam/usuarios` → HTML del shell |
+
+La regla de prioridad 10 permite recargar o compartir cualquier ruta de la SPA (`/iam/usuarios`) sin chocar con el API (`/iam/api/v1/...`).
+
+| Prefijo | Servicio (nombre en compose) | Perfil | MFE |
+|---------|------------------------------|--------|-----|
+| `/iam` | `iam-api:8080` | `iam` | sí |
+| `/scheduling` | `scheduling-api:8080` (con rate limit 60/min, ráfaga 20) | `scheduling` | sí |
+| `/academic-management` | `academic-api:8080` | `academic` | sí |
+| `/training-environment` | `training-api:8080` | `training` | sí |
+| `/reference-data` | `reference-data-api:8080` | `reference` | sí |
+| `/actors` | `actors-api:8080` por HTTPS | `actors` | sí |
+| `/document` | `document-api:8080`; `/document/api/v1/document-templates` → `document-template-api:8080` (prioridad 31) | `document` | sí |
+| `/monitoring` | `monitoring-api:8000` | `monitoring` | sí |
+| `/audit` | `audit-query-api:8080` | `audit` | sí |
+| `/notification` | `notification-api:8080` | `notification` | no |
+
+**Qué cambia respecto del enrutado anterior.** Antes `/iam`, `/scheduling`, `/audit` y `/notification` mandaban todo lo que colgaba del prefijo al servicio, y document respondía en `/api/v1/documents` y `/api/v1/document-templates` sin prefijo. Ahora el prefijo de dominio solo cubre `/api/` y los health. Por eso `/api/v1/documents` pasa a ser `/document/api/v1/documents`, y un servicio cuyas rutas no cuelgan de `/api/v1` (hoy notification, con `POST /notifications`) queda sin ruta de negocio por el edge hasta que se alinee a su contrato (ADR-022 §3: no hay reglas especiales en el edge para tapar esa deriva).
+
+**Lo que la tabla da por supuesto de otras HU:**
+
+- `web-shell-static` y los 9 `<dominio>-mfe-static`: **HU-SHELL-011** construye las imágenes (cada repo trae su `Dockerfile`) y `docker-compose.yml` define los servicios en el perfil `edge`, con `build.additional_contexts` para `design-system` y `frontend-platform` (ver [frontend-images.md](./frontend-images.md)). Sin el perfil `edge` las familias de prioridad 20 y 10 responden `502` desde el edge. Contrato con esa HU: son imágenes nginx que escuchan en `8080` (ADR-007 §2), sin publicar puerto al host; el edge quita `/mfe/<dominio>` y el contenedor sirve su `dist/` en la raíz (el MFE se compila con `base: '/mfe/<dominio>/'`, ADR-022 §5); el fallback a `index.html` lo hace el nginx del shell, no Traefik. `FRONTEND_REPOS_DIR` (default `..`) apunta a la carpeta con los repos del frontend, igual que `BACKEND_REPOS_DIR` para el backend.
+- `actors` expone HTTPS con mTLS. El edge todavía no presenta certificado de cliente (`serversTransport`), así que `/actors/...` falla en el edge con un 5xx hasta **HU-ACT-020**.
+- Si el servicio de un dominio no está levantado, su ruta responde `502` (no `404`): la ruta existe, el backend no.
+
+### Verificar las tres familias
+
+```bash
+docker compose --env-file .env.<ambiente> --profile edge --profile iam up -d --build   # API + shell + remotes
+EDGE_URL=http://localhost:18080 bash scripts/edge-smoke.sh
+SKIP_DOMAINS="actors" EDGE_URL=http://localhost:18080 bash scripts/edge-smoke.sh   # omite dominios cuyo servicio no corre
+```
+
+El script no necesita token: comprueba **quién respondió**. Para cada dominio, que `/<dominio>/api/...` llegue al servicio (no al shell ni a un 5xx) y que su health responda 200; que `/mfe/<dominio>/remoteEntry.js` devuelva JavaScript; y que las rutas de la SPA (`/<dominio>/...`, `/`) devuelvan el HTML del shell. Termina con código distinto de cero si algo falla.
+
+### Agregar un dominio
+
+En `traefik/dynamic.yml`: un `service` por backend, el middleware `strip-<dominio>` (y `strip-mfe-<dominio>` si tiene MFE), los routers `<dominio>-api` y `<dominio>-health` (prioridad 30) y `<dominio>-mfe` (20); luego sumarlo a `scripts/edge-smoke.sh` y al perfil que corresponda en `docker-compose.yml` (con `traefik` en su lista `profiles`). No hay variable por ambiente: la tabla es la misma en los cuatro.
+
 ---
 
 ## Gotchas de observabilidad / deploy
@@ -144,7 +231,7 @@ docker compose --env-file .env.develop --profile notification --profile observab
   - **`monitoring` (SDK Python):** `:4318` con **http/protobuf**. En Python no hay un protocolo implícito: lo decide el paquete exportador que se importe. `opentelemetry-exporter-otlp-proto-grpc` apunta por defecto a `localhost:4317` (gRPC, sin ruta) y `opentelemetry-exporter-otlp-proto-http` a `http://localhost:4318` con una ruta por señal (`/v1/traces`, `/v1/metrics`, `/v1/logs`). `monitoring-service` importa el exportador HTTP y le agrega esa ruta a `OTEL_EXPORTER_OTLP_ENDPOINT` (`http://otel-collector:4318`); su `requirements-runtime.lock` no incluye el exportador gRPC. `document` (Python) no está verificado: su servicio del compose no define `OTEL_*`.
 
   **No copies la config OTLP de un stack a otro** (por ejemplo, la de `notification` a un micro Java o Python). Apuntar el `iam` (Java) a `:4317` produjo `Connection reset` → **0 trazas** en Tempo, sin error visible en el arranque. Si un servicio no emite trazas, revisá primero puerto + protocolo contra su runtime y, en Python, contra el exportador que importa.
-- **Bug del socket de Docker Desktop / WSL rompe el edge Traefik en local.** El bind-mount del socket de Docker en Docker Desktop sobre WSL no siempre expone un socket real, y el provider Docker de Traefik queda sin descubrir servicios → el edge no enruta. **Workaround:** usar el **provider `file`** de Traefik (configuración estática de rutas) en lugar del provider Docker, o correr en un entorno con socket de Docker real. **Estado: `E2-edge` no validado localmente** por este bug — el enrutado por edge se ha verificado por otras vías, no por el descubrimiento automático vía socket.
+- **El socket de Docker Desktop / WSL rompía el edge Traefik en local (resuelto con HU-SHELL-009).** El bind-mount del socket de Docker en Docker Desktop sobre WSL no siempre expone un socket real, y el provider Docker de Traefik quedaba sin descubrir servicios → el edge no enrutaba (todo respondía 404). **Ya no aplica:** el edge usa el **provider `file`** (`traefik/dynamic.yml`, [ver arriba](#edge-tabla-de-rutas-por-dominio-adr-022-hu-shell-009)) en los cuatro ambientes, sin labels ni socket, así que no hay override local ni variables `TRAEFIK_DOCKER_*`. El enrutado por edge se valida con `scripts/edge-smoke.sh`.
 
 ---
 
