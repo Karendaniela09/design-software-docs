@@ -1235,9 +1235,13 @@ components:
 
     Ficha:
       type: object
-      required: [id, ficha_number, program_id, program_version, training_center_id, status, start_date, training_shift, training_modality, max_capacity, created_at, updated_at]
+      required: [id, ficha_number, program_id, program_version, training_center_id, status, start_date, training_shift, training_modality, max_capacity, row_version, created_at, updated_at]
       properties:
         id: { type: string, format: uuid }
+        row_version:
+          type: integer
+          minimum: 0
+          description: Versión de concurrencia de la ficha; se envía de vuelta en `PUT /fichas/{id}`.
         ficha_number: { type: string, maxLength: 20, description: Número de ficha SENA; único. }
         program_id: { type: string, format: uuid }
         program_version:

@@ -16,6 +16,7 @@ Documenta sistema de diseño, navegación y wireframes del producto.
 | [design-system.md](./design-system.md) | Tokens, componentes, patrones visuales y reglas UX/UI | 🟡 |
 | [navigation-map.md](./navigation-map.md) | Mapa de navegación y jerarquía de pantallas | 🟡 |
 | [wireframes.md](./wireframes.md) | Wireframes y referencias de interacción | 🟡 |
+| [academic-ficha-screens-spec.md](./academic-ficha-screens-spec.md) | UI spec de las pantallas de Academic Management para editar una ficha, cambiar su estado y consultar reportes (HU-ACAD-020) | 🟡 |
 
 ## Plantillas
 
