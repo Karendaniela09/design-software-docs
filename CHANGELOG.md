@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Changed — Cierre de ficha por aprobación de RAP y contrato de Academic R4 (ADR-030, 2026-10-24)
+
+- `05-architecture/decisions/records/ADR-030-academic-ficha-lifecycle-preconditions.md` (ACCEPTED por el dueño). Fija:
+  - una ficha pasa de `PRODUCTIVE_STAGE` a `COMPLETED` solo si cada aprendiz activo tiene aprobado el 100 % de los RAP activos del programa; no hay nota numérica, y una ficha sin aprendices activos no se puede completar (RN-ACAD-07 en `02-domain/entities-and-rules.md`);
+  - `EXECUTION` → `PRODUCTIVE_STAGE` no tiene condición de horas ejecutadas; el reporte de ejecución de scheduling queda como evidencia informativa;
+  - `DELETE /fichas/{id}` se mantiene como alias de la transición a `CANCELLED` (borrado lógico, mismas validaciones; la justificación `cancellation_notes` va en el cuerpo);
+  - el juicio por RAP vive en `actors-service` (`actors_learners.learner_rap_assessment`) y academic consulta la cobertura con un token M2M por audiencia.
+- Cambios incompatibles aceptados antes de v1 en `07-api/contracts/openapi/academic-management.yaml` y en `design-software-shared-contracts` (`openapi/academic-management.yaml`):
+  - `FichaUpdate` exige `row_version` y ya no lleva `actual_end_date` (que sigue en `FichaStatusChange`);
+  - `PATCH /fichas/{id}/status` agrega `cancellation_notes` (obligatoria solo para `CANCELLED`) y la respuesta `503`.
+- Contratos nuevos aditivos: `actors.yaml` (`PUT /fichas/{fichaId}/learners/{learnerId}/rap-assessments/{learningOutcomeId}` y `POST /internal/fichas/{fichaId}/rap-assessments/coverage`) e `iam.yaml` (`POST /auth/token` con `audience` opcional; si falta se lee como `actors-service`).
+- Datos: `06-actors-service/data-model.md` y `06-data/data-dictionary.md` (tabla `learner_rap_assessment`); RBAC: `ACT_LEARNER_RAP_ASSESSMENT_MANAGE` y `ACT_INTERNAL_FICHA_RAP_COVERAGE` en `rbac-design.md`.
+- Trabajo: HU-ACAD-11 (docs#171), HU-ACT-029 (docs#391) y, como seguimiento, HU-ACT-031 (docs#419, juicio del instructor).
+
 ### Added — Correlación de peticiones y métricas Prometheus de iam-service (HU-IAM-021)
 
 - `09-microservices/services/01-iam-service/runbook.md`: observabilidad con `X-Correlation-Id`, `trace_id` en los errores, `GET /actuator/prometheus`, comprobación manual, construcción con el wrapper de Maven y alcance de la verificación. La nota «Métricas: fuera de alcance» deja de aplicar

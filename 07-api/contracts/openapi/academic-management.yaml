@@ -833,23 +833,30 @@ paths:
     delete:
       operationId: deleteFicha
       tags: [fichas]
-      summary: Baja lógica de la ficha (transición a CANCELLED).
+      summary: Baja lógica de la ficha (alias de la transición a CANCELLED).
       description: >-
-        No elimina físicamente el registro. Equivale a cancelar la ficha:
-        aplica la transición de estado a `CANCELLED` y reutiliza las
-        validaciones de `PATCH /fichas/{id}/status` (guidelines ADR-004).
-        `COMPLETED` y `CANCELLED` son estados terminales; falla con 409 si la
-        ficha ya está en cualquiera de ellos. La cancelación publica el mismo
-        evento `academic.ficha.closed` que la transición a `CANCELLED`.
+        Does not remove the record. It is an alias of the transition to CANCELLED
+        of `PATCH /fichas/{id}/status` and applies the same validations: only
+        CENTER_DIRECTOR, the same scope rules, 409 if the ficha is already COMPLETED
+        or CANCELLED (terminal states), and the same `academic.ficha.closed` event.
+        As the cancellation justification is mandatory, it is sent in the body
+        (`cancellation_notes`, 10-500 trimmed Unicode code points); it is stored for
+        internal audit and omitted from the event.
       x-required-feature: ACADEMIC_FICHA_STATUS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FichaCancellation' }
       responses:
         '204':
           description: Ficha dada de baja.
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
-
+        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
   /fichas/{id}/status:
     parameters:
       - $ref: '#/components/parameters/FichaId'
@@ -858,14 +865,7 @@ paths:
       tags: [fichas]
       summary: Transiciona el estado de la ficha según su máquina de estados.
       description: >-
-        Transiciones válidas: INDUCTION → EXECUTION|CANCELLED; EXECUTION → PRODUCTIVE_STAGE|CANCELLED;
-        PRODUCTIVE_STAGE → COMPLETED|CANCELLED. COMPLETED y CANCELLED son terminales.
-        Las transiciones inválidas o desde estados terminales responden 409.
-        La cancelación está reservada a CENTER_DIRECTOR según RN-ACAD-05, sin
-        retirar el feature compartido `ACADEMIC_FICHA_STATUS` de otras
-        transiciones. Las precondiciones externas para EXECUTION →
-        PRODUCTIVE_STAGE (Scheduling) y PRODUCTIVE_STAGE → COMPLETED (Actors)
-        quedan abiertas hasta definir las APIs/HUs correspondientes.
+        Valid transitions are INDUCTION to EXECUTION or CANCELLED, EXECUTION to PRODUCTIVE_STAGE or CANCELLED, and PRODUCTIVE_STAGE to COMPLETED or CANCELLED. COMPLETED and CANCELLED are terminal. Cancellation is restricted to CENTER_DIRECTOR. Moving to PRODUCTIVE_STAGE has no hours condition. Moving to COMPLETED requires that every active learner of the ficha has APPROVED on 100% of the active RAPs (LearningOutcome) of the ficha's program; there is no numeric grade and no threshold, and a RAP that is NOT_APPROVED or has no judgment (pending) does not count. If the rule is not met the answer is 409 ACAD_FICHA_RAP_COVERAGE_INCOMPLETE; a program with no active RAPs, or a ficha with no active learners, answers 409 ACAD_STATUS_PRECONDITION_FAILED. Actors or M2M unavailability returns 503 without persisting the transition. A CANCELLED request requires 10-500 trimmed Unicode code points in cancellation_notes. The note is stored for internal audit and omitted from the response and public event.
       x-required-feature: ACADEMIC_FICHA_STATUS
       requestBody:
         required: true
@@ -884,6 +884,7 @@ paths:
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '503': { $ref: '_shared.yaml#/components/responses/ServiceUnavailable' }
 
   # ---------------------------------------------------------------- reports (own domain)
   /reports/enrollment-by-ficha:
@@ -1336,6 +1337,19 @@ components:
           enum: [IN_PERSON, VIRTUAL, HYBRID]
         max_capacity: { type: integer, minimum: 1 }
 
+    FichaCancellation:
+      type: object
+      additionalProperties: false
+      required: [cancellation_notes]
+      properties:
+        cancellation_notes:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: >-
+            Justification of the cancellation. The trimmed value must contain 10-500
+            Unicode code points. Stored internally; never returned or published in the event.
+
     FichaStatusChange:
       type: object
       required: [status]
@@ -1343,12 +1357,28 @@ components:
         status:
           type: string
           enum: [INDUCTION, EXECUTION, PRODUCTIVE_STAGE, COMPLETED, CANCELLED]
-          description: Estado destino; debe ser una transición válida desde el estado actual.
+          description: Target status; must be a valid transition from the current status.
         actual_end_date:
           type: [string, 'null']
           format: date
-          description: Fecha real de cierre; aplica al transicionar a COMPLETED o CANCELLED.
-
+          description: Actual closing date for COMPLETED or CANCELLED transitions.
+        cancellation_notes:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: >-
+            Required only for CANCELLED. Trimmed value must contain 10-500 Unicode
+            code points. Stored internally; never returned or published in the event.
+      allOf:
+        - if:
+            properties:
+              status: { const: CANCELLED }
+            required: [status]
+          then:
+            required: [cancellation_notes]
+          else:
+            not:
+              required: [cancellation_notes]
     EnrollmentByFichaReportItem:
       type: object
       required: [ficha_id, ficha_number, program_id, program_code, program_name, training_center_id, status, max_capacity, start_date]

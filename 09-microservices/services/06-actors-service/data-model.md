@@ -204,6 +204,39 @@ Historial de inscripciones de un aprendiz en fichas de caracterización. Permite
 
 ---
 
+### `learner_rap_assessment`
+
+Juicio evaluativo de un aprendiz sobre un RAP (`LearningOutcome`) de su ficha. Es la evidencia que
+`academic-management-service` consulta para decidir si una ficha puede pasar de `PRODUCTIVE_STAGE` a
+`COMPLETED` (regla RN-ACAD-07 y [ADR-030](../../../05-architecture/decisions/records/ADR-030-academic-ficha-lifecycle-preconditions.md)):
+todos los aprendices activos con el 100 % de los RAP activos del programa en `APPROVED`. **No hay nota
+numérica ni umbral**; la ausencia de fila significa juicio pendiente.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK |
+| `learner_id` | UUID | No | FK compuesta → `learner_ficha_enrollment (learner_id, ficha_id)` |
+| `ficha_id` | UUID | No | FK compuesta → `learner_ficha_enrollment (learner_id, ficha_id)`; referencia lógica a `enrollment_ficha.id` |
+| `learning_outcome_id` | UUID | No | Referencia externa → `learning_outcome.id` en academic-management-service (sin FK entre BD) |
+| `result` | VARCHAR(20) | No | `APPROVED` o `NOT_APPROVED` |
+| `assessed_by` | UUID | No | Referencia externa → iam-service; quien emitió el juicio (del token) |
+| `assessed_at` | TIMESTAMPTZ | No | Momento del juicio vigente (reloj del servidor) |
+| `created_at`, `created_by`, `updated_at`, `updated_by` | TIMESTAMPTZ / UUID | No | Auditoría (ADR-004) |
+| `deleted_at`, `deleted_by` | TIMESTAMPTZ / UUID | Sí | Borrado lógico (ADR-004) |
+| `is_active` | BOOLEAN | No | Default `true` |
+| `row_version` | INT | No | Default `0`; concurrencia optimista |
+
+**CHECK**: `result IN ('APPROVED','NOT_APPROVED')`.
+
+**Constraints**:
+- UNIQUE `(learner_id, ficha_id, learning_outcome_id)` — un juicio vigente por aprendiz, ficha y RAP; el último juicio reemplaza al anterior (upsert).
+- FK compuesta a `learner_ficha_enrollment (learner_id, ficha_id)` con `ON DELETE RESTRICT` y `ON UPDATE RESTRICT` (el borrado es lógico, no en cascada).
+- Sin FK sobre `learning_outcome_id`: el RAP vive en otra base de datos y el servicio no lo valida; un id ajeno al programa de la ficha nunca cuenta para la cobertura.
+
+**Changesets** (`design-software-actors-db`, [PR #71](https://github.com/code-sena/design-software-actors-db/pull/71), abierto y pendiente de revisión y merge a develop): `hu-act-029-learner-rap-assessment-table-001` (`01_ddl/03_tables`), `hu-act-029-learner-rap-assessment-constraints-001` (`01_ddl/04_alter`: PK, UNIQUE y FK) y `hu-act-029-learner-rap-assessment-indexes-001` (`01_ddl/10_indexes`), cada uno con rollback espejo.
+
+---
+
 ### `company`
 
 Empresa que participa en la etapa productiva de aprendices SENA.
@@ -373,6 +406,8 @@ Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `publish
 | `user_id` (learner) | `user.id` | `iam-service` |
 | `competency_id` | `competency.id` | `academic-management-service` |
 | `ficha_id` (learner_ficha_enrollment) | `enrollment_ficha.id` | `academic-management-service` |
+| `learning_outcome_id` (learner_rap_assessment) | `learning_outcome.id` | `academic-management-service` |
+| `assessed_by` (learner_rap_assessment) | `user.id` | `iam-service` |
 | `training_center_id` | `training_center.id` | `reference-data-service` |
 | `city_id` | `municipality.id` | `reference-data-service` |
 | `approved_by` (availability exception) | `user.id` | `iam-service` |
@@ -396,6 +431,9 @@ Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `publish
 | `learner_ficha_enrollment` | `(learner_id, is_current)` | Partial | Inscripción activa del aprendiz |
 | `learner_ficha_enrollment` | `ficha_id` | B-Tree | Aprendices por ficha |
 | `learner_ficha_enrollment` | `(learner_id, enrollment_date)` | B-Tree | Historial cronológico |
+| `learner_rap_assessment` | `(learner_id, ficha_id, learning_outcome_id)` | UNIQUE | Un juicio vigente por aprendiz, ficha y RAP |
+| `learner_rap_assessment` | `(ficha_id, result)` WHERE `is_active = true` AND `deleted_at IS NULL` | Partial | Cobertura de RAP aprobados por ficha |
 | `activity_log` | `(instructor_id, recorded_at)` WHERE `instructor_id IS NOT NULL` | Partial | Bitácora cronológica por instructor |
 | `activity_log` | `(learner_id, recorded_at)` WHERE `learner_id IS NOT NULL` | Partial | Bitácora cronológica por aprendiz |
 | `company` | `nit` | UNIQUE | Identificación tributaria única |
+

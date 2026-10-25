@@ -58,6 +58,7 @@ La renumeración no equivale a aceptación. Arquitectura debe ratificar las resp
 | [ADR-023](./records/ADR-023-web-shell-owns-login-and-session.md) | El web-shell es dueño del login y de la sesión | ACCEPTED |
 | [ADR-024](./records/ADR-024-monitoring-r2-performance.md) | Optimización de lecturas de Monitoring para R2 | PROPOSED |
 | [ADR-025](./records/ADR-025-academic-resilient-messaging.md) | Mensajería resiliente para academic-management | PROPOSED |
+| [ADR-030](./records/ADR-030-academic-ficha-lifecycle-preconditions.md) | Academic Management R4 security, lifecycle preconditions (RAP approval), cancellation and MFE integration | ACCEPTED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.
@@ -75,3 +76,4 @@ La renumeración no equivale a aceptación. Arquitectura debe ratificar las resp
 - [ADR-023: El web-shell es dueño del login y de la sesión](./records/ADR-023-web-shell-owns-login-and-session.md) — aceptada (ACCEPTED).
 - [ADR-024: Optimización de lecturas de Monitoring para R2](./records/ADR-024-monitoring-r2-performance.md) — propuesta (PROPOSED), pendiente de revisión de Arquitectura.
 - [ADR-025: Mensajería resiliente para academic-management](./records/ADR-025-academic-resilient-messaging.md) — propuesta (PROPOSED), pendiente de revisión de Arquitectura.
+- [ADR-030: Academic Management R4 security, lifecycle preconditions (RAP approval), cancellation and MFE integration](./records/ADR-030-academic-ficha-lifecycle-preconditions.md) — aceptada (ACCEPTED) por el dueño el 2026-10-24.

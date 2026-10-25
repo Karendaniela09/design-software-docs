@@ -776,6 +776,85 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+  /fichas/{fichaId}/learners/{learnerId}/rap-assessments/{learningOutcomeId}:
+    put:
+      operationId: recordLearnerRapAssessment
+      tags: [learners]
+      summary: Records or corrects one learner's evaluative judgment on a learning outcome (RAP) of a ficha.
+      description: >-
+        Stores APPROVED or NOT_APPROVED for the learner on the RAP (LearningOutcome of
+        academic-management, referenced by id with no foreign key between databases).
+        Accepts only an active enrollment of the learner in the ficha. It is an upsert:
+        the last judgment replaces the previous one, and the absence of a judgment means
+        pending. There is no numeric grade and no threshold. assessed_by and assessed_at
+        come from the token and the server clock. The service does not validate the RAP
+        id against academic-management; an id outside the ficha's program never counts
+        toward the completion coverage.
+      x-required-feature: ACT_LEARNER_RAP_ASSESSMENT_MANAGE
+      parameters:
+        - name: fichaId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: learnerId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: learningOutcomeId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LearnerRapAssessmentWrite' }
+      responses:
+        '200':
+          description: Judgment stored with who judged and when.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LearnerRapAssessment' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
+  /internal/fichas/{fichaId}/rap-assessments/coverage:
+    post:
+      servers: [{ url: / }]
+      operationId: getFichaRapCoverage
+      tags: [learners]
+      summary: Verifies, for Academic, whether every active learner of the ficha has the given RAPs approved.
+      description: >-
+        Read-only query sent as POST because the list of RAP ids can hold hundreds of
+        entries. Academic sends the active RAPs of the ficha's program; Actors counts
+        the active learners that have APPROVED on all of them. A RAP that is
+        NOT_APPROVED or has no judgment does not count. The answer carries counts only:
+        no individual judgments and no learner identifiers. Requires an M2M token with
+        audience actors-service.
+      x-required-feature: ACT_INTERNAL_FICHA_RAP_COVERAGE
+      parameters:
+        - name: fichaId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FichaRapCoverageRequest' }
+      responses:
+        '200':
+          description: Active learners and learners with full RAP approval.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FichaRapCoverage' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
   /learners/{id}/activity-log:
     parameters:
       - $ref: '#/components/parameters/LearnerId'
@@ -1650,6 +1729,59 @@ components:
           format: uuid
           description: null = evento del sistema.
         recorded_at: { type: string, format: date-time }
+
+    LearnerRapAssessmentWrite:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: string
+          enum: [APPROVED, NOT_APPROVED]
+          description: Evaluative judgment. There is no numeric grade; no judgment means pending.
+
+    LearnerRapAssessment:
+      type: object
+      required: [ficha_id, learner_id, learning_outcome_id, result, assessed_by, assessed_at]
+      properties:
+        ficha_id: { type: string, format: uuid }
+        learner_id: { type: string, format: uuid }
+        learning_outcome_id:
+          type: string
+          format: uuid
+          description: Logical reference to LearningOutcome in academic-management (no foreign key between databases).
+        result: { type: string, enum: [APPROVED, NOT_APPROVED] }
+        assessed_by:
+          type: string
+          format: uuid
+          description: User that recorded the judgment, taken from the token.
+        assessed_at: { type: string, format: date-time }
+
+    FichaRapCoverageRequest:
+      type: object
+      additionalProperties: false
+      required: [learning_outcome_ids]
+      properties:
+        learning_outcome_ids:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          uniqueItems: true
+          items: { type: string, format: uuid }
+          description: Active RAPs of the ficha's program, as resolved by Academic.
+
+    FichaRapCoverage:
+      type: object
+      required: [ficha_id, required_learning_outcomes, active_learners, fully_approved_learners, all_active_learners_fully_approved]
+      properties:
+        ficha_id: { type: string, format: uuid }
+        required_learning_outcomes: { type: integer, minimum: 1 }
+        active_learners: { type: integer, minimum: 0 }
+        fully_approved_learners:
+          type: integer
+          minimum: 0
+          description: Active learners with APPROVED on every requested RAP.
+        all_active_learners_fully_approved: { type: boolean }
 
     Learner:
       type: object

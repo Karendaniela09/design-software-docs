@@ -230,3 +230,26 @@ Las siguientes reglas se validan **antes** de persistir el cambio y emitir el ev
 - El `competency_code` debe ser único dentro del mismo `program_id`.
 - Una competencia en estado `DEACTIVATED` no puede volver a `CREATED` ni `UPDATED`; debe crearse una nueva con distinto código.
 - No se puede desactivar una competencia si existen fichas abiertas con resultados de aprendizaje asociados a ella.
+
+## HU-ACAD-11 lifecycle and cancellation details (ADR-030)
+
+`EXECUTION` → `PRODUCTIVE_STAGE` has no hours precondition (owner decision of
+2026-10-24): Academic does not read Scheduling for it, and the transition applies
+only the role and state-machine rules.
+
+Before `PRODUCTIVE_STAGE` → `COMPLETED`, every active learner of the ficha must
+have `APPROVED` on 100% of the active RAPs (`LearningOutcome`) of the ficha's
+program (RN-ACAD-07). There is no numeric grade: a RAP that is `NOT_APPROVED` or
+has no judgment does not count. Academic resolves the required RAP ids from its
+own database and asks Actors for the coverage; Actors is authoritative for the
+judgments and returns counts only. An incomplete coverage answers
+`409 ACAD_FICHA_RAP_COVERAGE_INCOMPLETE`; a program with no active RAPs, or a
+ficha with no active learners, answers `409 ACAD_STATUS_PRECONDITION_FAILED`.
+Missing or invalid Actors evidence fails closed with `503`.
+
+For a new cancellation, `cancellation_notes` is required only with target status
+`CANCELLED` (also through the `DELETE /fichas/{id}` alias, which carries it in
+the body). Academic trims it and enforces 10–500 Unicode code points, stores
+it with cancellation actor/time, and omits it from the API response and
+`academic.ficha.closed` public event. These rules are in ADR-030, accepted by the
+project owner on 2026-10-24.

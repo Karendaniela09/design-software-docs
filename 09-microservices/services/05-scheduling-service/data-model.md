@@ -96,6 +96,8 @@ Conflicto detectado durante la validación del horario en estado DRAFT.
 
 **`site_travel_time`** *(D-11)* — matriz de tiempos de traslado entre sedes para el conflicto `INSTRUCTOR_TRAVEL_CONFLICT`: `id`, `origin_site_id` (ref lógica), `destination_site_id` (ref lógica), `travel_minutes`, `is_active`, timestamps. `UNIQUE(origin_site_id, destination_site_id)`.
 
+**`ficha_training_center_projection`** — proyección local de `ficha_id` a `training_center_id` usada por lecturas con scope `TRAINING_CENTER`; guarda `updated_at` y no tiene FK hacia Academic porque la ficha y el centro pertenecen a otro servicio. La tabla ya existe en `develop` de `design-software-scheduling-db` (`01_ddl/03_tables/0008_create_ficha_training_center_projection.sql`); el PR de R4 no la crea ni agrega ningún changeset de scheduling-db. La integración que sincroniza esta proyección desde Academic debe mantenerla actualizada; sin fila para una ficha, la consulta scoped no devuelve sesiones.
+
 ## Referencias externas
 
 | Campo | Referencia lógica | Servicio propietario |

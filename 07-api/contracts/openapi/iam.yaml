@@ -29,6 +29,62 @@ tags:
 
 paths:
   # ---------------------------------------------------------------- auth
+  /auth/token:
+    post:
+      operationId: issueServiceAccessToken
+      tags: [auth]
+      summary: Issues a short-lived audience-bound M2M token for an allowlisted service.
+      description: >-
+        Accepts client_credentials with HTTP Basic authentication and an allowlisted
+        audience. actors-service receives ACT_INTERNAL_FICHA_LEARNER_COUNT:GLOBAL,
+        ACT_INTERNAL_FICHA_RAP_COVERAGE:GLOBAL, and ACADEMIC_FICHA_VIEW:GLOBAL.
+        scheduling-service receives SCH_REPORT_VIEW:GLOBAL. The JWT aud claim contains
+        the selected audience; client secrets are configured in secret storage.
+        When audience is omitted the request is treated as actors-service, which is
+        what the pre-R4 Academic client sends; this is a transitional allowance. A
+        present but unknown or blank audience is rejected with invalid_target.
+      security: []
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: HTTP Basic client_id and client_secret.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [grant_type]
+              properties:
+                grant_type: { type: string, const: client_credentials }
+                audience:
+                  type: string
+                  enum: [actors-service, scheduling-service]
+                  default: actors-service
+                  description: Optional; omitted means actors-service (transitional compatibility).
+      responses:
+        '200':
+          description: Bearer token with audience and allowed scopes; response is not cached.
+          headers:
+            Cache-Control: { schema: { type: string, const: no-store } }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, token_type, expires_in, scope, audience]
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string, const: Bearer }
+                  expires_in: { type: integer, minimum: 30, maximum: 900 }
+                  scope: { type: string }
+                  audience: { type: string, enum: [actors-service, scheduling-service] }
+        '400':
+          description: Unsupported grant type (unsupported_grant_type) or unknown audience (invalid_target).
+        '401':
+          description: Invalid client credentials.
+
   /auth/login:
     post:
       operationId: login

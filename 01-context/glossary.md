@@ -11,6 +11,7 @@
 | Programa de formación | Diseño curricular aprobado a nivel nacional (Técnico, Tecnólogo, etc.) | `TrainingProgram` |
 | Competencia | Unidad de aprendizaje dentro de un programa; norma de competencia laboral | `Competency` |
 | RAP (Resultado de Aprendizaje) | Subunidad de una competencia; unidad mínima de formación | `LearningOutcome` |
+| Juicio evaluativo | Resultado de evaluar a un aprendiz en un RAP: aprobado o no aprobado; sin juicio = pendiente. No hay nota numérica | `LearnerRapAssessment` (`APPROVED` / `NOT_APPROVED`) |
 | Línea / Red tecnológica | Niveles de agrupación curricular por área de conocimiento | `TechLine` / `TechNetwork` |
 | Jornada | Bloque de tiempo de operación: Diurna, Nocturna, Mixta (Madrugada/Fin de semana) | `training_shift` (catálogo) |
 | Modalidad | Forma de impartir: Presencial, Virtual, Híbrida | `training_modality` (catálogo) |

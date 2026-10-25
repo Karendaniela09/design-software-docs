@@ -1,6 +1,6 @@
 # Modelo de datos — academic-management-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 
 ## Convenciones de modelado (transversales)
@@ -212,6 +212,47 @@ La restricción única `(consumer_name, event_id)` hace que una segunda entrega 
 | `enrollment_ficha` | `(training_center_id, status)` | B-Tree | Consultas de dashboard por centro y estado |
 | `outbox` | `(next_attempt_at, created_at)` pendiente | B-Tree parcial | Relay de eventos publicables |
 | `processed_event` | `processed_at` | B-Tree | Operación y retención de recibos |
+
+## HU-ACAD-11 R4 implementation fields (ADR-030)
+
+The `enrollment_ficha` aggregate adds the following nullable fields for newly
+cancelled fichas. Existing cancelled records are not backfilled with invented
+reasons.
+
+| Field | Type | Nullable | Description |
+|-------|------|----------|-------------|
+| `cancellation_notes` | VARCHAR(500) | Yes | Trimmed internal justification; required on new `CANCELLED` transitions and limited to 10–500 Unicode code points. |
+| `cancellation_at` | TIMESTAMPTZ | Yes | Time at which the cancellation transition was stored. |
+| `cancellation_by` | UUID | Yes | Authenticated actor that performed the cancellation. |
+
+These three fields must be either all null or all populated. The justification
+is excluded from the ficha API response and the public closure event.
+
+**Changeset:** `hu-acad-11-cancellation-notes-970`, en `01_ddl/04_alter/000-changelog.yaml` de
+`design-software-academic-management-db`
+([PR #135](https://github.com/code-sena/design-software-academic-management-db/pull/135), abierto y
+pendiente de revisión y merge a develop). SQL `01_ddl/04_alter/970_acad11_cancellation_notes.sql`;
+rollback `05_rollbacks/01_ddl/04_alter/970_acad11_cancellation_notes.rollback.sql`. El changeset
+agrega las tres columnas con `ADD COLUMN IF NOT EXISTS` y dos CHECK sobre `enrollment_ficha`:
+
+- `ck_enrollment_ficha_cancellation_notes_length`: la nota es nula o tiene entre 10 y 500 caracteres
+  después de `btrim`.
+- `ck_enrollment_ficha_cancellation_audit`: las tres columnas son nulas o las tres están pobladas
+  (la regla anterior, aplicada también en la base de datos).
+
+El rollback elimina ambos CHECK y las tres columnas, por lo que descarta las justificaciones ya
+almacenadas.
+
+### Regla de cierre de ficha (RN-ACAD-07) — sin cambio de esquema
+
+El paso `PRODUCTIVE_STAGE` → `COMPLETED` no agrega columnas ni tablas en este servicio. Academic
+calcula el conjunto de RAP requeridos con sus propias tablas: todo `learning_outcome` con
+`is_active = true` (y sin `deleted_at`) cuya `competency` está activa y pertenece al programa de
+la ficha (`enrollment_ficha.program_id`). Ese conjunto se envía a `actors-service`, dueño de los
+juicios (`learner_rap_assessment`, ver su `data-model.md`), que responde cuántos aprendices activos
+tienen el 100 % en `APPROVED`. `learning_outcome` no tiene dimensión de versión: `program_version`
+de la ficha se conserva como snapshot, pero el conjunto requerido no se resuelve por versión
+(decisión del dueño del 2026-10-24: se mantiene así; seguimiento en ADR-030).
 
 ## Remediación de congruencia — R3 (2026-08-06)
 

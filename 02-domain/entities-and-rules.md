@@ -129,6 +129,22 @@ El `max_capacity` de una ficha es fijado al momento de la creación y no puede a
 Puede reducirse si hay retiros de aprendices, pero nunca quedar por debajo del número
 de aprendices activos actuales.
 
+### RN-ACAD-07: Cierre de ficha por aprobación de RAP
+En el SENA no hay nota numérica: cada RAP (`LearningOutcome`) recibe un **juicio evaluativo** por
+aprendiz, `APPROVED` (aprobado) o `NOT_APPROVED` (no aprobado); la ausencia de juicio significa
+pendiente. Una ficha solo pasa de `PRODUCTIVE_STAGE` a `COMPLETED` si **cada aprendiz activo tiene
+aprobado el 100 % de los RAP activos** del programa de la ficha. Un RAP `NOT_APPROVED` o pendiente
+no cuenta. No existe umbral parcial ni nota. Una ficha **sin aprendices activos no puede pasar a
+`COMPLETED`**. El juicio vive en `actors-service`; la lista de RAP requeridos la resuelve
+`academic-management-service` (decisión del dueño del 2026-10-24; ver
+[ADR-030](../05-architecture/decisions/records/ADR-030-academic-ficha-lifecycle-preconditions.md),
+aceptado).
+
+La transición `EXECUTION` → `PRODUCTIVE_STAGE` **no tiene condición de horas ejecutadas** (el dueño
+retiró el 80 % propuesto); la única regla documentada sobre llegar a la etapa productiva es
+`RN-ACT-04` (70 % de avance curricular del aprendiz, configurable). El reporte de ejecución de
+`scheduling-service` queda como evidencia informativa, sin bloquear nada.
+
 ---
 
 ## Dominio M7 — Actores (Instructores y Aprendices)

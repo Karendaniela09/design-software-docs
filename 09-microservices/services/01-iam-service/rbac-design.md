@@ -126,6 +126,8 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 | `ACT_COMPANY_MANAGE` | CRUD de empresas | WRITE |
 | `ACT_ACTIVITY_LOG_VIEW` | Ver bitácora de actividad de actores | READ |
 | `ACT_INTERNAL_FICHA_LEARNER_COUNT` | Contar aprendices activos por ficha (interno, servicio-a-servicio) | READ |
+| `ACT_LEARNER_RAP_ASSESSMENT_MANAGE` | Registrar o corregir el juicio evaluativo (APPROVED / NOT_APPROVED) de un aprendiz sobre un RAP de su ficha | WRITE |
+| `ACT_INTERNAL_FICHA_RAP_COVERAGE` | Verificar la cobertura de aprobación de RAP de los aprendices activos de una ficha (interno, servicio-a-servicio) | READ |
 
 ### MOD_DOCUMENTS
 
@@ -254,6 +256,8 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `ACT_COMPETENCY_ASSIGN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ACT_PRODUCTIVE_STAGE_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
 | `ACT_INTERNAL_FICHA_LEARNER_COUNT` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `ACT_LEARNER_RAP_ASSESSMENT_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
+| `ACT_INTERNAL_FICHA_RAP_COVERAGE` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `MON_DASHBOARD_FULL` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `MON_DASHBOARD_OWN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
 | `MON_TRACKING_SESSION_CREATE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
@@ -353,3 +357,37 @@ INSERT INTO role_feature (role_id, feature_id, scope_type) VALUES ...
 ```
 
 La inicialización de datos base se ejecuta mediante seeds en el primer deploy.
+
+## HU-ACAD-11 service-token audiences (ADR-030)
+
+The Academic R4 implementation uses POST /api/v1/auth/token with
+grant_type=client_credentials, HTTP Basic client authentication, and an
+allowlisted audience. The issued service JWT contains that audience in aud and
+receives only the features mapped to it:
+
+| Audience | Feature authorities |
+|-----------|---------------------|
+| actors-service | ACT_INTERNAL_FICHA_LEARNER_COUNT:GLOBAL, ACT_INTERNAL_FICHA_RAP_COVERAGE:GLOBAL, ACADEMIC_FICHA_VIEW:GLOBAL |
+| scheduling-service | SCH_REPORT_VIEW:GLOBAL |
+
+`audience` is optional: when it is omitted IAM treats the request as
+`actors-service`, so the pre-R4 Academic client keeps working while IAM is
+deployed first. An unknown or blank audience is rejected with `invalid_target`.
+Omission is a transitional allowance.
+
+Actors and Scheduling validate the audience before exposing service-token
+feature authorities. Credentials are supplied through secret storage. Approved
+by the project owner on 2026-10-24; see ADR-030 in the architecture decisions.
+The `scheduling-service` audience serves the informative execution report only;
+Academic does not call it in this release.
+
+### Judgment of learning outcomes (RAP)
+
+`ACT_LEARNER_RAP_ASSESSMENT_MANAGE` lets a user record or correct a learner's
+`APPROVED` / `NOT_APPROVED` judgment on a RAP of the learner's ficha (ADR-030,
+RN-ACAD-07). It replaces the numeric final-grade feature of the first draft of
+this PR; no such feature was ever released. The roles above are the current seed
+(`SYSTEM_ADMIN` global; `CENTER_DIRECTOR` and `COORDINATOR` by training center);
+the owner confirmed them on 2026-10-24. Letting `INSTRUCTOR` record judgments,
+limited to the fichas and RAPs they teach, is the work item HU-ACT-031
+(code-sena/design-software-docs#419).

@@ -16,3 +16,4 @@
 - [ADR-023: El web-shell es dueño del login y de la sesión](ADR-023-web-shell-owns-login-and-session.md) — aceptada.
 - [ADR-024: Optimización de lecturas de Monitoring para R2](ADR-024-monitoring-r2-performance.md) — propuesta (PROPOSED).
 - [ADR-025: Mensajería resiliente para academic-management](ADR-025-academic-resilient-messaging.md) — propuesta (PROPOSED).
+- [ADR-030: Seguridad de Academic Management R4, precondiciones del ciclo de la ficha (aprobación de RAP), cancelación e integración del MFE](ADR-030-academic-ficha-lifecycle-preconditions.md) — aceptada (ACCEPTED) por el dueño el 2026-10-24.

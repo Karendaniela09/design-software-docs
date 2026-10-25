@@ -39,6 +39,25 @@ Estado: `outbox` ya existe en `develop`; `processed_event` está en el PR citado
 
 > **Regla de aislamiento:** cada servicio debe crear y usar su propio schema; ninguna tabla debe quedar en `public`. Verificar este punto en la revisión de cada `data-model.md` antes de marcarlo 🟢.
 
+## Actualización HU-ACAD-11 de Academic Management — 2026-10-24
+
+| Objeto | Tipo / columnas principales | Changeset | Propósito y fuente canónica |
+|---|---|---|---|
+| `academic_management.enrollment_ficha`: `cancellation_notes`, `cancellation_at`, `cancellation_by` | VARCHAR(500) NULL; TIMESTAMPTZ NULL; UUID NULL | `hu-acad-11-cancellation-notes-970` | Justificación interna de la cancelación de una ficha y su auditoría (momento y actor); [modelo del servicio](../09-microservices/services/03-academic-management-service/data-model.md) |
+| `academic_management.enrollment_ficha`: constraints de cancelación | `ck_enrollment_ficha_cancellation_notes_length` (nota nula o de 10 a 500 caracteres tras `btrim`); `ck_enrollment_ficha_cancellation_audit` (las tres columnas nulas o las tres pobladas) | `hu-acad-11-cancellation-notes-970` | Coherencia de la cancelación aplicada en la base de datos; mismo modelo canónico |
+
+Estado: changeset publicado en `design-software-academic-management-db` [PR #135](https://github.com/code-sena/design-software-academic-management-db/pull/135), pendiente de revisión y merge a develop. El índice global no duplica las definiciones: el modelo del servicio contiene el detalle, el SQL y el rollback.
+
+## Actualización HU-ACAD-11 de Actors — juicio evaluativo por RAP — 2026-10-24
+
+| Objeto | Tipo / columnas principales | Changeset | Propósito y fuente canónica |
+|---|---|---|---|
+| `actors_learners.learner_rap_assessment` | `learner_id`, `ficha_id`, `learning_outcome_id` (UUID sin FK entre BD), `result` (`APPROVED` / `NOT_APPROVED`), `assessed_by`, `assessed_at` y auditoría ADR-004 | `hu-act-029-learner-rap-assessment-table-001` (03_tables) | Juicio evaluativo de un aprendiz sobre un RAP de su ficha; evidencia de la regla de cierre RN-ACAD-07 (100 % de los RAP activos del programa aprobados por cada aprendiz activo). No hay nota numérica; [modelo del servicio](../09-microservices/services/06-actors-service/data-model.md) |
+| `actors_learners.learner_rap_assessment`: constraints | PK; `UNIQUE (learner_id, ficha_id, learning_outcome_id)`; FK compuesta a `learner_ficha_enrollment (learner_id, ficha_id)` con `ON DELETE RESTRICT` | `hu-act-029-learner-rap-assessment-constraints-001` (04_alter) | Un juicio vigente por aprendiz, ficha y RAP; borrado lógico, sin cascada; mismo modelo canónico |
+| `actors_learners.learner_rap_assessment`: índice | `ix_learner_rap_assessment_ficha_result` (parcial sobre filas activas) | `hu-act-029-learner-rap-assessment-indexes-001` (10_indexes) | Conteo de cobertura por ficha; mismo modelo canónico |
+
+Estado: changesets publicados en `design-software-actors-db` [PR #71](https://github.com/code-sena/design-software-actors-db/pull/71), pendientes de revisión y merge a develop. Sustituyen a la tabla `learner_final_grade` del primer borrador del PR, retirada por decisión del dueño (no hay nota numérica).
+
 ## Datos de referencia compartidos
 
 El servicio `reference-data-service` es el propietario de la jerarquía institucional y los catálogos base. Otros servicios **no duplican** esos catálogos: los referencian por `id` (o los consumen vía evento/contrato), según [service-catalog.md](../09-microservices/service-catalog.md).

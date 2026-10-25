@@ -26,6 +26,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [qa-report-r4-security-actors.md](./qa-report-r4-security-actors.md) | Technical report and QA verification OWASP ASVS L1 for actors-service R4 | 🟢 |
 | [test-evidence-hu-act-027.md](./test-evidence-hu-act-027.md) | Test evidence and technical validation for the follow-up reports view (HU-ACT-027) | 🟡 |
 | [qa-report-r4-security-iam.md](./qa-report-r4-security-iam.md) | Technical report and QA evidence for IAM R4 session revocation | 🟢 |
+| [qa-report-r4-security-academic-management.md](./qa-report-r4-security-academic-management.md) | R4 security and HU-ACAD-11 quality report for academic-management-service | 🟡 |
 | [qa-report-r1-document-service.md](./qa-report-r1-document-service.md) | Informe técnico y evidencias QA del Document Service | 🟡 |
 | [test-evidence-hu-act-028.md](./test-evidence-hu-act-028.md) | Test evidence and technical validation for the improvement plans view (HU-ACT-028) | 🟡 |
 | [qa-report-r3-monitoring-service.md](./qa-report-r3-monitoring-service.md) | Informe técnico y evidencias QA de Monitoring Service R3 | 🟡 |
@@ -55,3 +56,11 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 ## Validación Reference Data
 
 - [reference-data-hu-ref-020-r1-validation.md](./reference-data-hu-ref-020-r1-validation.md): revalidación al 2026-10-24. Frontend Platform y Web Shell tienen CI aprobado sobre los SHA documentados; MFE mantiene CI propio pendiente por SHELL_DEPS_TOKEN. Los ADR-020/021 siguen PROPOSED y los PR originales requieren revisión/merge.
+
+## Academic R4 E5/E7 evidence
+
+See the canonical Academic R4 technical and QA report in
+qa-report-r4-security-academic-management.md for the selected rules, repository
+traceability, validations performed, evidence matrix and environment
+limitations. The business rules were approved by the project owner on
+2026-10-24, as recorded in ADR-030.

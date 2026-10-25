@@ -670,6 +670,75 @@ paths:
               schema: { $ref: '_shared.yaml#/components/schemas/Error' }
 
   # ---------------------------------------------------------------- reports (own domain)
+  /reports/ficha-execution-summary:
+    get:
+      operationId: getFichaExecutionSummary
+      tags: [reports]
+      summary: Returns execution hours and session statuses for one ficha period.
+      description: >-
+        Reads the active published schedule for the ficha and period. Includes
+        active, non-deleted sessions. hours_pending includes only PENDING;
+        NOT_EXECUTED and CANCELLED are reported separately. Requires
+        SCH_REPORT_VIEW and applies the token's GLOBAL or TRAINING_CENTER scope.
+      x-required-feature: SCH_REPORT_VIEW
+      parameters:
+        - name: ficha_id
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: period
+          in: query
+          required: true
+          schema: { type: string, maxLength: 10 }
+      responses:
+        '200':
+          description: Execution summary for the ficha and period.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FichaExecutionSummary' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
+
+  /reports/ficha-execution-summary/aggregate:
+    get:
+      operationId: getFichaExecutionAggregate
+      tags: [reports]
+      summary: Aggregates execution for every published ficha period in a date range.
+      description: >-
+        Includes active, non-deleted class sessions with scheduling status ACTIVE
+        from every active published schedule for the ficha. Filters session_date
+        inclusively between from and to. Period identifiers are opaque evidence
+        and are not parsed or ordered. eligible_scheduled_hours sums EXECUTED,
+        PENDING, and NOT_EXECUTED hours; CANCELLED hours are excluded. Requires
+        SCH_REPORT_VIEW and applies the token's GLOBAL or TRAINING_CENTER scope.
+      x-required-feature: SCH_REPORT_VIEW
+      parameters:
+        - name: ficha_id
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: from
+          in: query
+          required: true
+          description: Inclusive start date; Academic uses the ficha start date.
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          description: Inclusive end date; Academic uses the transition date.
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Aggregated execution evidence across periods.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FichaExecutionAggregate' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
   /reports/schedule-by-instructor:
     get:
       operationId: reportScheduleByInstructor
@@ -1245,6 +1314,54 @@ components:
           type: integer
           description: Fichas distintas atendidas en el ambiente.
 
+    FichaExecutionSummary:
+      type: object
+      required: [ficha_id, period, hours_scheduled, hours_executed, hours_pending, sessions_considered, session_statuses]
+      properties:
+        ficha_id: { type: string, format: uuid }
+        period: { type: string, maxLength: 10 }
+        hours_scheduled: { type: number, minimum: 0 }
+        hours_executed: { type: number, minimum: 0 }
+        hours_pending: { type: number, minimum: 0 }
+        sessions_considered: { type: integer, minimum: 0 }
+        session_statuses:
+          type: object
+          required: [PENDING, EXECUTED, NOT_EXECUTED, CANCELLED]
+          properties:
+            PENDING: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            EXECUTED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            NOT_EXECUTED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            CANCELLED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+
+    FichaExecutionAggregate:
+      type: object
+      required: [ficha_id, period_from, period_to, periods, eligible_scheduled_hours, hours_executed, sessions_considered, session_statuses]
+      properties:
+        ficha_id: { type: string, format: uuid }
+        period_from: { type: string, format: date }
+        period_to: { type: string, format: date }
+        periods:
+          type: array
+          uniqueItems: true
+          items: { type: string, maxLength: 10 }
+        eligible_scheduled_hours: { type: number, minimum: 0 }
+        hours_executed: { type: number, minimum: 0 }
+        sessions_considered: { type: integer, minimum: 0 }
+        session_statuses:
+          type: object
+          required: [PENDING, EXECUTED, NOT_EXECUTED, CANCELLED]
+          properties:
+            PENDING: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            EXECUTED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            NOT_EXECUTED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+            CANCELLED: { $ref: '#/components/schemas/SessionExecutionStatusSummary' }
+
+    SessionExecutionStatusSummary:
+      type: object
+      required: [count, hours]
+      properties:
+        count: { type: integer, minimum: 0 }
+        hours: { type: number, minimum: 0 }
     EnvironmentOccupancyEntry:
       type: object
       required: [environment_id, period_from, period_to, occupied_slots, total_slots, occupancy_rate]

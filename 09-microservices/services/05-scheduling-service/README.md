@@ -19,7 +19,7 @@ Creación, validación, publicación, archivo y consulta de horarios y sesiones.
 ## Persistencia
 
 - Esquemas: scheduling
-- Tablas: scheduling.class_session, scheduling.environment_availability_projection, scheduling.instructor_availability_projection, scheduling.outbox, scheduling.schedule, scheduling.scheduling_conflict, scheduling.site_travel_time, scheduling.time_slot
+- Tablas: scheduling.class_session, scheduling.environment_availability_projection, scheduling.ficha_training_center_projection, scheduling.instructor_availability_projection, scheduling.outbox, scheduling.schedule, scheduling.scheduling_conflict, scheduling.site_travel_time, scheduling.time_slot
 
 ## API detectada
 
