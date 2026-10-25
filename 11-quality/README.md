@@ -24,8 +24,10 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [test-evidence-hu-act-005.md](./test-evidence-hu-act-005.md) | Test evidence and technical validation for the Activity Log Timeline (HU-ACT-005) | 🟡 |
 | [qa-report-r4-security-scheduling.md](./qa-report-r4-security-scheduling.md) | Informe de auditoría de seguridad y verificación OWASP ASVS L1 para scheduling-service | 🟢 |
 | [qa-report-r4-security-actors.md](./qa-report-r4-security-actors.md) | Technical report and QA verification OWASP ASVS L1 for actors-service R4 | 🟢 |
+| [test-evidence-hu-act-027.md](./test-evidence-hu-act-027.md) | Test evidence and technical validation for the follow-up reports view (HU-ACT-027) | 🟡 |
 | [qa-report-r4-security-iam.md](./qa-report-r4-security-iam.md) | Technical report and QA evidence for IAM R4 session revocation | 🟢 |
 | [qa-report-r1-document-service.md](./qa-report-r1-document-service.md) | Informe técnico y evidencias QA del Document Service | 🟡 |
+| [test-evidence-hu-act-028.md](./test-evidence-hu-act-028.md) | Test evidence and technical validation for the improvement plans view (HU-ACT-028) | 🟡 |
 | [qa-report-r3-monitoring-service.md](./qa-report-r3-monitoring-service.md) | Informe técnico y evidencias QA de Monitoring Service R3 | 🟡 |
 | [test-evidence-hu-act-012.md](./test-evidence-hu-act-012.md) | Test evidence and technical validation for the Active Learners by Ficha view (HU-ACT-026) | 🟡 |
 | [qa-report-r5-audit.md](./qa-report-r5-audit.md) | Informe técnico y evidencias QA de Auditoría R5 | 🟡 |
