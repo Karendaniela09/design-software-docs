@@ -1,6 +1,6 @@
 # Setup local
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: DevOps
 
 Cómo levantar la base de datos del proyecto y aplicar las migraciones de cada módulo en local. Complementa a [migration-strategy.md](../06-data/migration-strategy.md).
@@ -30,7 +30,9 @@ Una **única base de datos PostgreSQL 16** en contenedor, y un servicio Liquibas
    docker compose --env-file .env.develop --profile tooling run --rm liquibase-<modulo> update
    ```
 
-   Módulos disponibles: `liquibase-academic`, `liquibase-actors`, `liquibase-audit`, `liquibase-document`, `liquibase-iam`, `liquibase-monitoring`, `liquibase-reference`, `liquibase-scheduling`, `liquibase-training`.
+   Módulos disponibles: `liquibase-academic`, `liquibase-actors`, `liquibase-audit`, `liquibase-document`, `liquibase-iam`, `liquibase-monitoring`, `liquibase-notification`, `liquibase-reference`, `liquibase-scheduling`, `liquibase-training`.
+
+   **Qué datos se aplican lo decide `LIQUIBASE_CONTEXTS`** del `.env.<ambiente>` (el compose ya lo pasa como `--contexts`; no se escribe en el comando). Para develop: `LIQUIBASE_CONTEXTS=01_ddl,02_dml,03_dcl,04_tcl,dev`. Si la variable falta o está vacía rige `01_ddl,02_dml,03_dcl,04_tcl`, que **no** incluye los datos de prueba (`dev`/`qa`). Valores de los cuatro ambientes y reglas en [environments.md](./environments.md#contexts-de-liquibase-por-ambiente).
 
 3. **Verificar** el estado de las migraciones de un módulo:
 

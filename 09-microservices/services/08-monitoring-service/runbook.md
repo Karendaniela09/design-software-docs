@@ -133,7 +133,7 @@ Cuando existan escritores antiguos, detenerlos antes de CONTRACT y ejecutar el S
 
 CONTRACT usa `changelog/changelog-contract.yaml` y el changeset `r6-monitoring-contract-specific-actions-v2-993`, separado del changelog habitual. Sus precondiciones bloquean datos nulos, documentos con versión/forma no soportada y diferencias entre TEXT y JSONB.
 
-La definición Compose de `liquibase-monitoring-contract` usa la imagen `ds-liquibase:latest`, perfil `r6-contract`, volumen del repositorio DB en `/workspace`, `working_dir: /workspace`, dependencia de PostgreSQL saludable y `--changeLogFile=changelog/changelog-contract.yaml`; además fija las tablas de control Liquibase en `public`. El entrypoint no incluye `update` de forma fija: prepara Liquibase y requiere añadir el comando explícito:
+La definición Compose de `liquibase-monitoring-contract` usa la imagen `ds-liquibase:latest`, perfil `r6-contract`, volumen del repositorio DB en `/workspace`, `working_dir: /workspace`, dependencia de PostgreSQL saludable y `--changeLogFile=changelog/changelog-contract.yaml`; además fija las tablas de control Liquibase en `public`. Su `--contexts` es el `LIQUIBASE_CONTEXTS` del ambiente seguido de `,r6-contract` (el changeset de CONTRACT lleva ese context; sin él el servicio no aplicaría nada), ver [Contexts de Liquibase por ambiente](../../../10-devops/environments.md#contexts-de-liquibase-por-ambiente). El entrypoint no incluye `update` de forma fija: prepara Liquibase y requiere añadir el comando explícito:
 
 ```powershell
 docker compose --profile r6-contract run --rm liquibase-monitoring-contract update

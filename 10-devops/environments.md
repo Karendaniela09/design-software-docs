@@ -64,6 +64,7 @@ docker compose --env-file .env.develop --profile tooling run --rm liquibase-<mod
 Estos archivos parametrizan la conexión a Postgres (host, puerto, nombre de BD, usuario, clave) del ambiente correspondiente y, además, la **configuración de la capa de aplicación** de los perfiles que corren en ese ambiente:
 
 - **Datos:** conexión a Postgres del ambiente.
+- **Migraciones:** `LIQUIBASE_CONTEXTS`, los contexts de Liquibase que aplican los `liquibase-<modulo>` del ambiente. Es lo **único** que cambia entre ambientes en el `docker-compose.yml`, que es idéntico en los cuatro (ver [Contexts de Liquibase por ambiente](#contexts-de-liquibase-por-ambiente)).
 - **Aplicación (`iam`):** `IAM_DB_USERNAME` / `IAM_DB_PASSWORD` (usuario de aplicación, ver `create-app-user.sh`), `IAM_JWT_PRIVATE_KEY` / `IAM_JWT_ISSUER` (y demás `IAM_JWT_*`).
 - **Edge / infra:** `EDGE_PORT` (puerto del Traefik del ambiente), `BACKEND_REPOS_DIR` (carpeta de repos de backend clonados para el build context).
 
@@ -77,8 +78,33 @@ El detalle operativo de los comandos y la tabla completa de variables por servic
 - El **tracking de Liquibase se aísla por módulo** (`--liquibase-schema-name=<modulo>`), de modo que cada servicio tenga su propia `databasechangelog` y su historial sea auditable y reversible de forma independiente.
 - **Datos por ambiente:**
   - `develop` y `qa` admiten **datos sintéticos de prueba** (seeds con `context` `dev`/`qa` y `labels` de Liquibase; decisión del dueño del 2026-10-24, HU-IAM-019). Nunca datos personales reales. Ver [Datos sintéticos (develop y qa)](#datos-sintéticos-develop-y-qa).
-  - `staging`/`main` reciben **solo catálogos de negocio** (semillas reales, idempotentes con `ON CONFLICT DO NOTHING`); los datos sintéticos y de prueba se aíslan para que **no** se promuevan.
+  - `staging`/`main` reciben **solo catálogos de negocio** (semillas reales, idempotentes con `ON CONFLICT DO NOTHING`); los datos sintéticos y de prueba se aíslan para que **no** se promuevan (`LIQUIBASE_CONTEXTS`, ver [Contexts de Liquibase por ambiente](#contexts-de-liquibase-por-ambiente)). Hoy hay seeds de prueba o demo sin `context` que aún llegan: están en la [auditoría de seeds](../06-data/migration-strategy.md#auditoría-de-seeds-sin-context-hu-shell-016), cada uno con su HU.
 - En `qa`/`staging`/`main` las migraciones son **forward-only**; el rollback es plan de contingencia documentado, apoyado en los **tags de release** (`04_tcl/`), no operación rutinaria.
+
+---
+
+## Contexts de Liquibase por ambiente
+
+> HU-SHELL-016. **Liquibase sin `--contexts` aplica todos los changesets**, incluidos los de datos de prueba (`dev`/`qa`), y un valor vacío (`--contexts=`) equivale a no pasarlo. Por eso cada servicio `liquibase-<modulo>` del `docker-compose.yml` de docker-infra recibe siempre `--contexts=${LIQUIBASE_CONTEXTS:-01_ddl,02_dml,03_dcl,04_tcl}`.
+
+El compose es **el mismo en los cuatro ambientes** ([ADR-022](../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md) §6). Lo único que cambia es el valor de `LIQUIBASE_CONTEXTS` en el `.env.<ambiente>`:
+
+| Ambiente | Archivo | `LIQUIBASE_CONTEXTS` | ¿Aplica datos de prueba? |
+|---|---|---|---|
+| develop | `.env.develop` | `01_ddl,02_dml,03_dcl,04_tcl,dev` | Sí |
+| qa | `.env.qa` | `01_ddl,02_dml,03_dcl,04_tcl,qa` | Sí |
+| staging | `.env.staging` | `01_ddl,02_dml,03_dcl,04_tcl` | No |
+| main | `.env.main` | `01_ddl,02_dml,03_dcl,04_tcl` | No |
+
+Reglas:
+
+1. **El valor por defecto excluye los datos de prueba.** Si `LIQUIBASE_CONTEXTS` no existe o está vacío, el compose usa `01_ddl,02_dml,03_dcl,04_tcl` (el valor de staging y main, sin `dev` ni `qa`). `.env.example` trae ese mismo valor. Los `.env.<ambiente>` no están en git, así que un ambiente con un archivo anterior a este cambio queda protegido sin tocar nada; el costo de olvidar la variable es que develop o qa se queden **sin** fixtures, nunca que staging o main las reciban. Un `LIQUIBASE_CONTEXTS=` vacío no apaga el filtro: se trata igual que si faltara.
+2. **Las cuatro carpetas son obligatorias en cualquier valor.** `iam-db`, `reference-data-db` y `scheduling-db` (y `actors-db` en `01_ddl`) incluyen sus carpetas con `contextFilter: 01_ddl|02_dml|03_dcl|04_tcl`, que Liquibase combina con **AND** con el context del changeset. Con `LIQUIBASE_CONTEXTS=dev` a secas, esos módulos no aplican ni el DDL: el `update` termina bien sin hacer nada. Por eso `dev` y `qa` se **suman** a las cuatro carpetas, nunca las reemplazan.
+3. **Sin `--contexts` en la línea de comandos.** El compose ya lo fija en el `entrypoint`; los comandos de [local-setup.md](./local-setup.md) (`... run --rm liquibase-<modulo> update`) no necesitan nada más. Para cambiar de ambiente se cambia el `--env-file`, no el comando. Un `--contexts` escrito después de `update` **gana** sobre el del compose (medido: con el valor de staging y `update --contexts=01_ddl,02_dml,03_dcl,04_tcl,dev` se cargaron los 7 usuarios sintéticos), así que el valor por defecto protege de un olvido, no de un argumento explícito.
+4. **Un solo servicio suma un context propio:** `liquibase-monitoring-contract` (perfil `r6-contract`) agrega `r6-contract` al valor del ambiente, porque el changeset que ejecuta (`r6-monitoring-contract-specific-actions-v2-993`) lleva ese context y, sin él, el servicio no haría nada.
+5. **Un context nuevo se documenta aquí.** Los datos de prueba usan `dev,qa`; no se inventa un context por HU. Si alguno debe aplicarse solo en un subconjunto de ambientes, hay que sumarlo al valor de esos ambientes y a esta tabla.
+
+Comprobación tras desplegar staging o main (debe dar `0`): `SELECT count(*) FROM identity."user" WHERE email LIKE 'synthetic.%@example.test';`. Los seeds de prueba o demo que **aún no** llevan `context` y por eso llegan igual a staging y main están listados, con su HU de seguimiento, en la [auditoría de seeds](../06-data/migration-strategy.md#auditoría-de-seeds-sin-context-hu-shell-016).
 
 ---
 
@@ -110,29 +136,15 @@ Un usuario por cada rol del catálogo RBAC (`rbac.role`, 7 roles). Los siete tie
 
 El seed es el changeset `hu-iam-019-seed-synthetic-users-002` (`iam-db`, `02_dml/04_patches`, rollback espejo en `05_rollbacks/02_dml/04_patches`). Usa **el mismo `context: "dev,qa"` que las otras fixtures de prueba** de IAM (`hu-ref-018-jwt-fixture-001`) — no se creó un context nuevo — y la label `synthetic` para poder localizarlo.
 
-Cada `include` del changelog maestro lleva además `contextFilter: <carpeta>` (`01_ddl`, `02_dml`, `03_dcl`, `04_tcl`), que Liquibase combina con **AND** con el context del changeset. Por eso quien pasa `--contexts` debe pasar también los cuatro contexts de carpeta:
+Qué contexts recibe cada ambiente (develop `...,dev`, qa `...,qa`, staging y main sin ninguno de los dos) y por qué el valor por defecto los excluye está en [Contexts de Liquibase por ambiente](#contexts-de-liquibase-por-ambiente): desde HU-SHELL-016 el compose lo fija solo, con `LIQUIBASE_CONTEXTS` del `.env.<ambiente>`, y ya no hay que pasar `--contexts` a mano.
 
-| Ambiente | Argumento de `update` | ¿Aplica los usuarios sintéticos? |
-|---|---|---|
-| develop | `--contexts=01_ddl,02_dml,03_dcl,04_tcl,dev` | Sí |
-| qa | `--contexts=01_ddl,02_dml,03_dcl,04_tcl,qa` | Sí |
-| staging, main | `--contexts=01_ddl,02_dml,03_dcl,04_tcl` | **No** |
-
-```bash
-# develop (el argumento va al final: el compose ya fija el resto del comando)
-docker compose --env-file .env.develop --profile tooling run --rm liquibase-iam update \
-  --contexts=01_ddl,02_dml,03_dcl,04_tcl,dev
-```
-
-> **Riesgo conocido — sin `--contexts`, Liquibase aplica todo.** Si el `update` no recibe `--contexts`, corren **todos** los changesets sin importar su context, incluidos los de `dev,qa`. Hoy el `docker-compose.yml` de docker-infra no fija `--contexts`, así que un `update` simple en `staging`/`main` **sí** cargaría las fixtures de prueba. La garantía "nunca en staging ni main" depende de que esos despliegues pasen el filtro explícito de la tabla anterior (un valor inyectado por ambiente, no código distinto). Tras desplegar `staging`/`main`, comprobar que no hay usuarios sintéticos: `SELECT count(*) FROM identity."user" WHERE email LIKE 'synthetic.%@example.test';` debe dar `0`. Fijar el filtro por ambiente en docker-infra queda como deuda aparte.
->
-> **Deuda previa, fuera de HU-IAM-019:** el changeset `hu-iam-017-seed-learner-006` (`hu-iam-017-learner@example.test`, con hash BCrypt) no lleva `context`, así que llega a **todos** los ambientes aunque se filtre; hay que decidir si se le asigna `dev,qa` o se retira.
+> **Deuda previa, fuera de HU-IAM-019:** el changeset `hu-iam-017-seed-learner-006` (`hu-iam-017-learner@example.test`, con hash BCrypt) no lleva `context`, así que llega a **todos** los ambientes aunque se filtre; con él, `hu-iam-017-qa-password-007` le fija otro BCrypt válido. Lo mismo ocurre con `seed-demo-iam-001` (`admin@sena.edu.co`) y con los demás seeds de la [auditoría](../06-data/migration-strategy.md#auditoría-de-seeds-sin-context-hu-shell-016). Se resuelven en HU-IAM-023 (docs#405) y sus hermanas.
 
 ### Provisión de contraseñas (en cada despliegue de develop y qa)
 
 Script: `design-software-iam-db/scripts/provision-synthetic-passwords.sql` (psql 15 o superior por `\getenv`; la imagen `postgres:16` lo cumple). Lee las contraseñas de variables de entorno, las convierte a BCrypt dentro de la base con `crypt()` / `gen_salt('bf', 10)` (el mismo coste que el codificador del servicio) y verifica cada hash antes de confirmar. Mismo patrón que `test/hu-ref-020/prepare.sql`.
 
-1. Aplicar las migraciones de `iam-db` con los contexts de la tabla anterior.
+1. Aplicar las migraciones de `iam-db` con el `LIQUIBASE_CONTEXTS` de develop o qa (con `dev` o `qa` sumado a las cuatro carpetas; con el valor por defecto los usuarios sintéticos no existen y el script falla con código 3).
 2. Generar, **en el momento del despliegue**, siete contraseñas aleatorias de entre 12 y 72 bytes y exportarlas como variables del proceso. Nunca en un archivo versionado, ni en un `.env` que viva en git:
 
    | Variable | Usuario |
