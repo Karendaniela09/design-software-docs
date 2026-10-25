@@ -50,6 +50,12 @@ No forman parte del contrato de negocio (no están en `iam.yaml`) — son un `@R
 
 Respaldan la propagación de trazas de [ADR-008](../../../../../05-architecture/decisions/records/ADR-008-observability-opentelemetry.md); no requieren `Authorization`.
 
+Además, `GET /actuator/prometheus` (Spring Boot Actuator, HU-IAM-021) expone las métricas HTTP en formato Prometheus. Es un endpoint operativo de la red interna de observabilidad: no está en `iam.yaml`, no requiere `Authorization` y **no se enruta por el edge** (ADR-022 solo enruta `/iam/api/` y los health/ready exactos). Detalle en el [runbook](../../runbook.md#observabilidad-otel--hu-iam-011-correlación-y-métricas--hu-iam-021).
+
+### Cabecera transversal `X-Correlation-Id` (HU-IAM-021)
+
+Todas las respuestas, también las de error, devuelven `X-Correlation-Id`. Si la petición trae la cabecera con 1 a 128 caracteres entre letras, dígitos, `.`, `_` o `-`, el servicio conserva ese valor; si falta o no es válida, genera un UUID. El valor aparece como `correlation_id` en los logs JSON de la petición. Es un cambio aditivo: no altera rutas, parámetros ni esquemas de `iam.yaml`. No sustituye al contexto W3C `traceparent`: el `trace_id` del cuerpo de error es el de la traza OpenTelemetry activa (con respaldo a `X-Request-Id` y, si no hay ninguno, un UUID).
+
 ---
 
 ## Autenticación

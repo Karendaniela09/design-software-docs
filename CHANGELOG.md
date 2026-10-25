@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added — Correlación de peticiones y métricas Prometheus de iam-service (HU-IAM-021)
+
+- `09-microservices/services/01-iam-service/runbook.md`: observabilidad con `X-Correlation-Id`, `trace_id` en los errores, `GET /actuator/prometheus`, comprobación manual, construcción con el wrapper de Maven y alcance de la verificación. La nota «Métricas: fuera de alcance» deja de aplicar
+- `09-microservices/services/01-iam-service/decisions.md`: decisión de correlación y métricas (sin ADR propio)
+- `09-microservices/services/01-iam-service/components/iam-api/contract.md`: cabecera transversal `X-Correlation-Id` (cambio aditivo) y endpoint operativo de métricas, que no se enruta por el edge
+- La documentación que vivía en `docs/observability/` del repositorio `design-software-iam-service` (PR #43) se traslada aquí; allí solo queda un enlace en el README
+
 ### Changed — Refresh token en cookie `HttpOnly` (HU-IAM-018)
 
 - `07-api/contracts/openapi/iam.yaml`, `07-api/authentication.md` y `09-microservices/services/01-iam-service/components/iam-api/contract.md`: concretan ADR-023 §6. **Cambio de contrato incompatible**, decidido por ese ADR:

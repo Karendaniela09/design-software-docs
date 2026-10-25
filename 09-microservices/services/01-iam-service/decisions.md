@@ -233,3 +233,20 @@ de tokens validos.
 
 - [ADR-018: Validación del estado de sesión al obtener el usuario actual](../../../05-architecture/decisions/records/ADR-018-iam-session-revocation-r4.md) — **PROPOSED**.
 - Alcance: rutas de IAM que invocan `GetCurrentUser`; la revocación inmediata en servicios que verifican JWT/JWKS sin consultar IAM sigue sin demostrarse.
+
+---
+
+## Observabilidad IAM R3: correlación y métricas HTTP (HU-IAM-021)
+
+Decisión del servicio, sin ADR propio: sigue el patrón de [ADR-008](../../../05-architecture/decisions/records/ADR-008-observability-opentelemetry.md) y no cambia ninguna decisión transversal. El detalle operativo está en el [runbook](./runbook.md#observabilidad-otel--hu-iam-011-correlación-y-métricas--hu-iam-021).
+
+**Decisión:**
+- Un filtro HTTP valida o genera `X-Correlation-Id`, lo devuelve al cliente y lo pone en el MDC como `correlation_id` durante la petición. Restaura el MDC anterior aunque el controlador falle.
+- El contrato de error prioriza el `trace_id` activo del agente OpenTelemetry y conserva el respaldo existente (`X-Request-Id`, luego UUID).
+- Las métricas RED salen por Actuator/Micrometer en formato Prometheus, con la etiqueta `service` e histogramas de `http.server.requests`.
+- Se reutilizan el agente OpenTelemetry y los logs JSON de HU-IAM-011. El servicio no aplica migraciones: el entorno provisiona la versión compatible de la base de datos y el servicio conserva la validación de esquema.
+
+**Consecuencias:**
+- Actuator queda en la red interna de observabilidad y fuera de la ruta pública del edge (ADR-022).
+- Es el mismo artefacto en los cuatro ambientes: no hay comportamiento condicionado al ambiente; solo cambian los valores inyectados (`OTEL_*`, red de Prometheus).
+- Que `/actuator/prometheus` responda no acredita un scrape, y la correlación de petición no acredita una traza distribuida ni reemplaza a `traceparent`.

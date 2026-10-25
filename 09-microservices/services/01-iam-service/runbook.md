@@ -1,6 +1,6 @@
 # Runbook — iam-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-10-24 (HU-IAM-019)
+> Estado: 🟢 Estable | Última actualización: 2026-10-24 (HU-IAM-021)
 > Puerto: `8080` interno (contenedor), **no expuesto al host** — se accede vía edge Traefik en `/iam/*` (ADR-007) | SLO: 99.9 % uptime | Criticidad: P0 (servicio de entrada — ningún otro servicio autentica sin él)
 
 > Esta versión reemplaza el borrador previo (2026-06-20), que documentaba un diseño no
@@ -14,7 +14,7 @@
 
 > Actualizado en HU-IAM-011 (implementación) y HU-IAM-012 (acceso vía edge). El servicio expone
 > un `HealthController` propio (`co.sena.iam.adapter.in.rest`) — **no** Spring Boot Actuator: la
-> app también tiene `management.endpoints.web.exposure.include: health,info` habilitado, pero
+> app también tiene `management.endpoints.web.exposure.include: health,info,prometheus` habilitado, pero
 > `/health` y `/ready` a continuación son el contrato real que opera el healthcheck de
 > orquestación, no `/actuator/health`.
 
@@ -45,7 +45,7 @@ quedan **acumulados sin pérdida** en `identity.outbox` hasta que el broker vuel
 
 ---
 
-## Observabilidad (OTel — HU-IAM-011)
+## Observabilidad (OTel — HU-IAM-011, correlación y métricas — HU-IAM-021)
 
 - **Traces**: OTel Java agent (auto-instrumentación, zero-code) — spans HTTP (Spring MVC) + spans de BD (JDBC/Hibernate), correlacionados por `trace_id`. Se activa vía `-javaagent` en el `Dockerfile` (imagen ya lo descarga en build); se configura 100 % por variables de entorno, sin secretos:
 
@@ -60,7 +60,29 @@ quedan **acumulados sin pérdida** en `identity.outbox` hasta que el broker vuel
 
 - **Logs**: JSON estructurado (logback + `logstash-logback-encoder`) por stdout. El agent OTel inyecta `trace_id`/`span_id` en el MDC cuando hay un span activo; el encoder JSON los embebe en cada línea, permitiendo saltar de una traza en Tempo a sus logs en Loki (panel único en Grafana, ADR-008).
 
-- **Métricas**: fuera de alcance de HU-IAM-011.
+- **Correlación de peticiones** (HU-IAM-021): un filtro HTTP (`CorrelationIdFilter`) valida o genera `X-Correlation-Id`, lo devuelve en la respuesta y lo pone en el MDC como `correlation_id` durante la petición; el MDC anterior se restaura al terminar, incluso si el controlador falla. El valor es válido con 1 a 128 caracteres entre letras, dígitos, `.`, `_` o `-`; si no, se genera un UUID.
+
+- **`trace_id` en los errores** (HU-IAM-021): el cuerpo de error usa el `trace_id` de la traza OpenTelemetry activa; si no hay traza, el `X-Request-Id` entrante y, por último, un UUID. `X-Correlation-Id` identifica la petición y no sustituye a `traceparent`: el frontend debe propagar `traceparent` desde un span activo del shell; crear una cabecera aleatoria no demuestra una traza distribuida.
+
+- **Métricas** (HU-IAM-021): Micrometer con el registro Prometheus. `GET /actuator/prometheus` expone `http_server_requests_seconds_count`, `_sum` y `_bucket` (histograma de `http.server.requests`) con la etiqueta `service="iam-service"`; con ellos se calculan las métricas RED (tasa, errores, duración). Prometheus debe consultar `http://<iam-api>:8080/actuator/prometheus` por la red interna de observabilidad. El endpoint no requiere `Authorization` y **no debe publicarse por el edge**: la tabla de rutas de [ADR-022](../../../05-architecture/decisions/records/ADR-022-edge-routing-table-by-domain.md) solo enruta `/iam/api/` y los health/ready exactos, pero el router `PathPrefix(/iam)` que hoy usa `docker-infra` en `develop` sí lo dejaría pasar hasta que se aplique ese ADR.
+
+### Comprobación manual
+
+Con IAM publicado en el puerto 8080 del contenedor (o en el puerto mapeado en local):
+
+```bash
+curl -i -H 'X-Correlation-Id: runbook-check-1' http://localhost:8080/health   # 200 y la cabecera devuelta con el mismo valor
+curl -i http://localhost:8080/health                                           # 200 y un UUID generado
+curl -s http://localhost:8080/actuator/prometheus | grep 'http_server_requests_seconds_count'
+```
+
+Después de al menos una petición HTTP, `http_server_requests_seconds_count` y `http_server_requests_seconds_bucket` aparecen con `service="iam-service"`.
+
+### Construcción y alcance de la verificación
+
+- Requiere Java 21. El wrapper (`./mvnw`, `./mvnw.cmd` en PowerShell) fija Maven 3.9.10 en `.mvn/wrapper/maven-wrapper.properties`, de modo que un clon limpio compila. El workflow `IAM build and tests` ejecuta `./mvnw verify` en cada PR hacia `develop`; las pruebas de integración con PostgreSQL y RabbitMQ se omiten si no se proporcionan esas dependencias.
+- Con R4 y el refresh token en cookie (HU-IAM-018) integrados (`develop@390a649`), el workflow `IAM build and tests` pasó 226 pruebas (101 en `iam-core`, 120 en `iam-adapters`, 5 en `iam-api`) y el workflow de pruebas negativas R4 también pasó; 60 pruebas de integración quedaron omitidas sin base de datos ni broker.
+- **Lo que esa verificación no acredita:** el recorrido navegador → shell → MFE → IAM → PostgreSQL, un scrape real de Prometheus, la exportación OTLP a Tempo, la ingesta en Loki ni el disparo y la recuperación de una alerta. Eso exige el entorno integrado y su propia evidencia. Que el endpoint de métricas responda no demuestra que Prometheus lo consulte.
 
 ---
 
