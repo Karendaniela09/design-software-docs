@@ -1,6 +1,6 @@
 # Runbook — monitoring-service
 
-> Estado: 🟡 En progreso | Última actualización: 2026-10-20
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 
 ## Componentes operativos
 
@@ -27,9 +27,11 @@ Variables operativas esperadas:
 
 | Variable | Uso |
 | --- | --- |
-| `DATABASE_URL` | Conexión a `monitoring_db`. |
+| `DATABASE_URL` | Conexión a `monitoring_db` con el **usuario de aplicación** (miembro de `monitoring_writer`), nunca con el superusuario. Ver [Usuario de base de datos](#usuario-de-base-de-datos). |
 | `AMQP_URL` | Conexión RabbitMQ/AMQP para worker, relay y readiness. |
-| `JWKS_URL` | JWKS de IAM para validación JWT. |
+| `JWKS_URL` | JWKS de IAM (`http://iam-api:8080/api/v1/auth/.well-known/jwks.json`) para validar la firma de los JWT. Obligatoria para la API: sin ella los endpoints protegidos responden `503 AUTH_NOT_CONFIGURED`. |
+| `JWT_ISSUER` | `iss` esperado. Por defecto `sena-iam-service`; en cada ambiente se inyecta el mismo valor con que corre IAM (`IAM_JWT_ISSUER`). |
+| `JWT_AUDIENCE` | `aud` esperado. Vacío por defecto: los access tokens de IAM no llevan `aud`. Ver [Autenticación](#autenticación). |
 | `API_HOST` / `API_PORT` | Bind HTTP local o contenedor. |
 | `REQUEST_TIMEOUT_SECONDS` | Presupuesto de timeout para operaciones salientes. |
 | `READINESS_TIMEOUT_SECONDS` | Timeout de chequeos `/ready`. |
@@ -40,12 +42,40 @@ Variables operativas esperadas:
 | `LOG_LEVEL` | Nivel de logs JSON. |
 | `ALERT_WORKER_MODE` | `consumer` o `relay`. |
 
+### Autenticación
+
+monitoring acepta la misma sesión que el resto de los módulos: el access token JWT RS256 que emite `iam-service` ([authentication.md](../../../07-api/authentication.md)). No tiene emisor, llave ni audience propios, y el mismo artefacto con las mismas variables corre en `develop`, `qa`, `staging` y `main` (ADR-022 §6); solo cambian los valores inyectados.
+
+| Verificación | Regla |
+|---|---|
+| Firma | RS256, con la clave pública del JWKS de IAM (`JWKS_URL`) elegida por el `kid` del token. El cliente cachea el conjunto de claves y lo refresca cuando aparece un `kid` desconocido (IAM publica la clave actual y la anterior durante una rotación; una clave nueva puede tardar hasta 30 s en verse). |
+| Expiración | `exp` obligatorio y vigente. |
+| Emisor | `iss` igual a `JWT_ISSUER` (por defecto `sena-iam-service`). |
+| Sujeto | `sub` obligatorio. |
+| Audience | **IAM no emite `aud` en los tokens de usuario**, así que `JWT_AUDIENCE` queda vacío y no se exige audience. Si se configura, `aud` pasa a ser obligatorio y debe coincidir. Con `JWT_AUDIENCE` vacío, un token que sí traiga `aud` se rechaza (falla cerrado): el día que IAM emita un audience hay que configurarlo aquí de forma explícita. |
+| RBAC | El claim `features` trae pares `CODE:SCOPE_TYPE`; cada endpoint exige su código `MON_*` (`x-required-feature` del contrato). El sufijo de scope **todavía no se interpreta**: ver [Riesgos conocidos](#riesgos-conocidos). |
+
+Respuestas: sin `Authorization: Bearer`, token inválido, mal firmado, de otro emisor o vencido → `401 UNAUTHORIZED`; feature ausente → `403 FORBIDDEN`; `JWKS_URL` sin configurar → `503 AUTH_NOT_CONFIGURED`; JWKS de IAM inalcanzable → `503 DEPENDENCY_UNAVAILABLE` (la sesión del usuario no es inválida: IAM no responde).
+
+No existe llave pública local, emisor local ni modo sin firma en el servicio; las pruebas firman con una llave descartable y la sirven como JWKS.
+
+### Usuario de base de datos
+
+La API, el `alert-worker` y el relay de Outbox se conectan a `monitoring_db` con el **usuario de aplicación**: un rol con `LOGIN` miembro de `monitoring_writer` (`SELECT/INSERT/UPDATE/DELETE` sobre el esquema `monitoring`, grants de `design-software-monitoring-db/03_dcl`). En el stack local lo crea `design-software-docker-infra/create-app-user.sh` (`APP_DB_USER` / `APP_DB_PASSWORD`, igual que iam, notification, actors y scheduling). El servicio nunca necesita DDL, por lo que no debe recibir el superusuario (`POSTGRES_USER`) ni el dueño del esquema:
+
+```
+DATABASE_URL=postgresql+psycopg://<APP_DB_USER>:<APP_DB_PASSWORD>@<host>:5432/<base>
+```
+
+Verificación: `SELECT usename FROM pg_stat_activity WHERE datname = '<base>'` solo debe mostrar el usuario de aplicación para las conexiones del servicio, y `SELECT rolsuper FROM pg_roles WHERE rolname = '<usuario>'` debe dar `false`.
+
 ## Arranque local
 
 ```powershell
 python -m pip install -e ".[dev]"
 $env:DATABASE_URL="postgresql+psycopg://monitoring:monitoring@localhost:5432/monitoring_db"
 $env:AMQP_URL="amqp://guest:guest@localhost:5672/"
+$env:JWKS_URL="http://localhost:8080/api/v1/auth/.well-known/jwks.json"
 python -m uvicorn apps.api.main:app --host 0.0.0.0 --port 8000
 ```
 
@@ -176,6 +206,15 @@ Impacto: no se registran/consultan KPIs ni alertas.
 3. evitar consumir/acknowledge eventos si no puede persistirse el resultado;
 4. recuperar BD y verificar backlog del worker.
 
+## P1 — La API responde 401 o 503 a un usuario con sesión válida
+
+Impacto: el MFE de Monitoring no carga indicadores ni alertas.
+
+1. `401 UNAUTHORIZED` con un token recién emitido por IAM: comparar el `iss` del token con `JWT_ISSUER` (debe ser el `IAM_JWT_ISSUER` con que corre IAM). Si el token trae `aud`, configurar `JWT_AUDIENCE` con ese valor.
+2. `503 AUTH_NOT_CONFIGURED`: falta `JWKS_URL` en el servicio.
+3. `503 DEPENDENCY_UNAVAILABLE`: monitoring no alcanza el JWKS de IAM. Verificar que `iam-api` responde `GET /api/v1/auth/.well-known/jwks.json` desde la red del servicio. Las claves ya cacheadas siguen sirviendo hasta que el conjunto expira (5 min).
+4. `401` solo en tokens nuevos tras una rotación de claves de IAM: el servicio refresca el JWKS al ver un `kid` desconocido, con un mínimo de 30 s entre refrescos.
+
 ## P1 — Lag del `alert-worker`
 
 Impacto: KPIs/alertas se calculan tarde. Notification puede estar sano pero no recibirá nuevos `monitoring.alert.triggered` hasta que Monitoring procese el backlog.
@@ -242,6 +281,11 @@ Si la alerta existe en Monitoring pero el usuario no recibió aviso:
 2. capturar `event_id`/`correlation_id`;
 3. transferir investigación al runbook de `notification-service`;
 4. **no** consultar ni modificar tablas de `notification_db` desde Monitoring.
+
+## Riesgos conocidos
+
+- **El scope de los features no se aplica.** monitoring valida el feature (`MON_KPI_VIEW`, `MON_DASHBOARD_OWN`, …) pero ignora el `SCOPE_TYPE` del claim (`OWN_FICHAS`, `TRAINING_CENTER`, `GLOBAL`), así que un instructor con `MON_KPI_VIEW:OWN_FICHAS` ve los datos de todas las fichas. El paso 6 de [authentication.md](../../../07-api/authentication.md) ("extraer `scope_type` y aplicar filtro de datos") queda como HU aparte; hasta entonces el servicio no restringe los datos por propietario ni por centro de formación para ningún usuario que tenga el feature.
+- **Códigos de error de autenticación.** El servicio responde `UNAUTHORIZED` / `FORBIDDEN`; [authentication.md](../../../07-api/authentication.md) lista `MISSING_TOKEN`, `TOKEN_INVALID`, `TOKEN_EXPIRED` e `INSUFFICIENT_PERMISSIONS`, y `shared-contracts/errors/error-codes.yaml` lista `UNAUTHENTICATED` y `FORBIDDEN`. Las tres fuentes divergen; unificarlas es una decisión de contratos fuera de esta HU.
 
 ## Escalamiento
 

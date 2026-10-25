@@ -62,3 +62,7 @@ Reversión: revertir los commits propios por repositorio después de revisión, 
 ## Integracion con IAM real local
 
 El perfil adicional usa JWKS del servicio IAM y permite configurar audiencia vacia porque su token de usuario no contiene aud. El perfil R3 original conserva audiencia monitoring. La verificacion RS256, emisor, exp y sub sigue obligatoria, y una audiencia inesperada se rechaza. La prueba real incluye 200 autorizado, 401 por firma alterada y 403 para usuario sin rol. Ver 03-parte-1/validacion-integraciones.md en el expediente R3. Los PR se mantienen abiertos por instruccion del usuario.
+
+## Actualización HU-MON-011 (2026-10-24)
+
+La identidad aislada de R3 (emisor `monitoring-r3-local`, clave pública montada y audiencia `monitoring`) queda reemplazada. La API acepta únicamente los access tokens de `iam-service`, verificados contra su JWKS (`JWKS_URL`, `JWT_ISSUER` con valor por defecto `sena-iam-service`, `JWT_AUDIENCE` vacío por defecto porque IAM no emite `aud`), y el código ya no admite clave pública local ni emisor propio. Las secciones anteriores sobre "JWKS real y una clave pública montada" y "audiencia monitoring" describen el estado de R3 y no el vigente. Ver la decisión 13 en [decisions.md](../../../09-microservices/services/08-monitoring-service/decisions.md) y la sección de autenticación del [runbook](../../../09-microservices/services/08-monitoring-service/runbook.md#autenticación). El resto de este ADR (observabilidad) no cambia.

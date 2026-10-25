@@ -1,6 +1,6 @@
 # Decisiones internas — monitoring-service
 
-> Estado: 🟢 Vigente | Última actualización: 2026-10-20
+> Estado: 🟢 Vigente | Última actualización: 2026-10-24
 > Para decisiones que afectan más de un servicio → ADR en `05-architecture/decisions/records/`.
 
 | # | Decisión | Motivo | Estado |
@@ -17,6 +17,8 @@
 | 10 | **Decisión histórica: mantener `notification-worker` dentro de Monitoring.** | Era la opción previa a separar capacidades transversales. | **SUPERSEDED por ADR-005** |
 | 11 | Migración progresiva de `improvement_plan.specific_actions` de TEXT a JSONB mediante EXPAND, BACKFILL, CONTRACT y ROLLBACK. | Preservar datos y compatibilidad HTTP durante la evolución del esquema. Ver ADR-013. | PROPOSED                         |
 | 12 | Lecturas de KPI y alertas con índices específicos y `DISTINCT ON` para el último KPI por ficha y tipo; el contrato HTTP no cambia. | Cumplir el objetivo p95 < 300 ms del reto R2 sin afectar a los consumidores. Ver ADR-024. | PROPOSED |
+| 13 | La API acepta los access tokens de `iam-service`: firma RS256 contra el JWKS de IAM (`JWKS_URL`), `exp`, `sub` e `iss` (`JWT_ISSUER`, por defecto `sena-iam-service`). **No se exige audience:** IAM no emite `aud`, así que `JWT_AUDIENCE` es opcional y está vacío por defecto; si se configura pasa a ser obligatorio, y un `aud` inesperado se rechaza. El servicio no tiene llave, emisor ni modo sin firma locales. | Misma sesión que el resto de los módulos (ADR-022 §2) y mismo artefacto con las mismas variables en los 4 ambientes (ADR-022 §6). Fallar cerrado ante un `aud` inesperado obliga a una decisión explícita el día que IAM emita uno. Reemplaza la identidad aislada R3 de ADR-010. | PROPOSED |
+| 14 | API, `alert-worker` y relay de Outbox se conectan con el **usuario de aplicación** (miembro de `monitoring_writer`), no con el superusuario. | Mínimo privilegio: el servicio solo necesita DML sobre el esquema `monitoring`; el patrón es el de los demás servicios (`create-app-user.sh`). | PROPOSED |
 
 ## Consecuencias de ADR-005 para Monitoring
 

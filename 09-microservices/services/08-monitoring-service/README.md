@@ -1,6 +1,6 @@
 # monitoring-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-24
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -30,7 +30,9 @@ KPIs, seguimiento de fichas, sesiones de seguimiento, alertas generadas y planes
 
 ## Configuración
 
-- Sin variables detectadas automáticamente en archivos de configuración/código.
+- Autenticación (HU-MON-011): acepta los access tokens JWT RS256 de `iam-service`, verificados contra su JWKS. Variables `JWKS_URL`, `JWT_ISSUER` (por defecto `sena-iam-service`) y `JWT_AUDIENCE` (vacía por defecto: IAM no emite `aud`).
+- Base de datos: `DATABASE_URL` con el usuario de aplicación (miembro de `monitoring_writer`), no el superusuario.
+- Lista completa de variables, reglas de verificación y diagnóstico: [runbook.md](./runbook.md#configuración).
 
 ## Notas
 

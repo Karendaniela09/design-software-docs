@@ -115,6 +115,14 @@ La clave pública se expone en `GET /auth/.well-known/jwks.json` (estándar JWKS
 6. Extraer scope_type y aplicar filtro de datos
 ```
 
+> **Audience y emisor en la práctica.** `iam-service` **no emite el claim `aud`** en los access
+> tokens de usuario (emite `iss`, `sub`, `iat`, `exp`, `jti` y los claims de la tabla anterior), por
+> lo que ningún servicio debe exigir audience. El valor de `iss` es el `IAM_JWT_ISSUER` con que
+> corre IAM (`sena-iam-service` es el valor de referencia): cada servicio lo recibe por
+> configuración y la misma imagen sirve en los cuatro ambientes. Si IAM llegara a emitir `aud`,
+> cada servicio debe configurarlo de forma explícita (monitoring lo hace con `JWT_AUDIENCE`, vacío
+> por defecto).
+
 ### Aplicación del scope en queries
 
 | scope_type | Filtro SQL a aplicar |
