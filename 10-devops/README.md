@@ -21,6 +21,7 @@ Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambi
 | [local-setup.md](./local-setup.md) | Levantar Postgres, aplicar changelogs por módulo y hacer bring-up de los perfiles de aplicación (`iam`, `notification`) + observabilidad en local | 🟡 |
 | [ci-cd.md](./ci-cd.md) | Pipeline previsto: validación de changelogs, PR checks, Conventional Commits y promoción por ramas (implementado vs pendiente) | 🟡 |
 | [environments.md](./environments.md) | Los 4 ambientes (`develop`/`qa`/`staging`/`main`), variables por `.env.<ambiente>` y advertencia de secretos | 🟡 |
+| [frontend-images.md](./frontend-images.md) | Las 10 imágenes estáticas del frontend (shell y 9 MFE) que sirve el edge: cómo se construyen, qué sirven y cómo se verifican | 🟡 |
 | [runtime-configuration-map.md](./runtime-configuration-map.md) | Mapa de variables de configuración runtime detectadas por repositorio | 🟡 |
 
 ## Plantillas

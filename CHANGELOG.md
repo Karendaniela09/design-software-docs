@@ -9,6 +9,16 @@
 - `09-microservices/services/01-iam-service/components/iam-api/contract.md`: cabecera transversal `X-Correlation-Id` (cambio aditivo) y endpoint operativo de métricas, que no se enruta por el edge
 - La documentación que vivía en `docs/observability/` del repositorio `design-software-iam-service` (PR #43) se traslada aquí; allí solo queda un enlace en el README
 
+### Added — Imágenes del frontend servidas por el edge (HU-SHELL-011)
+
+- `10-devops/frontend-images.md`: cómo se construyen y se sirven las 10 imágenes estáticas del frontend (web-shell y los 9 MFE). Documenta:
+  - la imagen nginx en el puerto 8080 que el edge alcanza como `web-shell-static` y `<dominio>-mfe-static`;
+  - la base `/mfe/<dominio>/` de cada MFE, solo en `vite build`;
+  - el manifest de remotes de mismo origen, idéntico en `qa`, `staging` y `main`, y el de `develop` con los puertos 5101–5109;
+  - los contextos de build con nombre (`--build-context`) para los hermanos `design-system` y `frontend-platform`;
+  - la verificación local y los límites conocidos (sesión del shell: HU-SHELL-010; servicios de compose: `docker-infra`).
+- `10-devops/README.md`: índice actualizado.
+
 ### Changed — Refresh token en cookie `HttpOnly` (HU-IAM-018)
 
 - `07-api/contracts/openapi/iam.yaml`, `07-api/authentication.md` y `09-microservices/services/01-iam-service/components/iam-api/contract.md`: concretan ADR-023 §6. **Cambio de contrato incompatible**, decidido por ese ADR:
