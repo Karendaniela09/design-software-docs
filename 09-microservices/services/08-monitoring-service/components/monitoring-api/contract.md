@@ -54,7 +54,8 @@ CRUD del catálogo de tipos de alerta (umbral por defecto, unidad, si afecta el
 
 ### `GET /risk-levels` · `GET /kpi-statuses`
 
-Listas planas, solo lectura.
+Solo lectura. Responden la lista paginada estándar `{ data, pagination }` (`page`, `page_size`;
+[`guidelines.md` §6](../../../../../07-api/guidelines.md)), igual que el resto de las colecciones.
 
 - **Feature requerido:** `MON_ALERT_VIEW` y `MON_KPI_VIEW` respectivamente.
 

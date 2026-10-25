@@ -247,21 +247,29 @@ paths:
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
-  # ---------------------------------------------------------------- catalogs: risk-levels / kpi-statuses (solo lectura)
+  # ---------------------------------------------------------------- catalogs: risk-levels / kpi-statuses (solo lectura, paginados)
   /risk-levels:
     get:
       operationId: listRiskLevels
       tags: [catalogs]
       summary: Niveles de severidad de riesgo (valores fijos, ordenados por criticidad).
       x-required-feature: MON_ALERT_VIEW
+      parameters:
+        - $ref: '_shared.yaml#/components/parameters/page'
+        - $ref: '_shared.yaml#/components/parameters/page_size'
       responses:
         '200':
-          description: Lista de niveles de riesgo.
+          description: Página de niveles de riesgo.
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/RiskLevel' }
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/RiskLevel' }
+                  pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
@@ -271,14 +279,22 @@ paths:
       tags: [catalogs]
       summary: Estados de KPI y su nivel de riesgo asociado.
       x-required-feature: MON_KPI_VIEW
+      parameters:
+        - $ref: '_shared.yaml#/components/parameters/page'
+        - $ref: '_shared.yaml#/components/parameters/page_size'
       responses:
         '200':
-          description: Lista de estados de KPI.
+          description: Página de estados de KPI.
           content:
             application/json:
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/KpiStatus' }
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/KpiStatus' }
+                  pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 

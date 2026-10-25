@@ -16,6 +16,11 @@
 - Datos: `06-actors-service/data-model.md` y `06-data/data-dictionary.md` (tabla `learner_rap_assessment`); RBAC: `ACT_LEARNER_RAP_ASSESSMENT_MANAGE` y `ACT_INTERNAL_FICHA_RAP_COVERAGE` en `rbac-design.md`.
 - Trabajo: HU-ACAD-11 (docs#171), HU-ACT-029 (docs#391) y, como seguimiento, HU-ACT-031 (docs#419, juicio del instructor).
 
+### Changed — Catálogos de solo lectura de Monitoring paginados
+
+- `07-api/contracts/openapi/monitoring.yaml` y `09-microservices/services/08-monitoring-service/components/monitoring-api/contract.md`: `GET /risk-levels` y `GET /kpi-statuses` documentan la lista paginada estándar `{ data, pagination }` con `page` y `page_size` (`07-api/guidelines.md` §6), que es lo que `monitoring-service` ya responde. Antes el contrato decía "arreglo plano".
+- Efecto en consumidores: ninguno que no esté ya cubierto. `monitoring-mfe` acepta el arreglo y el sobre durante la transición (monitoring-mfe#11). El espejo en `design-software-shared-contracts` (`openapi/monitoring.yaml`) lleva el mismo cambio.
+
 ### Added — Correlación de peticiones y métricas Prometheus de iam-service (HU-IAM-021)
 
 - `09-microservices/services/01-iam-service/runbook.md`: observabilidad con `X-Correlation-Id`, `trace_id` en los errores, `GET /actuator/prometheus`, comprobación manual, construcción con el wrapper de Maven y alcance de la verificación. La nota «Métricas: fuera de alcance» deja de aplicar
