@@ -9,6 +9,8 @@ info:
     contrato. Alineado con el modelo de datos de reference-data-service y con
     07-api/guidelines.md. La extensión `x-required-feature` declara el feature RBAC
     que exige cada operación (ver rbac-design.md, módulo `MOD_REFERENCE`).
+x-reference-scope: GLOBAL
+x-reference-scope-policy: Narrower grants do not authorize global reference operations.
 servers:
   - url: /api/v1
 security:
@@ -60,6 +62,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createMacroregion
       tags: [institutional-hierarchy]
@@ -79,6 +82,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
@@ -98,6 +102,7 @@ paths:
               schema: { $ref: '#/components/schemas/Macroregion' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateMacroregion
@@ -118,6 +123,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -130,6 +136,7 @@ paths:
           description: Macrorregión desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -173,6 +180,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createMicroregion
       tags: [institutional-hierarchy]
@@ -192,6 +200,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -212,6 +221,7 @@ paths:
               schema: { $ref: '#/components/schemas/Microregion' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateMicroregion
@@ -232,6 +242,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -244,6 +255,7 @@ paths:
           description: Microrregión desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -288,6 +300,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createDepartment
       tags: [institutional-hierarchy]
@@ -307,6 +320,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -327,6 +341,7 @@ paths:
               schema: { $ref: '#/components/schemas/Department' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateDepartment
@@ -347,6 +362,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -359,6 +375,7 @@ paths:
           description: Departamento desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -403,6 +420,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createMunicipality
       tags: [institutional-hierarchy]
@@ -422,6 +440,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -442,6 +461,7 @@ paths:
               schema: { $ref: '#/components/schemas/Municipality' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateMunicipality
@@ -462,6 +482,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -474,6 +495,7 @@ paths:
           description: Municipio desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -518,6 +540,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createTrainingCenter
       tags: [institutional-hierarchy]
@@ -537,6 +560,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -557,6 +581,7 @@ paths:
               schema: { $ref: '#/components/schemas/TrainingCenter' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateTrainingCenter
@@ -577,6 +602,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -589,6 +615,7 @@ paths:
           description: Centro de formación desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -634,6 +661,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createInstitutionalUnit
       tags: [institutional-hierarchy]
@@ -653,6 +681,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -673,6 +702,7 @@ paths:
               schema: { $ref: '#/components/schemas/InstitutionalUnit' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateInstitutionalUnit
@@ -693,6 +723,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -705,6 +736,7 @@ paths:
           description: Unidad institucional desactivada.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -744,6 +776,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createCatalog
       tags: [catalogs]
@@ -763,6 +796,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
@@ -782,6 +816,7 @@ paths:
               schema: { $ref: '#/components/schemas/Catalog' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateCatalog
@@ -802,6 +837,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -814,6 +850,7 @@ paths:
           description: Catálogo desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -859,6 +896,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     post:
       operationId: createCatalogDetail
@@ -879,6 +917,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
@@ -908,6 +947,7 @@ paths:
               schema: { $ref: '#/components/schemas/CatalogDetail' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateCatalogDetail
@@ -928,6 +968,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
     delete:
@@ -940,6 +981,7 @@ paths:
           description: Valor de catálogo desactivado.
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
 
@@ -981,6 +1023,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
     post:
       operationId: createParameter
       tags: [parameters]
@@ -1000,6 +1043,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
@@ -1019,6 +1063,7 @@ paths:
               schema: { $ref: '#/components/schemas/Parameter' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateParameter
@@ -1042,6 +1087,7 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
@@ -1084,6 +1130,7 @@ paths:
                   pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/DependencyUnavailable' }
 
   /health/live:
     get:
@@ -1136,6 +1183,14 @@ paths:
                 additionalProperties: true
 
 components:
+  responses:
+    DependencyUnavailable:
+      description: The IAM signing keys cannot be obtained. Retry after the dependency recovers.
+      content:
+        application/json:
+          schema: { $ref: '_shared.yaml#/components/schemas/Error' }
+          example:
+            error: { code: DEPENDENCY_UNAVAILABLE, message: Signing keys are temporarily unavailable., trace_id: example-trace-id }
   parameters:
     MacroregionId:
       name: id

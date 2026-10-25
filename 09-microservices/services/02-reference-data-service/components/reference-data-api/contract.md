@@ -24,6 +24,8 @@ halts_registrados: ninguno
 ## Autenticación
 Todos los endpoints requieren `Authorization: Bearer <JWT>` emitido por `iam-service`. La autorización se resuelve por **feature + scope** (RBAC), features del módulo `MOD_REFERENCE` (ver [rbac-design.md](../../../01-iam-service/rbac-design.md)).
 
+Los seis features `REF_*` se exigen **solo con alcance `GLOBAL`** ([DEC-006](../../decisions.md)): un grant con un alcance más estrecho (por ejemplo `REF_CATALOG_VIEW:TRAINING_CENTER`) responde `403`, igual que un token sin el feature. Sin token o con un token inválido responde `401`. Si no se pueden obtener las claves de firma de IAM (JWKS), las operaciones protegidas responden `503 DEPENDENCY_UNAVAILABLE`.
+
 ## Base URL
 `/api/v1`
 

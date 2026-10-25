@@ -14,6 +14,7 @@
 | DEC-003 | training_shift y training_modality como ENUMs locales en academic-service | 🟢 Estable |
 | DEC-004 | Jerarquia institucional como arbol simple sin closure table | 🟢 Estable |
 | DEC-005 | Tabla parameter para valores de configuracion del sistema | 🟢 Estable |
+| DEC-006 | Alcance GLOBAL exclusivo para los features REF_* | 🟢 Estable |
 
 ---
 
@@ -111,3 +112,21 @@
 - Los servicios consumidores deben definir una estrategia de lectura: leer al iniciar (requiere reinicio para actualizar) o cachear con TTL corto (permite actualizacion sin reinicio pero con latencia).
 - La tabla `parameter` debe distinguirse claramente de la configuracion de infraestructura (conexiones, credenciales) que debe seguir en variables de entorno por razones de seguridad.
 - Los parametros con impacto critico en logica de negocio deben tener validaciones de rango/tipo para prevenir valores incorrectos ingresados por error administrativo.
+
+---
+
+### DEC-006: Alcance GLOBAL exclusivo para los features REF_*
+
+**Decision:** Los seis features del modulo `MOD_REFERENCE` (`REF_HIERARCHY_VIEW`/`MANAGE`, `REF_CATALOG_VIEW`/`MANAGE`, `REF_PARAMETER_VIEW`/`MANAGE`) se exigen unicamente con alcance `GLOBAL`. Un grant del mismo feature con un alcance mas estrecho (`TRAINING_CENTER`, `AREA`, de propiedad) o sin alcance se rechaza con `403` y nunca se ensancha a global. Cuando no se pueden obtener las claves JWKS de IAM, las operaciones protegidas responden `503 DEPENDENCY_UNAVAILABLE`.
+
+**Contexto:** La matriz RBAC de IAM ([rbac-design.md](../01-iam-service/rbac-design.md), `MOD_REFERENCE`) concede los seis features solo con `GLOBAL`, y los seeds de `iam-db` lo respetan. El middleware aceptaba cualquier alcance conocido para el codigo exacto del feature, de modo que un grant de centro operaba como global. La HU-INT-REF-001 ([docs#294](https://github.com/code-sena/design-software-docs/issues/294)) cerro esa brecha. Ninguna operacion de referencia esta definida por centro, asi que no hay un filtro de datos que aplicar.
+
+**Alternativas consideradas:**
+- **Filtrar por centro con `training_center_id` del token:** descartada. Exige un contrato y un filtrado de datos que hoy no existen, y los datos de referencia (jerarquia, catalogos, parametros) son compartidos por todos los centros.
+- **Ignorar el alcance (comportamiento anterior):** descartada. Convierte un permiso restringido en global.
+- **Rechazar todo alcance distinto de GLOBAL (decision adoptada):** falla cerrado y coincide con la matriz de IAM.
+
+**Consecuencias:**
+- La presentacion aplica la misma regla. `/auth/me` entrega codigos sin alcance; `@sena/frontend-platform` los cruza con los grants `CODE:SCOPE_TYPE` del JWT en memoria y solo `REF_*:GLOBAL` se vuelve permiso de navegacion para el remote. Esa lectura del JWT solo decide que se muestra: la firma RS256, el emisor, la expiracion y el alcance los verifica el backend en cada operacion.
+- Si un rol futuro necesita datos de referencia por centro, primero hacen falta un contrato y una decision nuevos; solo despues se pueden conceder alcances estrechos en IAM.
+- El contrato (`reference-data.yaml`) declara `x-reference-scope: GLOBAL` y la respuesta `503` en las operaciones protegidas. Guia de integracion: [reference-data-int-ref-001.md](../../../10-devops/reference-data-int-ref-001.md).

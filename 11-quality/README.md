@@ -65,3 +65,10 @@ qa-report-r4-security-academic-management.md for the selected rules, repository
 traceability, validations performed, evidence matrix and environment
 limitations. The business rules were approved by the project owner on
 2026-10-24, as recorded in ADR-030.
+
+
+## HU-INT-REF-001 integration
+
+- [Acceptance evidence](./reference-data-hu-int-ref-001-validation.md): ten-criterion local validation with real IAM, PostgreSQL, the canonical edge and the production Reference Data remote. Independent approval and promotion remain pending.
+
+- [HU-INT-REF-001 QA handoff](./qa-handoff-hu-int-ref-001.md): entrega basada en la plantilla, seis PRs, ramas/commits, diez criterios, evidencias y pendientes de CI/revisión.
