@@ -91,10 +91,21 @@ curl -sI http://localhost:<edge>/mfe/<dominio>/assets/<css>     # 200, text/css,
 
 `scripts/edge-smoke.sh` de `docker-infra` repite las tres familias de rutas.
 
+## Shell en desarrollo (`npm run dev`)
+
+El servidor de desarrollo del shell reenvía al edge, igual que una imagen desplegada (ADR-022 §5):
+
+| Ruta | Destino |
+|---|---|
+| `/<dominio>/api/` (los 10 dominios) | `VITE_EDGE_ORIGIN`, por defecto `http://localhost:18080` |
+| `/mfe/` | el mismo origen |
+
+No hay proxies por micro (`/api/v1` hacia IAM, `/audit/api/v1` hacia `:8081`, `/time-slots` hacia `:8080`). El shell habla con IAM en `/iam/api/v1/auth/*` (login, refresh, logout y `me`), con el access token solo en memoria y el refresh token en la cookie `HttpOnly` de IAM ([ADR-023](../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md) §5 y §6). A cada remote le inyecta `httpClient`, `identity` y `permissions` por `remote-props`; nunca el token.
+
 ## Límites conocidos
 
-- La imagen del shell sigue la fuente de sesión por defecto del código (`mock` mientras no se defina otra). El login y la sesión reales los resuelve HU-SHELL-010 ([ADR-023](../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md)); sin sesión, `/login` puede quedar en blanco.
-- El shell sigue con el proxy de desarrollo de `vite.config.ts` y con la base de API del código actual. La base de API relativa de los MFE (`/<dominio>/api/v1`) y el proxy único hacia el edge son HU-SHELL-012.
+- La imagen del shell habla con IAM real por defecto y `/login` es una página del shell (HU-SHELL-010, [ADR-023](../05-architecture/decisions/records/ADR-023-web-shell-owns-login-and-session.md)). La sesión genérica sin IAM (`VITE_SESSION_SOURCE=mock`) solo funciona en el servidor de desarrollo y nunca entra en un build, así que la imagen es la misma en los 4 ambientes. Para iniciar sesión necesita `iam-api` detrás de `/iam/api/` en el edge.
+- El proxy de desarrollo del shell (`vite.config.ts`) ya es uno solo hacia el edge (HU-SHELL-010, ver abajo). La base de API relativa de cada MFE (`/<dominio>/api/v1`) se mueve MFE por MFE (HU-SHELL-012 y las HU de cada dominio): hasta que lo haga, un MFE que siga con su base antigua no llega a su backend por el edge.
 - Publicar las imágenes en un registro (CI) está fuera de esta HU.
 
 ## Referencias

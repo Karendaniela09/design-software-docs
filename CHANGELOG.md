@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed — Sesión y login del shell (HU-SHELL-010)
+
+- `10-devops/frontend-images.md`: la imagen del shell usa IAM real por defecto (la sesión genérica solo existe en el servidor de desarrollo) y `/login` es del shell; nueva sección "Shell en desarrollo" con el proxy único hacia el edge (`VITE_EDGE_ORIGIN`) y el ciclo de sesión de ADR-023 (access token en memoria, refresh con cookie `HttpOnly`, `httpClient` inyectado a los remotes). Se corrigen dos "Límites conocidos" que ya no son ciertos.
+
 ### Changed — Cierre de ficha por aprobación de RAP y contrato de Academic R4 (ADR-030, 2026-10-24)
 
 - `05-architecture/decisions/records/ADR-030-academic-ficha-lifecycle-preconditions.md` (ACCEPTED por el dueño). Fija:
