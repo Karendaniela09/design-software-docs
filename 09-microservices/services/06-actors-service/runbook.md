@@ -63,6 +63,7 @@ curl -sf http://actors-service:8006/health/db | jq .
 | Competencias marcadas `requires_review` en masa | Lote de `competency_assignment.requires_review = true` sin atender > 24 h | P2 | Notificar coordinadores para revisión manual |
 | Latencia alta en `/instructors/available` | P95 > 300 ms | P2 | Verificar índice `competency_id WHERE is_active = true`; ver [Consulta de disponibilidad lenta](#consulta-de-disponibilidad-lenta) |
 | Servicio no responde | `/health` retorna 5xx o sin respuesta > 1 min | P0 | Reiniciar pod/contenedor; revisar logs de arranque |
+| `ActorsHighErrorRate` | Respuestas 4xx/5xx de actors-service por encima del 5 % durante 2 minutos (sin contar `/actuator`) | P2 | Ver [Tasa de error alta en actors-service](#tasa-de-error-alta-en-actors-service) |
 
 ---
 
@@ -284,6 +285,26 @@ SELECT event_id, event_type, attempts, last_error FROM actors_tracking.company_v
 1. Si crece `pending` y nada se publica, comprobar que `ACTORS_OUTBOX_ENABLED=true`, que RabbitMQ responde y que el exchange `actors-events` existe con un binding hacia los consumidores. Con el interruptor en `false` las filas se acumulan sin perderse.
 2. Un mensaje sin binding se devuelve como "no enrutable" y la fila se reintenta; corregir el binding y esperar el siguiente reintento.
 3. Para una fila `DEAD`, corregir la causa (`last_error`) y reactivarla con `POST /api/v1/ops/actors/outbox/{eventId}/replay`. Los consumidores deduplican por `event_id`.
+
+---
+
+### Tasa de error alta en actors-service
+
+**Síntoma:** se dispara la alerta `ActorsHighErrorRate` (Prometheus y regla de Grafana `actors-r3-errors`): más del 5 % de las respuestas son 4xx o 5xx durante 2 minutos.
+
+**Dónde mirar (HU-ACT-024):**
+
+- **Métricas RED.** `actors-api` expone `/actuator/prometheus` en el puerto de gestión **8081**, sin mTLS y solo dentro de la red de Docker (no se publica ni pasa por el edge; el negocio sigue en 8080 con mTLS). Prometheus lo lee con el job `actors-service`. Las series son `http_server_requests_seconds_count` y `_bucket`, etiquetadas por `application`, `uri` (plantilla de la ruta, nunca el id real), `method` y `status`.
+- **Tablero.** `Actors R3 · Alta de aprendiz (RED)` en Grafana (`observability/grafana/dashboards/actors-r3.json` de `docker-infra`): tasa, errores y p95 por ruta, y las tres rutas más usadas.
+- **Trazas.** Tempo, con el `traceId` de la petición; las consultas JDBC aparecen como spans dentro de la traza.
+- **Logs.** Una línea JSON por evento con `timestamp`, `level`, `logger`, `message`, `service`, `correlation_id` (el trace id W3C, el mismo que llega desde el MFE en `traceparent`), `span_id` y `stack_trace`. Filtrar por `correlation_id` en Loki une las capas de una misma petición. Nunca se registran tokens ni documentos.
+
+**Acciones:**
+
+1. En el tablero, ver qué ruta concentra los errores y si son 4xx (clientes: token vencido o sin permiso, validación) o 5xx (servicio o base de datos).
+2. Con un `correlation_id` de una petición fallida, abrir su traza en Tempo y filtrar los logs por ese valor.
+3. 401/403 en bloque: revisar `IAM_JWKS_URI` e `IAM_JWT_ISSUER` y que iam-service responda. 5xx en bloque: ver [Falla de base de datos](#falla-de-base-de-datos) y los eventos del outbox si el fallo es al guardar un evento.
+4. Si el aviso es por pruebas con entradas inválidas a propósito, la alerta vuelve a normal sola cuando el ratio baja del 5 %.
 
 ---
 

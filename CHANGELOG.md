@@ -360,6 +360,11 @@
 - `09-microservices/services/06-actors-service/decisions.md`: fila 10 con la decisión de un solo outbox por servicio (columnas aditivas sobre `company_visit_outbox`, un solo despachador por RabbitMQ), fila 11 con la regla de que el contract va en un changelog aparte y fila 13 con las decisiones de observabilidad de HU-ACT-024 (antes una nota de diseño local en `design-software-actors-service#34`); fila 12 con la decisión de HU-ACT-028: el plan de mejoramiento individual (`actors-mfe`) y el de ficha (`monitoring-mfe`) son dos conceptos, y el edge los distingue por el prefijo de dominio de ADR-022.
 - `09-microservices/services/06-actors-service/{events,README,runbook}.md` y `10-devops/runtime-configuration-map.md`: actors publica por **RabbitMQ** (exchange `actors-events`, ADR-001; HU-ACT-021) y no por Kafka. `events.md` documenta `actors.instructor.availability_changed`, la política de entrega del outbox (al menos una vez, back-off de 1/4/16/64 s, estado `DEAD`, reproducción) y la deuda de alineación del payload; el runbook reemplaza las variables y comandos de Kafka por los de RabbitMQ y agrega el procedimiento de eventos pendientes o muertos; la configuración pasa de `KAFKA_BOOTSTRAP_SERVERS` a `SPRING_RABBITMQ_*`, `ACTORS_OUTBOX_ENABLED` y `ACTORS_EVENTS_EXCHANGE` (mismo nombre en los 4 ambientes).
 
+### Changed — Runbook de observabilidad de actors y servicio del contract R6
+
+- `09-microservices/services/06-actors-service/runbook.md`: alerta `ActorsHighErrorRate` y procedimiento «Tasa de error alta en actors-service» (puerto de gestión 8081, tablero `actors-r3`, trazas, logs JSON por `correlation_id`). Cierra el DoR de runbook de HU-ACT-024.
+- `09-microservices/services/06-actors-service/data-model.md`: el contrato R6 se ejecuta con el servicio `liquibase-actors-contract` de `docker-infra`.
+
 ---
 
 ## [Estructura inicial]

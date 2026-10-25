@@ -141,7 +141,7 @@ comisiones, etc. Complementa las reglas de disponibilidad del ambiente en schedu
 
 La API REST sigue exponiendo el campo `status`; el servicio lo traduce a `status_id`. Mientras `status` exista, el contract no ha corrido.
 
-**Orden de despliegue.** (1) `update` con el expand y el backfill, con la versión anterior del servicio en ejecución (el trigger de sincronización mantiene coherentes `status` y `status_id`); (2) desplegar la versión nueva de actors-service, que mapea solo `status_id` y expone `status` desde el catálogo; (3) ejecutar el contract con `changelog/changelog-contract.yaml`. El backfill se hace por lotes de 500 filas con `COMMIT` por lote (`FOR UPDATE SKIP LOCKED`), es idempotente y se reanuda si se interrumpe, porque lo pendiente es exactamente `status_id IS NULL`.
+**Orden de despliegue.** (1) `update` con el expand y el backfill, con la versión anterior del servicio en ejecución (el trigger de sincronización mantiene coherentes `status` y `status_id`); (2) desplegar la versión nueva de actors-service, que mapea solo `status_id` y expone `status` desde el catálogo; (3) ejecutar el contract con `changelog/changelog-contract.yaml` (en `docker-infra`: `docker compose --env-file .env.<ambiente> --profile r6-contract run --rm liquibase-actors-contract update`). El backfill se hace por lotes de 500 filas con `COMMIT` por lote (`FOR UPDATE SKIP LOCKED`), es idempotente y se reanuda si se interrumpe, porque lo pendiente es exactamente `status_id IS NULL`.
 
 **Compatibilidad por fase.** La versión anterior del servicio (no mapea `status` ni `status_id`) funciona en todas las fases. La versión nueva exige que `status_id` exista: no arranca sin el expand (`ddl-auto: validate`), así que el expand y el backfill van antes que su despliegue.
 
