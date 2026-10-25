@@ -100,6 +100,12 @@
 
 - `09-microservices/services/08-monitoring-service/runbook.md`: sección "Imágenes de contenedor" con el Dockerfile de cada deployable (`deploy/Dockerfile.api`, `deploy/Dockerfile.worker`), el proceso que ejecuta cada uno, los modos `consumer` y `relay` del worker y la base común (`python:3.11-slim` con `requirements-runtime.lock`).
 
+### Added — Rendimiento de Scheduling para R2
+
+- `05-architecture/decisions/records/ADR-027-scheduling-r2-performance.md` (PROPOSED): decisión de conservar los dos índices parciales de lectura, la compresión JSON y `open-in-view=false`, con la evidencia resumida.
+- `11-quality/qa-report-r2-scheduling-service.md`: resultados k6, ranking SQL, planes antes/después a escala pequeña y a escala realista (480 120 sesiones), rollback y SHA-256 de las salidas originales retiradas del repositorio.
+- `09-microservices/services/05-scheduling-service/data-model.md`: los dos índices R2 en «Índices relevantes».
+
 ### Added — Estándar transversal de estados parametrizables y auditoría (ADR-004)
 
 **Estándar autoritativo:**

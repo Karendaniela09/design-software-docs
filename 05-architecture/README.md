@@ -30,6 +30,9 @@ Toda decisión que cruce una frontera de bounded context o afecte a más de un s
 | [ADR-002](./decisions/records/ADR-002-scheduling-read-models.md) | Read models en `scheduling-service` para reducir dependencias síncronas a ≤ 2 (CQRS-lite) | [pattern-guide.md](./pattern-guide.md) §Reglas de dependencia |
 | [ADR-003](./decisions/records/ADR-003-object-storage.md) | Object storage compatible S3 (MinIO en DEV/QA) para documentos/PDFs | [security-threat-model.md](./security-threat-model.md) I-04 |
 | [ADR-004](./decisions/records/ADR-004-status-parametrization-and-audit-standard.md) | Estados parametrizables + estándar de auditoría append-only y soft delete | [cross-cutting.md](./cross-cutting.md) §Estados y §Auditoría · [06-data/modeling-conventions.md](../06-data/modeling-conventions.md) |
+| [ADR-018](./decisions/records/ADR-018-iam-session-revocation-r4.md) | Revocación de sesiones en IAM para R4 | [informe QA](../11-quality/qa-report-r4-security-iam.md) |
+| [ADR-019](./decisions/records/ADR-019-actors-security-hardening.md) | Endurecimiento de seguridad de Actors para R4 | [informe QA](../11-quality/qa-report-r4-security-actors.md) |
+| [ADR-027](./decisions/records/ADR-027-scheduling-r2-performance.md) | Rendimiento de consultas de Scheduling para R2 | [informe QA](../11-quality/qa-report-r2-scheduling-service.md) |
 
 ## Relación con 09-microservices
 

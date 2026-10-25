@@ -114,6 +114,8 @@ Conflicto detectado durante la validación del horario en estado DRAFT.
 | `class_session` | `(instructor_id, session_date, start_time, end_time)` | B-Tree | Detección de conflictos de instructor |
 | `class_session` | `(environment_id, session_date, start_time, end_time)` | B-Tree | Detección de conflictos de ambiente |
 | `class_session` | `schedule_id` | B-Tree | Carga de sesiones por horario |
+| `schedule` | `ix_schedule_active_created_at` sobre `(created_at) WHERE is_active = true` | B-Tree parcial (R2) | Listado paginado de horarios activos ordenado por fecha de creación, sin Sort ([ADR-027](../../../05-architecture/decisions/records/ADR-027-scheduling-r2-performance.md)) |
+| `class_session` | `ix_class_session_active_schedule_date` sobre `(schedule_id, session_date) WHERE is_active = true` | B-Tree parcial (R2) | Sesiones activas de un horario ordenadas por fecha, sin Sort; su beneficio aparece desde unos cien registros por horario ([informe QA R2](../../../11-quality/qa-report-r2-scheduling-service.md)) |
 
 > **Nota (UNIQUE parcial sobre `schedule`):** un `UNIQUE (ficha_id, period)` total impediría crear un nuevo DRAFT cuando ya existe un PUBLISHED para la misma ficha+período, lo que contradice la invariante de inmutabilidad (los cambios deben generar un nuevo `schedule` en DRAFT). El índice parcial con `WHERE status = 'PUBLISHED'` garantiza un único horario publicado por ficha/período a la vez que permite coexistir borradores y versiones archivadas.
 

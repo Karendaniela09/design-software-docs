@@ -69,3 +69,7 @@ Creación, validación, publicación, archivo y consulta de horarios y sesiones.
 ## Notas
 
 Mantiene proyecciones locales de disponibilidad de instructores y ambientes.
+
+## Rendimiento R2
+
+La decisión está en [ADR-027](../../../05-architecture/decisions/records/ADR-027-scheduling-r2-performance.md) y los resultados en el [informe QA R2](../../../11-quality/qa-report-r2-scheduling-service.md).
