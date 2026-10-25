@@ -75,6 +75,14 @@
 - `data-model.md`: `document_version.correlation_id` e índice único parcial (changeset `hu-doc-004-version-idempotency-974`)
 - Pendiente de reconciliación: `document-lifecycle-worker/contract.md` conserva estados (`DRAFT`, `EMITIDO`) que ya no existen
 
+### Changed — Contrato de sesiones de IAM (R4)
+
+- `07-api/contracts/openapi/iam.yaml`, `09-microservices/services/01-iam-service/components/iam-api/contract.md` y `rbac-design.md`: alineados con la regla implementada y probada en iam-service#44. Consultar y revocar sesiones propias no exige ningún feature RBAC. Las sesiones ajenas solo las gestiona un administrador global (`SYSTEM_ADMIN` sin centro de formación): `IDENTITY_USER_VIEW` efectivo para consultar e `IDENTITY_USER_MANAGE` efectivo para revocar. Cambio solo de texto: no cambian rutas, parámetros, esquemas ni códigos de respuesta
+- `x-required-feature` se retira de `GET` y `DELETE /users/{id}/sessions…` porque el requisito ya no es uniforme; la regla condicional queda en la `description` de cada operación
+- `12-ux-ui/mockup-ddd/flows/05-administrador.md`: feature de la revocación de sesión actualizado
+- `09-microservices/services/01-iam-service/decisions.md`: DEC-009 registra la regla (sin ADR propio; ADR-018 cubre la validación del estado de sesión, no este reparto)
+- Pendiente: `shared-contracts` y la copia fijada de `iam-service` conservan el texto anterior hasta su siguiente sincronización
+
 ### Fixed — Contrato OpenAPI de document-service (HU-DOC-002 / HU-DOC-003)
 
 - `07-api/contracts/openapi/document.yaml`: restaurado como "Document Service API" (`/documents`, `/documents/generate`, `/documents/{id}`, `/download-url`, `/versions`, `/reports/document-status`). El commit `0ac94c6` lo había sobrescrito con el contenido de la API de plantillas, que sigue en `template.yaml`

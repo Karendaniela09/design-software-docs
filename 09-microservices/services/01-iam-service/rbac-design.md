@@ -56,8 +56,8 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 
 | Código de feature | Descripción | Nivel de acción |
 |------------------|-------------|----------------|
-| `IDENTITY_USER_VIEW` | Ver lista y detalle de usuarios | READ |
-| `IDENTITY_USER_MANAGE` | Crear, editar y desactivar usuarios | WRITE |
+| `IDENTITY_USER_VIEW` | Ver lista y detalle de usuarios; consultar sesiones de otros usuarios (administrador global); la consulta de sesiones propias no exige este feature | READ |
+| `IDENTITY_USER_MANAGE` | Crear, editar y desactivar usuarios; habilitar la revocación administrativa de sesiones ajenas por un administrador global; la revocación de sesiones propias no exige este feature | WRITE |
 | `IDENTITY_ROLE_VIEW` | Ver roles y sus features asignados | READ |
 | `IDENTITY_ROLE_MANAGE` | Gestionar roles y asignar features | WRITE |
 | `IDENTITY_ROLE_ASSIGN` | Asignar roles a usuarios | WRITE |

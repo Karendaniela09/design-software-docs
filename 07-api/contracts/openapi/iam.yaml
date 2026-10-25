@@ -7,7 +7,8 @@ info:
     feature+scope), sesiones, overrides de scope y reporte de auditoría de login.
     Fuente de verdad del contrato. Alineado con el modelo de datos de iam-service
     y con 07-api/guidelines.md. La extensión `x-required-feature` declara el feature
-    RBAC que exige cada operación.
+    RBAC de las operaciones con un requisito uniforme; las reglas condicionales se
+    detallan en la descripción de la operación.
 servers:
   - url: /api/v1
 security:
@@ -277,8 +278,13 @@ paths:
     get:
       operationId: listUserSessions
       tags: [sessions]
-      summary: Sesiones activas (refresh tokens vigentes) del usuario.
-      x-required-feature: IDENTITY_USER_VIEW
+      summary: Consulta sesiones propias o de otro usuario autorizado.
+      description: >-
+        El usuario autenticado puede consultar sus propias sesiones sin requerir un
+        feature RBAC. Un administrador global (`SYSTEM_ADMIN` sin centro de formación)
+        puede consultar sesiones ajenas con `IDENTITY_USER_VIEW` efectivo. Un rol
+        administrativo limitado a un centro no autoriza consultas como administrador
+        global.
       responses:
         '200':
           description: Lista de sesiones activas.
@@ -301,8 +307,12 @@ paths:
     delete:
       operationId: revokeUserSession
       tags: [sessions]
-      summary: Revoca una sesión específica del usuario.
-      x-required-feature: IDENTITY_USER_VIEW
+      summary: Revoca una sesión propia o, como administrador global, de otro usuario.
+      description: >-
+        Para una sesión propia, el usuario autenticado no requiere ningún feature RBAC.
+        Para una sesión ajena, el solicitante debe ser un `SYSTEM_ADMIN` de alcance
+        global y requiere `IDENTITY_USER_MANAGE` efectivo. `IDENTITY_USER_VIEW` por sí
+        solo no autoriza revocar sesiones ajenas.
       responses:
         '204':
           description: Sesión revocada.

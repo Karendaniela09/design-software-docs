@@ -17,6 +17,7 @@
 | DEC-006 | Tabla audit_login local sin publicacion al audit-service | 🟢 Estable |
 | DEC-007 | Separacion de first_name y last_name en lugar de full_name | 🟢 Estable |
 | DEC-008 | Distribucion de clave publica via JWKS, sin secreto compartido | 🟢 Estable |
+| DEC-009 | Autorizacion de sesiones: autogestion del propietario y VIEW/MANAGE del administrador global | 🟢 Estable |
 
 ---
 
@@ -207,6 +208,24 @@ de tokens validos.
   de infraestructura donde el descubrimiento de servicios aun no esta disponible), el secreto
   compartido por configuracion sigue disponible como mecanismo de respaldo manual, gestionado
   por config (no hardcodeado), documentado pero no es el camino primario.
+
+---
+
+### DEC-009: Autorizacion de sesiones: autogestion del propietario y VIEW/MANAGE del administrador global
+
+**Decision:** El usuario autenticado puede listar y revocar sus propias sesiones (`GET` y `DELETE /users/{id}/sessions…` con `{id}` igual al suyo) sin ningun feature RBAC. Para las sesiones de otro usuario solo actua un administrador global (`SYSTEM_ADMIN` sin centro de formacion): `IDENTITY_USER_VIEW` efectivo para listar e `IDENTITY_USER_MANAGE` efectivo para revocar. `IDENTITY_USER_VIEW` por si solo no autoriza revocar sesiones ajenas.
+
+**Contexto:** Antes de IAM R4 el contrato exigia `IDENTITY_USER_VIEW` tanto al propietario como al administrador y la revocacion no distinguia lectura de escritura. La autogestion de sesiones propias fue aprobada por Arquitectura (comentario en `SessionController.requireAuthorized`) y esta cubierta por `SessionControllerTest.r4SessionOwnerCanListAndRevokeWithoutAdminPermissions`, que autentica al propietario sin features y verifica que no se consulta la autorizacion (iam-service#44, merge `c7735cf`).
+
+**Alternativas consideradas:**
+- **Exigir `IDENTITY_USER_VIEW` tambien al propietario:** obliga a conceder un feature administrativo de lectura a cualquier usuario solo para que cierre sus sesiones; contradice el principio de minimo privilegio.
+- **Permitir que `IDENTITY_USER_VIEW` revoque sesiones ajenas:** mezcla un permiso de lectura con una accion de escritura.
+- **ADR propio:** no se justifica; es una regla de autorizacion de un solo servicio sin impacto en otros contratos. ADR-018 cubre la validacion del estado de sesion, no este reparto.
+
+**Consecuencias:**
+- `iam.yaml` retira `x-required-feature` de ambas operaciones porque el requisito deja de ser uniforme; la regla condicional vive en la `description` de cada operacion y en [contract.md](components/iam-api/contract.md).
+- Un rol administrativo limitado a un centro de formacion no autoriza consultas ni revocaciones como administrador global.
+- `shared-contracts` y la copia fijada del contrato en iam-service conservan el texto anterior hasta su siguiente sincronizacion (cambio solo de texto: no cambian rutas, parametros, esquemas ni codigos de respuesta).
 
 ---
 

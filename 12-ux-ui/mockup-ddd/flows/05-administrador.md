@@ -371,7 +371,8 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
   - `GET /api/v1/users/{id}` (`IDENTITY_USER_VIEW`) → `User` (perfil).
   - `GET /api/v1/users/{id}/sessions` (`IDENTITY_USER_VIEW`) → `Session[]{ id, device_hint,
     ip_address, created_at, expires_at, is_revoked, revoked_at }`.
-  - `DELETE /api/v1/users/{id}/sessions/{session_id}` (`IDENTITY_USER_VIEW`) → `204`.
+  - `DELETE /api/v1/users/{id}/sessions/{session_id}` (sesión ajena: `IDENTITY_USER_MANAGE` de un
+    administrador global; sesión propia: sin feature) → `204`.
   - `POST /api/v1/users/{id}/deactivate` (`IDENTITY_USER_MANAGE`) → `204` (soft delete + revoca
     sesiones).
 - **Errores del contrato:** `401`, `403`, `404`.

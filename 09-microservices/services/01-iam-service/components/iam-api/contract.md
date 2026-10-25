@@ -241,13 +241,27 @@ Desactiva la cuenta (soft delete). Revoca todos los refresh tokens activos.
 
 Lista sesiones activas (refresh tokens válidos) del usuario.
 
-**Feature requerido:** `IDENTITY_USER_VIEW`
+**Feature requerido:**
+- Ninguno cuando el usuario autenticado consulta sus propias sesiones (autogestión).
+- `IDENTITY_USER_VIEW` efectivo cuando un administrador global (`SYSTEM_ADMIN` sin centro de
+  formación) consulta las sesiones de otro usuario.
 
 ### `DELETE /users/{id}/sessions/{session_id}`
 
-Revoca una sesión específica (permite al usuario cerrar una sesión remota).
+Revoca una sesión específica. El usuario autenticado puede cerrar una sesión propia (autogestión).
 
-**Feature requerido:** `IDENTITY_USER_VIEW` (propietario) o `IDENTITY_USER_MANAGE` (admin)
+**Feature requerido:**
+- Ninguno cuando la sesión pertenece al usuario autenticado (autogestión).
+- `IDENTITY_USER_MANAGE` efectivo cuando un administrador global revoca una sesión ajena.
+
+Un administrador que solo dispone de `IDENTITY_USER_VIEW` no puede revocar sesiones de otros usuarios.
+
+> **Trazabilidad:** Alineado con la regla de autorización de sesiones implementada en
+> [iam-service#44](https://github.com/code-sena/design-software-iam-service/pull/44)
+> (IAM R4, merge `c7735cf`, octubre de 2026): consulta y revocación de sesiones propias sin
+> feature; consulta de sesiones ajenas con `IDENTITY_USER_VIEW` y revocación con
+> `IDENTITY_USER_MANAGE`, ambas solo para un administrador global. Esta regla aún no tiene un ADR
+> propio: el ADR-018 trata la validación del estado de sesión, no el reparto VIEW/MANAGE.
 
 ---
 
