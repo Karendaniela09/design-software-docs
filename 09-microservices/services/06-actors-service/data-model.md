@@ -1,6 +1,6 @@
 # Modelo de datos — actors-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 > Fuente de dominio: análisis M7 (Instructores, Aprendices, Empresas)
 
@@ -120,8 +120,32 @@ comisiones, etc. Complementa las reglas de disponibilidad del ambiente en schedu
 | `description` | TEXT | Sí | Detalle adicional |
 | `approved_by` | UUID | Sí | Referencia externa → iam-service (coordinador que aprobó) |
 | `created_at` | TIMESTAMPTZ | No | |
+| `status` | VARCHAR(12) | No | Estado del flujo de la excepción. DEFAULT `APPROVED`. **Transitorio**: lo reemplaza `status_id` al terminar la migración R6 (ver abajo) |
+| `status_id` | UUID | Sí (No tras el contract) | FK → `actors_parameterization.status(id)` (categoría `INSTRUCTOR_EXCEPTION`). Nullable durante expand y backfill; `NOT NULL` con DEFAULT `APPROVED` tras el contract |
+| `support_document_id` | UUID | Sí | Soporte documental de la excepción (referencia lógica a document-service) |
+| `reviewed_by` | UUID | Sí | Referencia externa → iam-service (quien revisó) |
+| `reviewed_at` | TIMESTAMPTZ | Sí | Momento de la revisión |
+| `decision_reason` | TEXT | Sí | Motivo de la decisión (aprobar o rechazar) |
 
 **CHECK**: `exception_type IN ('SICK_LEAVE','VACATION','COMMISSION','PERSONAL_LEAVE','TRAINING','OTHER')`.
+
+**CHECK** (transitorio, mientras exista `status`): `status IN ('PENDING','APPROVED','REJECTED','CANCELLED')`. Las columnas `status` a `decision_reason` las agregó el changeset `refinamiento-actors-exception-970`.
+
+**Migración del estado al catálogo (HU-ACT-023, R6 — expand, backfill, contract).** El estado pasa de texto a referencia al catálogo de estados (ADR-004) sin caída del servicio, en tres changesets de `actors-db`:
+
+| Fase | Changeset | Qué hace | Cuándo corre |
+|------|-----------|----------|--------------|
+| Expand | `r6-instructor-exception-status-expand-980` | Siembra los estados `PENDING`, `APPROVED`, `REJECTED` y `CANCELLED` de la categoría `INSTRUCTOR_EXCEPTION`, agrega `status_id` (FK `NOT VALID`) y un puente de sincronización entre `status` y `status_id` | `update` normal |
+| Backfill | `r6-instructor-exception-status-backfill-981` | Llena `status_id` desde `status` por lotes, de forma idempotente y reanudable | `update` normal |
+| Contract | `r6-instructor-exception-status-contract-990` | Valida y deja `status_id` `NOT NULL` con DEFAULT `APPROVED`, y elimina `status` y el puente | **Aparte y a propósito**: solo desde `changelog/changelog-contract.yaml`, nunca desde el `update` normal (mismo patrón que `monitoring-db`) |
+
+La API REST sigue exponiendo el campo `status`; el servicio lo traduce a `status_id`. Mientras `status` exista, el contract no ha corrido.
+
+**Orden de despliegue.** (1) `update` con el expand y el backfill, con la versión anterior del servicio en ejecución (el trigger de sincronización mantiene coherentes `status` y `status_id`); (2) desplegar la versión nueva de actors-service, que mapea solo `status_id` y expone `status` desde el catálogo; (3) ejecutar el contract con `changelog/changelog-contract.yaml`. El backfill se hace por lotes de 500 filas con `COMMIT` por lote (`FOR UPDATE SKIP LOCKED`), es idempotente y se reanuda si se interrumpe, porque lo pendiente es exactamente `status_id IS NULL`.
+
+**Compatibilidad por fase.** La versión anterior del servicio (no mapea `status` ni `status_id`) funciona en todas las fases. La versión nueva exige que `status_id` exista: no arranca sin el expand (`ddl-auto: validate`), así que el expand y el backfill van antes que su despliegue.
+
+**Marcha atrás.** Siempre por tag de Liquibase (`r6-pre`, `r6-expanded`, `r6-backfilled`), nunca con `rollback-count` después de un `update` completo: los últimos changesets del master son los de `03_dcl` y se desharían los roles. Deshacer el contract no obliga a detener servicios; deshacer el expand exige detener antes la versión nueva. Las pruebas de las fases (CI con PostgreSQL 16, relleno interrumpido y reanudado, compatibilidad de escritura vieja y nueva) viven en `tests/r6/` de `design-software-actors-db`.
 
 **Uso en scheduling**: el endpoint `GET /instructors/available` descuenta estas excepciones
 al calcular disponibilidad en el período solicitado.
@@ -308,6 +332,36 @@ referencial. Un `CHECK` garantiza que exactamente una esté poblada:
 referencial que una FK polimórfica no ofrece.
 
 **Solo INSERT** — la bitácora es append-only. No se modifica ni elimina.
+
+---
+
+### `company_visit_outbox`
+
+Es el **único outbox transaccional** de actors-service (decisión 10 de [decisions.md](./decisions.md)). Todo evento de dominio se inserta en la misma transacción que el cambio de negocio y un despachador lo publica después en RabbitMQ (exchange `actors-events`, ADR-001). El nombre es histórico (R3, visitas a empresas); se conserva porque la versión anterior del servicio sigue escribiendo y leyendo esta tabla durante el despliegue, y renombrarla rompería esa convivencia. Un renombre posterior iría en un changelog de contract aparte (HU-ACT-023, decisión 11). Schema `actors_tracking`.
+
+Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `published_at`); `hu-act-022-outbox-delivery-state-960` (HU-ACT-022) agrega, solo de forma aditiva, las columnas de estado de entrega.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `event_id` | UUID | No | PK (identificador del evento; viaja como `message_id` de AMQP y los consumidores deduplican por él) |
+| `event_type` | VARCHAR(100) | No | Tipo de evento; es la clave de enrutamiento. Ej: `actors.learner.enrolled` |
+| `payload` | JSONB | No | **Sobre completo** del evento (`event_id`, `event_type`, `version`, `timestamp`, `source_service`, `correlation_id`, `payload`); el despachador lo publica tal cual |
+| `created_at` | TIMESTAMPTZ | No | DEFAULT `now()` |
+| `published_at` | TIMESTAMPTZ | Sí | `NULL` = no entregado. Lo fijan el despachador y el relé anterior |
+| `aggregate_id` | UUID | Sí | Agregado que originó el evento (las filas anteriores a HU-ACT-022 no lo tienen) |
+| `status` | VARCHAR(16) | No | `PENDING`, `SENDING` (reclamado con arrendamiento), `PUBLISHED` o `DEAD` (intentos agotados). DEFAULT `PENDING` |
+| `attempts` | INTEGER | No | Intentos realizados (≥ 0). DEFAULT 0 |
+| `available_at` | TIMESTAMPTZ | No | No entregar antes de este momento (back-off). DEFAULT `now()` |
+| `lease_until` | TIMESTAMPTZ | Sí | Fin del arrendamiento mientras `status = SENDING`; vencido, otra instancia puede reclamar la fila |
+| `last_error` | VARCHAR(1000) | Sí | Último error de publicación |
+
+**CHECK**: `status IN ('PENDING','SENDING','PUBLISHED','DEAD')` (`ck_company_visit_outbox_status`) y `attempts >= 0` (`ck_company_visit_outbox_attempts`).
+
+**Índice**: `ix_company_visit_outbox_pending` sobre `(created_at)` WHERE `published_at IS NULL`; cubre la búsqueda de filas por entregar.
+
+**Compatibilidad con el relé anterior.** El despachador nunca reclama una fila con `published_at` fijado, y el changeset 960 marca `PUBLISHED` las que ya tenían `published_at`. La versión anterior del servicio inserta solo `(event_id, event_type, payload)` y marca `published_at`; ambas operaciones siguen válidas porque las columnas nuevas tienen valor por defecto.
+
+**Entrega.** Cada pasada reclama las filas debidas con `FOR UPDATE SKIP LOCKED` y un arrendamiento de 45 s (varias instancias no publican la misma fila y un proceso caído deja filas recuperables). Un fallo reintenta con back-off exponencial de 1, 4, 16 y 64 s; tras 5 intentos la fila queda `DEAD` hasta que un operador la reactive (`POST /api/v1/ops/actors/outbox/{eventId}/replay`). La entrega es **al menos una vez**: un corte entre la confirmación del broker y el marcado puede repetir el mismo `event_id`.
 
 ---
 

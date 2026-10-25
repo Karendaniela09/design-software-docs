@@ -340,6 +340,12 @@
 - `CONTRIBUTING.md`: reducido a hub operativo con enlaces a reglas especializadas
 - `00-governance/documentation-rules.md`: enfocado en reglas documentales, índices y diagramas
 
+### Changed — Modelo de datos de actors: excepción de disponibilidad y outbox
+
+- `09-microservices/services/06-actors-service/data-model.md`: `instructor_availability_exception` documenta las columnas del changeset 970 (`status`, `support_document_id`, `reviewed_by`, `reviewed_at`, `decision_reason`) y la migración R6 del estado al catálogo (`status_id`; expand, backfill y contract; HU-ACT-023). La sección `company_visit_outbox` pasa a ser el **único outbox** de actors, con las columnas de estado de entrega de HU-ACT-022 (changeset `hu-act-022-outbox-delivery-state-960`); se descarta la tabla paralela `outbox_event` que proponía `design-software-actors-db#66`.
+- `09-microservices/services/06-actors-service/decisions.md`: fila 10 con la decisión de un solo outbox por servicio (columnas aditivas sobre `company_visit_outbox`, un solo despachador por RabbitMQ), fila 11 con la regla de que el contract va en un changelog aparte y fila 13 con las decisiones de observabilidad de HU-ACT-024 (antes una nota de diseño local en `design-software-actors-service#34`); fila 12 con la decisión de HU-ACT-028: el plan de mejoramiento individual (`actors-mfe`) y el de ficha (`monitoring-mfe`) son dos conceptos, y el edge los distingue por el prefijo de dominio de ADR-022.
+- `09-microservices/services/06-actors-service/{events,README,runbook}.md` y `10-devops/runtime-configuration-map.md`: actors publica por **RabbitMQ** (exchange `actors-events`, ADR-001; HU-ACT-021) y no por Kafka. `events.md` documenta `actors.instructor.availability_changed`, la política de entrega del outbox (al menos una vez, back-off de 1/4/16/64 s, estado `DEAD`, reproducción) y la deuda de alineación del payload; el runbook reemplaza las variables y comandos de Kafka por los de RabbitMQ y agrega el procedimiento de eventos pendientes o muertos; la configuración pasa de `KAFKA_BOOTSTRAP_SERVERS` a `SPRING_RABBITMQ_*`, `ACTORS_OUTBOX_ENABLED` y `ACTORS_EVENTS_EXCHANGE` (mismo nombre en los 4 ambientes).
+
 ---
 
 ## [Estructura inicial]

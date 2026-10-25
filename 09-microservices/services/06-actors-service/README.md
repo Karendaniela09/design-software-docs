@@ -85,7 +85,11 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 - `ACTORS_DB_USER`
 - `IAM_JWKS_URI`
 - `IAM_JWT_ISSUER`
-- `KAFKA_BOOTSTRAP_SERVERS`
+- `ACTORS_EVENTS_EXCHANGE`
+- `ACTORS_OUTBOX_ENABLED`
+- `SPRING_RABBITMQ_HOST`
+- `SPRING_RABBITMQ_PASSWORD`
+- `SPRING_RABBITMQ_USERNAME`
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 
 ## Documentación técnica

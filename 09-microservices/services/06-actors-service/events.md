@@ -1,12 +1,12 @@
 # Eventos — actors-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-24
 
 ---
 
 ## Eventos publicados
 
-Topic: **`actors-events`**
+Broker: **RabbitMQ** (ADR-001). Exchange tipo topic **`actors-events`**, durable. La clave de enrutamiento es el `event_type` del evento y el `message_id` de AMQP es su `event_id`. El mensaje es JSON persistente y se publica con confirmaciones del broker (publisher confirms) y modo `mandatory`: un mensaje sin ruta o sin confirmación se reintenta, no se pierde. Los eventos se guardan primero en el outbox transaccional (ver [data-model.md](./data-model.md), `company_visit_outbox`) y se entregan después; la entrega se activa con `ACTORS_OUTBOX_ENABLED=true`.
 
 ### `actors.instructor.assigned`
 
@@ -38,9 +38,21 @@ Instructor habilitado para dictar una competencia en una ficha de formación.
 
 ---
 
+### `actors.instructor.availability_changed`
+
+Excepción de disponibilidad del instructor creada o dada de baja (permisos, vacaciones, comisiones). Se publica con la misma regla de entrega que el resto.
+
+**Payload publicado hoy:** el agregado `InstructorAvailabilityException` serializado en camelCase: `id`, `instructorId`, `exceptionType`, `startDatetime`, `endDatetime`, `description`, `approvedBy`, `active`, `deletedAt`, `deletedBy`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `rowVersion` y, con la migración R6 (HU-ACT-023), `status`. Los nombres no siguen todavía la convención `snake_case` de esta página; alinearlos es un cambio de contrato que se acuerda con los consumidores antes de hacerlo.
+
+**Consumidores:** `audit-service`, `scheduling-service`
+
+---
+
 ### `actors.learner.enrolled`
 
 Aprendiz matriculado en una ficha de caracterización.
+
+> **Nota de alineación.** El payload que el servicio publica hoy es el registro de matrícula en camelCase (`id`, `learnerId`, `fichaId`, `enrollmentStatusId`, `stage`, `enrollmentDate`, `completionDate`, `isCurrent`, `transferReason`); la tabla de abajo describe el contrato objetivo y no se ha alineado con el emisor. Es una deuda previa a la migración de broker, registrada para acordarla con `audit-service` y `monitoring-service`.
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
@@ -194,7 +206,7 @@ Todos los eventos siguen el envelope estándar del ecosistema:
 
 | Campo | Descripción |
 |-------|-------------|
-| `event_id` | UUID v4 generado por actors-service en el momento de publicar. Idempotency key para consumidores. |
+| `event_id` | UUID v4 generado por actors-service al guardar el evento en el outbox, en la misma transacción del cambio de negocio. Idempotency key para consumidores. |
 | `event_type` | Nombre del evento en formato `<servicio>.<entidad>.<accion>`. |
 | `version` | Versión del contrato de payload. Incremento mayor si hay breaking changes. |
 | `timestamp` | Momento de publicación en UTC, ISO 8601. |
@@ -203,14 +215,24 @@ Todos los eventos siguen el envelope estándar del ecosistema:
 
 ---
 
-## Política de reintentos
+## Política de entrega y reintentos
 
-- **Broker:** Kafka (o equivalente configurado en el entorno).
-- **Topic de mensajes fallidos:** `actors-events.dlq` (Dead Letter Queue).
+**Publicación (outbox).**
+
+- **Broker:** RabbitMQ, exchange `actors-events` (ADR-001).
+- **Garantía:** al menos una vez. La fila del evento se confirma en la misma transacción que el cambio de negocio y un despachador la publica después. Si el servicio cae entre la confirmación del broker y el marcado de la fila, el mismo `event_id` puede publicarse otra vez.
+- **Reintentos:** si el broker no confirma o no puede enrutar el mensaje, la fila vuelve a `PENDING` con back-off exponencial de 1 s, 4 s, 16 s y 64 s; tras 5 intentos queda `DEAD`.
+- **Eventos muertos:** `GET /api/v1/ops/actors/outbox/status` cuenta las filas por estado y `POST /api/v1/ops/actors/outbox/{eventId}/replay` reactiva una fila `DEAD`. Es una operación interna (feature `ACT_INSTRUCTOR_MANAGE` mientras no exista un permiso de operaciones); el edge no debe enrutarla a usuarios finales.
+- **Varias instancias:** cada fila se reclama con un arrendamiento de 45 s; un proceso caído deja filas que otra instancia recupera al vencer el arrendamiento.
+- **Procesamiento idempotente:** los consumidores deben usar `event_id` como clave de idempotencia y deduplicar en su propio almacén.
+
+**Consumo de eventos de IAM.**
+
+- **Cola de mensajes fallidos:** `actors-events.dlq` (Dead Letter Queue de RabbitMQ), configurada por `ACTORS_IAM_DLQ`.
 - **Reintentos en consumo:** 3 intentos con backoff exponencial (1 s → 4 s → 16 s) antes de enviar el mensaje a la DLQ.
 - **Retención en DLQ:** 7 días. Pasado ese plazo el mensaje expira.
-- **Procesamiento idempotente:** Los consumidores deben usar `event_id` como clave de idempotencia. actors-service garantiza que cada evento tiene un `event_id` único; los consumidores son responsables de deduplicar en su propio almacén.
-- **Alertas:** Un mensaje en `actors-events.dlq` debe generar una alerta en `monitoring-service` dentro de los 5 minutos siguientes a su llegada.
+- **Reproducción:** `POST /api/v1/ops/actors/iam-dlq/replay-one` republica un mensaje de la DLQ y lo reconoce en una sola transacción AMQP.
+- **Alertas:** un mensaje en `actors-events.dlq` debe generar una alerta dentro de los 5 minutos siguientes a su llegada (regla `rabbitmq_queue_messages_ready{queue="actors-events.dlq"} > 0` en `docker-infra`).
 
 ---
 

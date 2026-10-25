@@ -36,11 +36,13 @@ curl -sf http://actors-service:8006/health/db | jq .
 | `IAM_SERVICE_URL` | URL base de `iam-service` para validación de JWT | `http://iam-service:8001` |
 | `ACADEMIC_MANAGEMENT_SERVICE_URL` | URL base de `academic-management-service` | `http://academic-management-service:8003` |
 | `REFERENCE_DATA_SERVICE_URL` | URL base de `reference-data-service` | `http://reference-data-service:8002` |
-| `KAFKA_BROKERS` | Lista de brokers Kafka | `kafka:9092` |
-| `KAFKA_CONSUMER_GROUP` | Grupo de consumo para eventos entrantes | `actors-service-cg` |
-| `KAFKA_TOPIC_PUBLISH` | Topic de publicación de eventos propios | `actors-events` |
-| `KAFKA_TOPIC_IAM` | Topic de eventos de IAM a consumir | `iam-events` |
-| `KAFKA_TOPIC_ACADEMIC` | Topic de eventos académicos a consumir | `academic-events` |
+| `SPRING_RABBITMQ_HOST` | Host de RabbitMQ (ADR-001) | `rabbitmq` |
+| `SPRING_RABBITMQ_USERNAME` / `SPRING_RABBITMQ_PASSWORD` | Credenciales de RabbitMQ | (secreto) |
+| `ACTORS_OUTBOX_ENABLED` | Activa el despachador del outbox hacia RabbitMQ. Por defecto `false`: los eventos se guardan igual y se entregan al activarlo. Mismo valor funcional en los 4 ambientes una vez que la tabla tiene las columnas de HU-ACT-022 | `false` |
+| `ACTORS_EVENTS_EXCHANGE` | Exchange topic de los eventos propios | `actors-events` |
+| `ACTORS_IAM_CONSUMER_ENABLED` | Activa el consumidor de eventos de IAM | `false` |
+| `IAM_EVENTS_EXCHANGE` | Exchange de eventos de IAM a consumir | `iam-events` |
+| `ACTORS_IAM_QUEUE` / `ACTORS_IAM_DLX` / `ACTORS_IAM_DLQ` | Cola de entrada, exchange de mensajes fallidos y cola de mensajes fallidos del consumidor de IAM | `actors-service.iam` / `actors-iam-dlx` / `actors-events.dlq` |
 | `JWT_SECRET` | Clave de verificación de tokens JWT | (secreto) |
 | `PORT` | Puerto de escucha del servicio | `8006` |
 | `LOG_LEVEL` | Nivel de logging | `info` |
@@ -57,7 +59,7 @@ curl -sf http://actors-service:8006/health/db | jq .
 | BD no responde | Timeout en `actors_db` > 5 s o `/health/db` retorna 5xx | P0 | Ver [Falla de base de datos](#falla-de-base-de-datos) |
 | Instructores no encontrados masivamente | Error 404 masivo desde `scheduling-service` al consultar instructores activos | P1 | Verificar integridad: `SELECT COUNT(*) FROM instructor WHERE is_active = true` |
 | Mensaje en DLQ de actors-events | Mensaje en `actors-events.dlq` sin procesar > 5 min | P1 | Revisar DLQ; ver [Mensajes en Dead Letter Queue](#mensajes-en-dead-letter-queue) |
-| Desincronización con iam-service | Evento `iam.user.created` no procesado; actor sin registro en actors-service | P1 | Verificar consumer group `actors-service-cg` en Kafka |
+| Desincronización con iam-service | Evento `iam.user.created` no procesado; actor sin registro en actors-service | P1 | Verificar la cola `ACTORS_IAM_QUEUE` y la DLQ en RabbitMQ (consumidor activo, mensajes sin reconocer) |
 | Competencias marcadas `requires_review` en masa | Lote de `competency_assignment.requires_review = true` sin atender > 24 h | P2 | Notificar coordinadores para revisión manual |
 | Latencia alta en `/instructors/available` | P95 > 300 ms | P2 | Verificar índice `competency_id WHERE is_active = true`; ver [Consulta de disponibilidad lenta](#consulta-de-disponibilidad-lenta) |
 | Servicio no responde | `/health` retorna 5xx o sin respuesta > 1 min | P0 | Reiniciar pod/contenedor; revisar logs de arranque |
@@ -243,20 +245,45 @@ psql "$DATABASE_URL" -c "
 **Diagnóstico:**
 
 ```bash
-# Leer mensaje(s) en la DLQ (con kafka-console-consumer o kafkacat)
-kafka-console-consumer \
-  --bootstrap-server "$KAFKA_BROKERS" \
-  --topic actors-events.dlq \
-  --from-beginning \
-  --max-messages 10
+# Ver cuántos mensajes hay en la DLQ y leer uno sin consumirlo (consola de gestión de RabbitMQ)
+rabbitmqctl list_queues name messages_ready | grep actors-events.dlq
+# Cola > Get messages (Ack mode: Reject requeue true), o con la API de gestión:
+curl -s -u "$RABBITMQ_USER:$RABBITMQ_PASSWORD" -X POST "http://rabbitmq:15672/api/queues/%2F/actors-events.dlq/get" \
+  -H 'content-type: application/json' -d '{"count":1,"ackmode":"ack_requeue_true","encoding":"auto"}'
 ```
 
 **Acciones:**
 
 1. Identificar el `event_type` y `event_id` del mensaje fallido.
 2. Determinar la causa: payload malformado, BD no disponible en el momento del procesamiento, referencia externa inválida.
-3. Si fue un fallo transitorio (BD no disponible): republicar el mensaje al topic original desde la DLQ. La lógica de idempotencia usa `event_id` para evitar duplicados.
+3. Si fue un fallo transitorio (BD no disponible): reproducir el mensaje con `POST /api/v1/ops/actors/iam-dlq/replay-one` (un mensaje por llamada; requiere `ACT_INSTRUCTOR_MANAGE`). La lógica de idempotencia usa `event_id` para evitar duplicados.
 4. Si el payload es inválido: corregir manualmente el estado en la BD según el procedimiento correspondiente y descartar el mensaje de la DLQ.
+
+---
+
+### Eventos de actors pendientes o muertos en el outbox
+
+**Síntoma:** un consumidor (audit, monitoring, scheduling) no recibe eventos de actors; o hay filas `DEAD` en `actors_tracking.company_visit_outbox`.
+
+**Diagnóstico:**
+
+```bash
+# Conteo por estado (pending, sending, published, dead)
+curl -s -H "Authorization: Bearer $TOKEN" http://actors-api:8080/api/v1/ops/actors/outbox/status
+```
+
+```sql
+SELECT status, count(*), min(created_at) FROM actors_tracking.company_visit_outbox
+ WHERE published_at IS NULL GROUP BY status;
+SELECT event_id, event_type, attempts, last_error FROM actors_tracking.company_visit_outbox
+ WHERE status = 'DEAD' ORDER BY created_at;
+```
+
+**Acciones:**
+
+1. Si crece `pending` y nada se publica, comprobar que `ACTORS_OUTBOX_ENABLED=true`, que RabbitMQ responde y que el exchange `actors-events` existe con un binding hacia los consumidores. Con el interruptor en `false` las filas se acumulan sin perderse.
+2. Un mensaje sin binding se devuelve como "no enrutable" y la fila se reintenta; corregir el binding y esperar el siguiente reintento.
+3. Para una fila `DEAD`, corregir la causa (`last_error`) y reactivarla con `POST /api/v1/ops/actors/outbox/{eventId}/replay`. Los consumidores deduplican por `event_id`.
 
 ---
 
