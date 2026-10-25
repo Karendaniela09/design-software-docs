@@ -343,10 +343,10 @@ HAVING COUNT(c.id) = 0;
 
 **Síntoma:** Alerta por más de 10 mensajes en la DLQ operativa definida para Academic.
 
-> Decisión abierta: la arquitectura debe confirmar si Academic usará una DLQ común
-> (`academic-events.dlq`) o DLQ por consumidor, su retención y el procedimiento de
-> reprocesamiento. Este runbook describe el punto operativo a verificar, pero no
-> debe leerse como implementación demostrada por Docs.
+Academic separa la DLQ de publicación `academic-events.dlq` de la DLQ del
+consumidor R1 `academic-events.r1.dlq`. La retención continúa pendiente; el
+reproceso del consumidor R1 requiere autorización. El consumidor R1 viene
+apagado: solo recibe mensajes si se inicia con `ACADEMIC_R1_CONSUMER_ENABLED=true`.
 
 **Publicación confiable:** el patrón esperado inserta el evento en Outbox dentro
 de la misma transacción que modifica el dato de negocio; un relay publica al
@@ -365,19 +365,17 @@ retry de consumo.
 
 **Pasos de recuperación:**
 
-1. Inspeccionar los mensajes en la DLQ operativa definida:
-   ```bash
-   kafka-console-consumer.sh \
-     --bootstrap-server kafka:9092 \
-     --topic academic-events.dlq \
-     --from-beginning \
-     --max-messages 20
-   ```
+1. Inspeccionar `academic-events.r1.dlq` en RabbitMQ Management y registrar
+   `message_id`, `event_type` y la razón de DLQ.
 2. Identificar el `event_type` y el `correlation_id` del evento fallido.
 3. Verificar el estado del consumidor fallido (`audit-service`, `monitoring-service` o `actors-service`).
-4. Si el error es transitorio (consumidor temporalmente caído), el consumidor puede reprocesar al recuperarse.
+4. Si el error es transitorio, un operador autorizado ejecuta
+   `POST /api/v1/events/dlq/reprocess-next`. El endpoint conserva `message_id`
+   para que la deduplicación siga siendo válida.
 5. Si el error es permanente (payload malformado), registrar en el sistema de incidencias. Si el evento es crítico para auditoría, notificar al equipo de auditoría para registro manual.
-6. Retención máxima en DLQ: pendiente de decisión.
+6. Confirmar que la DLQ pase de 1 a 0 y que exista un solo recibo para el mismo
+   `event_id` en `academic_management.processed_event`.
+7. Retención máxima en DLQ: pendiente de decisión.
 
 ### Escenario 6: Inconsistencia de datos — ficha con training_center_id inexistente
 

@@ -21,6 +21,8 @@ tags:
     description: Fichas de matrícula (oferta educativa) y su ciclo de vida.
   - name: reports
     description: Reportes propios del dominio académico.
+  - name: events
+    description: Operación de la mensajería de eventos del dominio (DLQ del consumidor R1).
 
 paths:
   # ---------------------------------------------------------------- tech-lines
@@ -1006,6 +1008,29 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
+  # ---------------------------------------------------------------- events (operación)
+  /events/dlq/reprocess-next:
+    post:
+      operationId: reprocessNextDeadLetter
+      tags: [events]
+      summary: Reprocesa el siguiente mensaje de la DLQ del consumidor R1.
+      description: >-
+        Retira un mensaje de `academic-events.r1.dlq` y lo vuelve a publicar en el exchange
+        `academic-events`, conservando su `message_id` (la identidad trazable del evento) y su
+        `event_type`; no copia los metadatos `x-death` del broker. Si la cola está vacía responde
+        200 con `reprocessed: false`. Es una operación manual: no recibe cuerpo y procesa un
+        mensaje por llamada. El feature `ACADEMIC_FICHA_MANAGE` es el que valida hoy el
+        servicio; un feature propio para operar la DLQ queda como decisión abierta.
+      x-required-feature: ACADEMIC_FICHA_MANAGE
+      responses:
+        '200':
+          description: Resultado del reproceso.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DlqReprocessResult' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+
 components:
   parameters:
     TechLineId:
@@ -1371,6 +1396,17 @@ components:
         is_delayed:
           type: boolean
           description: true si superó `expected_end_date` sin llegar a estado terminal.
+
+    DlqReprocessResult:
+      type: object
+      required: [reprocessed, event_id]
+      properties:
+        reprocessed:
+          type: boolean
+          description: true si había un mensaje en la DLQ y se volvió a publicar.
+        event_id:
+          type: [string, 'null']
+          description: '`message_id` del mensaje reprocesado; null cuando la DLQ estaba vacía.'
 
   securitySchemes:
     bearerAuth:

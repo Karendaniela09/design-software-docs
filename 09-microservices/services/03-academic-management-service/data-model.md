@@ -164,6 +164,43 @@ Estado inicial: `INDUCTION`. Transiciones válidas:
 |-------|-------------------|----------------------|
 | `training_center_id` | `training_center.id` | `reference-data-service` |
 
+## Tablas de integración resiliente
+
+### `outbox`
+
+La operación de negocio y su evento se confirman en la misma transacción. El relay publica posteriormente y conserva los reintentos.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK técnica |
+| `event_id` | UUID | No | Identificador único del evento |
+| `event_type` | VARCHAR(120) | No | Tipo canónico |
+| `topic` | VARCHAR(120) | No | Exchange de destino |
+| `routing_key` | VARCHAR(120) | No | Clave de enrutamiento |
+| `payload` | JSONB | No | Envelope serializado |
+| `created_at` | TIMESTAMPTZ | No | Momento de creación |
+| `next_attempt_at` | TIMESTAMPTZ | No | Próximo intento |
+| `retry_count` | INT | No | Intentos fallidos, mayor o igual a cero |
+| `published_at` | TIMESTAMPTZ | Sí | Confirmación positiva del broker |
+| `dead_lettered_at` | TIMESTAMPTZ | Sí | Envío agotado a DLQ |
+| `last_error` | TEXT | Sí | Último error observado |
+
+La unicidad de `event_id` evita dos filas para el mismo evento. El índice parcial `ix_academic_outbox_pending` cubre eventos no publicados ni enviados a DLQ.
+
+### `processed_event`
+
+Registra la recepción durable del consumidor y actúa como frontera de idempotencia.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK técnica |
+| `event_id` | UUID | No | ID conservado desde RabbitMQ |
+| `event_type` | VARCHAR(120) | No | Tipo recibido |
+| `consumer_name` | VARCHAR(120) | No | Consumidor que registró el evento |
+| `processed_at` | TIMESTAMPTZ | No | Momento de primera recepción |
+
+La restricción única `(consumer_name, event_id)` hace que una segunda entrega no cree otro recibo. El índice `ix_academic_processed_event_processed_at` soporta consultas operativas y futura retención.
+
 ## Índices relevantes
 
 | Tabla | Campos | Tipo | Motivo |
@@ -173,6 +210,8 @@ Estado inicial: `INDUCTION`. Transiciones válidas:
 | `enrollment_ficha` | `status` | B-Tree | Filtro por estado activo (frecuente) |
 | `enrollment_ficha` | `training_center_id` | B-Tree | Fichas activas por centro |
 | `enrollment_ficha` | `(training_center_id, status)` | B-Tree | Consultas de dashboard por centro y estado |
+| `outbox` | `(next_attempt_at, created_at)` pendiente | B-Tree parcial | Relay de eventos publicables |
+| `processed_event` | `processed_at` | B-Tree | Operación y retención de recibos |
 
 ## Remediación de congruencia — R3 (2026-08-06)
 

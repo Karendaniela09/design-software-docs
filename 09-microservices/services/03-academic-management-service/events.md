@@ -190,16 +190,16 @@ No se usan `schema_version`, `occurred_at`, `data` ni `source_port` como campos 
 | Parámetro | Valor |
 |-----------|-------|
 | Topic principal | `academic-events` |
-| Dead Letter Queue | Pendiente decidir si será `academic-events.dlq` común o una DLQ por consumidor |
+| DLQ de publicación | `academic-events.dlq` |
+| Cola del consumidor R1 | `academic-events.r1.consumer`; el consumidor viene apagado (`ACADEMIC_R1_CONSUMER_ENABLED=false`) y su cola y binding se declaran solo al encenderlo |
+| DLQ del consumidor R1 | `academic-events.r1.dlq`, mediante `academic-events.r1.dlx` |
 | Reintentos del publicador Academic | 3 reintentos después del intento original |
 | Backoff del publicador Academic | 1s → 4s → 16s |
-| Reintentos de consumo | Pendiente por consumidor; no equivalen al retry del publicador |
+| Reintentos del consumidor R1 | 1s → 4s → 16s antes de DLQ |
 | Retención en DLQ | Pendiente de decisión |
-| Reprocesamiento | Pendiente de decisión |
+| Reprocesamiento R1 | `POST /api/v1/events/dlq/reprocess-next`, autorizado y conservando `message_id` |
 
-El publicador de Academic usa reintentos 1s → 4s → 16s tras el intento original. Esa política cubre la publicación hacia el broker y no define por sí sola el retry de consumo; cada consumidor debe documentar su cola, DLQ y reprocesamiento. No se debe hacer ACK de mensajes que no pudieron ser procesados correctamente.
-
-La decisión sobre DLQ común o por consumidor, retención y reprocesamiento queda abierta. Hasta cerrarla, este documento no afirma una política operativa única de DLQ.
+El publicador y el consumidor R1 usan reintentos 1s → 4s → 16s, pero son mecanismos independientes. El relay exige publisher confirm antes de marcar el outbox como publicado. El consumidor conserva el mismo `message_id` y registra una única recepción por `(consumer_name, event_id)`. El consumidor R1 es de referencia: solo registra recibos y no aplica lógica de negocio, por eso viene apagado por defecto (`academic.events.consumer.enabled`, variable `ACADEMIC_R1_CONSUMER_ENABLED`) y debe encenderse de forma explícita para ejercitar la idempotencia y la DLQ. Con el consumidor apagado una cola enlazada a `academic.#` crecería sin que nadie la drene, por eso no se declara. La retención operativa de las DLQ continúa pendiente.
 
 ---
 

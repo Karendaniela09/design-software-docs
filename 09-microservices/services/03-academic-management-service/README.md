@@ -19,7 +19,7 @@ Líneas/redes tecnológicas, programas, competencias, resultados de aprendizaje 
 ## Persistencia
 
 - Esquemas: academic_management
-- Tablas: academic_management.competency, academic_management.enrollment_ficha, academic_management.knowledge_network, academic_management.learning_outcome, academic_management.tech_line, academic_management.tech_network, academic_management.training_program
+- Tablas: academic_management.competency, academic_management.enrollment_ficha, academic_management.knowledge_network, academic_management.learning_outcome, academic_management.outbox, academic_management.processed_event, academic_management.tech_line, academic_management.tech_network, academic_management.training_program
 
 ## API detectada
 

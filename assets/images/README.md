@@ -13,6 +13,10 @@ Este índice conserva las capturas R3 de Monitoring y registra las capturas de v
 
 - [Capturas R3](./r3-observability/README.md).
 
+### Academic Management R1
+
+- [Academic Management R1: captura del Shell y la ficha](academic-r1-shell-ficha.png) — evidencia visual de la [validación integrada R1](../../11-quality/academic-r1-validation-report.md).
+
 ### Training Environment R6
 
 - [Training Environment R6: capturas de integración](training-environment-r6/README.md).

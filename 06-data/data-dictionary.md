@@ -1,6 +1,6 @@
 # Diccionario de datos
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
+> Estado: 🟡 En progreso | Última actualización: 2026-10-24
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Datos
 
 Índice transversal del modelo de datos. **La fuente de verdad de cada tabla (columnas, tipos, PII, retención, índices, seeds) es el `data-model.md` de cada servicio.** Este documento no duplica esas definiciones: las referencia y fija las reglas comunes.
@@ -12,6 +12,15 @@ Definidas en [modeling-conventions.md](./modeling-conventions.md):
 - **Columnas de auditoría** estándar según tipo de tabla (transaccional / catálogo / append-only).
 - **Estados de negocio** parametrizables (`status_category` / `status` / `status_transition`); enums técnicos cerrados como `VARCHAR + CHECK`.
 - **Nomenclatura** de constraints: `pk_`, `uq_`, `fk_`, `ck_`, `ix_`.
+
+## Actualización R1 de Academic Management — 2026-10-24
+
+| Objeto | Tipo / columnas principales | Changeset | Propósito y fuente canónica |
+|---|---|---|---|
+| `academic_management.outbox` | PK UUID; `event_id` UUID único; `payload` JSONB; `next_attempt_at`, `published_at`, `dead_lettered_at` TIMESTAMPTZ; `retry_count` INT | `01_ddl/03_tables/008_create_table_outbox.sql` (ya en `develop`) | Outbox transaccional: el evento se confirma en la misma transacción que el cambio de negocio; [modelo del servicio](../09-microservices/services/03-academic-management-service/data-model.md) |
+| `academic_management.processed_event` | PK UUID; `event_id` UUID; `consumer_name` VARCHAR(120); `processed_at` TIMESTAMPTZ; único `(consumer_name, event_id)` | `01_ddl/03_tables/009_create_table_processed_event.sql` ([academic-management-db#134](https://github.com/code-sena/design-software-academic-management-db/pull/134), abierto) | Recibo durable del consumidor e idempotencia; mismo modelo canónico |
+
+Estado: `outbox` ya existe en `develop`; `processed_event` está en el PR citado de `academic-management-db`, pendiente de revisión y merge. El índice global no duplica las definiciones: el modelo del servicio contiene los campos, los índices y los límites de retención. Decisión asociada: [ADR-025](../05-architecture/decisions/records/ADR-025-academic-resilient-messaging.md) (PROPOSED).
 
 ## Mapa de servicios → schema → modelo
 

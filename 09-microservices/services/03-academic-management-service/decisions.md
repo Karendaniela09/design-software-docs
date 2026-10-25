@@ -3,6 +3,8 @@
 > Estado: 🟢 Estable | Última actualización: 2026-06-20
 > Para decisiones que afectan más de un servicio → crear ADR en `05-architecture/decisions/records/`
 
+La estrategia de outbox, confirmación, idempotencia y DLQ se documenta en [ADR-025](../../../05-architecture/decisions/records/ADR-025-academic-resilient-messaging.md).
+
 | # | Decisión | Alternativas descartadas | Motivo | Fecha |
 |---|----------|--------------------------|--------|-------|
 | 01 | Combinar M5 (programas) y M6 (fichas) en un solo servicio | Dos servicios separados | Fichas referencian directamente al programa; separarlos requeriría llamadas síncronas frecuentes entre servicios sin beneficio real en este volumen | 2026-06-17 |
@@ -20,8 +22,10 @@ Estas decisiones quedan abiertas para arquitectura/producto; este PR de Docs no 
 |------|--------|------|
 | Semántica de `expected_end_date: null` | Abierta | Definir impacto en actualización operativa y reportes. |
 | Retención de DLQ | Abierta | Definir duración y responsabilidad operativa. |
-| DLQ común o por consumidor | Abierta | Decidir entre `academic-events.dlq` común o DLQs independientes. |
-| Reprocesamiento de DLQ | Abierta | Definir procedimiento, herramientas y permisos. |
+| DLQ por consumidor R1 | Abierta | ADR-025 (PROPOSED) propone que el consumidor R1 use `academic-events.r1.dlq` y que la DLQ de publicación siga separada; se cierra al aceptar el ADR. |
+| Reprocesamiento de DLQ R1 | Abierta | ADR-025 (PROPOSED) propone que un operador autorizado use `POST /api/v1/events/dlq/reprocess-next` conservando `message_id`; se cierra al aceptar el ADR. El endpoint está en el contrato OpenAPI. |
+| Feature RBAC para operar la DLQ | Abierta | Hoy el endpoint exige `ACADEMIC_FICHA_MANAGE`. Definir si la operación de DLQ merece un feature propio. |
+| Consumidor R1 de referencia | Abierta | Solo registra recibos (`processed_event`) y viene apagado por defecto. Definir qué consumidor real adopta el inbox idempotente. |
 | Ubicación/semántica de `row_version` | Abierta | Confirmar si viaja en body, header u otro mecanismo. |
 | Respuesta ante `404` de Actors | Abierta | Definir si Academic responde 404, 409, 422, 503 u otro error. |
 | Autenticación M2M/scope Academic → Actors | Abierta | Confirmar client credentials, scope y feature requeridos. |

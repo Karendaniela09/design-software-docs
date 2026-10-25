@@ -15,3 +15,4 @@
 - [ADR-022: Tabla de rutas del edge por dominio y origen único para el frontend](ADR-022-edge-routing-table-by-domain.md) — aceptada.
 - [ADR-023: El web-shell es dueño del login y de la sesión](ADR-023-web-shell-owns-login-and-session.md) — aceptada.
 - [ADR-024: Optimización de lecturas de Monitoring para R2](ADR-024-monitoring-r2-performance.md) — propuesta (PROPOSED).
+- [ADR-025: Mensajería resiliente para academic-management](ADR-025-academic-resilient-messaging.md) — propuesta (PROPOSED).
