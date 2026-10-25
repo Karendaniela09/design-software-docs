@@ -37,6 +37,7 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [qa-report-r2-scheduling-service.md](./qa-report-r2-scheduling-service.md) | Informe técnico y evidencias de rendimiento y datos (R2) de Scheduling: k6, ranking SQL, planes a dos escalas y rollback | 🟡 |
 | [qa-report-r6-monitoring-db.md](./qa-report-r6-monitoring-db.md) | Informe técnico y evidencias QA de la migración R6 de Monitoring DB | 🟡 |
 | [academic-r1-validation-report.md](./academic-r1-validation-report.md) | Validación integrada de Academic Management y R1 | 🟡 |
+| [test-evidence-document-mfe-acta-01.md](./test-evidence-document-mfe-acta-01.md) | Test evidence of document-mfe (HU-DOC-011): unit, coverage, tokens and bundle budget re-run on the final head; E2E, accessibility, Lighthouse and Pact pending | 🟡 |
 
 ## Plantillas
 

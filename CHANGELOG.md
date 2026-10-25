@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added — Decisiones y evidencia de document-mfe (HU-DOC-011)
+
+- `09-microservices/services/07-document-service/decisions.md`: filas 06 a 09 con las decisiones internas del front end (estado en hooks sobre puertos de salida, errores con reintento y sin listas vacías falsas, sesión y base `/document/api/v1` por el `httpClient` que inyecta el shell, permisos de la sesión con el backend como autoridad). Sin ADR nuevo: salen de ADR-022 y ADR-023.
+- `11-quality/test-evidence-document-mfe-acta-01.md` (y su fila en `11-quality/README.md`): evidencia de pruebas, cobertura, tokens y presupuesto de bundle sobre el head final de document-mfe#9; E2E, accesibilidad, Lighthouse y Pact quedan como pendientes de re-ejecución.
+
 ### Changed — Sesión y login del shell (HU-SHELL-010)
 
 - `10-devops/frontend-images.md`: la imagen del shell usa IAM real por defecto (la sesión genérica solo existe en el servidor de desarrollo) y `/login` es del shell; nueva sección "Shell en desarrollo" con el proxy único hacia el edge (`VITE_EDGE_ORIGIN`) y el ciclo de sesión de ADR-023 (access token en memoria, refresh con cookie `HttpOnly`, `httpClient` inyectado a los remotes). Se corrigen dos "Límites conocidos" que ya no son ciertos.
