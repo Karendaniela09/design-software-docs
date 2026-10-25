@@ -161,6 +161,10 @@
 
 ---
 
+### Added — Pantallas pendientes de actors-mfe en el inventario de UX
+
+- `12-ux-ui/mockup-ddd/screen-inventory.md`: sección "Pantallas pendientes de diseñar" con cuatro pantallas de `actors-mfe` que ya tienen HU `[FRONTEND]` en el tablero (HU-ACT-025 a HU-ACT-028) y backend terminado, pero no tienen mockup. No cuentan en el total de 53.
+
 ### Added — Profundización de seguridad, reglas de negocio y prerequisitos de fases
 
 **RBAC completo en `iam-service`:**

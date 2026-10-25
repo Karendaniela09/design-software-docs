@@ -120,7 +120,18 @@ halts_registrados: ninguno
 | **reference-mfe** | 6 | Datos de referencia, Editar catálogo, Parametrización, CRUD catálogos, Param: Hub de parametrización, Param: Geografía institucional |
 
 > Totales: **53 pantallas/modales**, **10 unidades de build** (9 MFE de dominio + shell-host).
-> Generadas hasta ahora: **53**. Pendientes: **0**.
+> Generadas hasta ahora: **53**. Pendientes de diseñar: **4** (ver la sección siguiente).
+
+## Pantallas pendientes de diseñar (HU en el tablero)
+
+Las cuatro pantallas siguientes de `actors-mfe` ya tienen HU `[FRONTEND]` en el tablero y su backend terminado, pero **no tienen mockup**: no cuentan en el total de 53. Quedan referenciadas aquí para cumplir el DoR de cada HU (pantalla listada); su mockup (detalle en `flows/`) se completa en una iteración de diseño posterior y no bloquea el merge del código.
+
+| # | Pantalla | Rol | MFE | HU | Backend | Estado |
+|---|---|---|---|---|---|:--:|
+| 1 | Bitácora de actividad (pestaña del perfil de instructor y de aprendiz) | coordinador + soporte | actors-mfe | HU-ACT-025 (docs#379) | HU-ACT-005 (docs#189) | ⬜ |
+| 2 | Aprendices activos por ficha | coordinador + instructor | actors-mfe | HU-ACT-026 (docs#380) | HU-ACT-012 (docs#196) | ⬜ |
+| 3 | Reportes de seguimiento (seguimiento de aprendices y carga de instructores) | coordinador académico + instructor de seguimiento | actors-mfe | HU-ACT-027 (docs#381) | HU-ACT-011 (docs#195) | ⬜ |
+| 4 | Planes de mejoramiento de instructor y aprendiz (plan individual del actor; el plan de ficha es de `monitoring-mfe`, HU-MON-008) | coordinador + instructor de seguimiento | actors-mfe | HU-ACT-028 (docs#382) | HU-ACT-010 (docs#194) | ⬜ |
 
 ## Prioridad de generación (MVP primero)
 1. Completar **Coordinador** (núcleo): Crear/editar horario → Panel de conflictos → Resolver conflicto → Disponibilidad → Fichas.
