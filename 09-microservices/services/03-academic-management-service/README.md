@@ -1,6 +1,6 @@
 # academic-management-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-24
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -23,6 +23,10 @@ Líneas/redes tecnológicas, programas, competencias, resultados de aprendizaje 
 
 ## API detectada
 
+Todas las rutas del contrato (`servers: /api/v1`, ver [`academic-management.yaml`](../../../07-api/contracts/openapi/academic-management.yaml) y [contract.md](./components/academic-management-api/contract.md)) se sirven bajo `/api/v1`, también los catálogos (`tech-lines`, `tech-networks`, `knowledge-networks`, `training-programs`) y las competencias. Las rutas sin ese prefijo responden 404. Por el edge se publican como `/academic-management/api/v1/...` (ADR-022 §3).
+
+Todos los listados responden con el envelope único del contrato: `{ "data": [...], "pagination": { "page", "page_size", "total_items", "total_pages" } }`, con `page` base 1 y `page_size` máximo 100 (`_shared.yaml`), y los campos de cada elemento en `snake_case` (`is_active`, `created_at`). Los errores usan `{ "error": { "code", "message", "details", "trace_id" } }`.
+
 | Metodo | Ruta | Fuente |
 |---|---|---|
 | GET | `/api/v1/competencies/{competencyId}/learning-outcomes` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\LearningOutcomeController.java` |
@@ -32,31 +36,31 @@ Líneas/redes tecnológicas, programas, competencias, resultados de aprendizaje 
 | GET | `/api/v1/fichas/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\FichaController.java` |
 | DELETE | `/api/v1/learning-outcomes/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\LearningOutcomeController.java` |
 | PUT | `/api/v1/learning-outcomes/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\LearningOutcomeController.java` |
-| DELETE | `/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
-| GET | `/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
-| PUT | `/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
-| GET | `/knowledge-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
-| POST | `/knowledge-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
-| DELETE | `/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
-| GET | `/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
-| PUT | `/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
-| GET | `/tech-lines` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
-| POST | `/tech-lines` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
-| DELETE | `/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
-| GET | `/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
-| PUT | `/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
-| GET | `/tech-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
-| POST | `/tech-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
-| DELETE | `/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
-| GET | `/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
-| PUT | `/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
-| GET | `/training-programs` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
-| POST | `/training-programs` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
-| DELETE | `/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
-| GET | `/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
-| PUT | `/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
-| GET | `/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
-| POST | `/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
+| DELETE | `/api/v1/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
+| GET | `/api/v1/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
+| PUT | `/api/v1/competencies/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
+| GET | `/api/v1/knowledge-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
+| POST | `/api/v1/knowledge-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
+| DELETE | `/api/v1/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
+| GET | `/api/v1/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
+| PUT | `/api/v1/knowledge-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\KnowledgeNetworkController.java` |
+| GET | `/api/v1/tech-lines` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
+| POST | `/api/v1/tech-lines` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
+| DELETE | `/api/v1/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
+| GET | `/api/v1/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
+| PUT | `/api/v1/tech-lines/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechLineController.java` |
+| GET | `/api/v1/tech-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
+| POST | `/api/v1/tech-networks` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
+| DELETE | `/api/v1/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
+| GET | `/api/v1/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
+| PUT | `/api/v1/tech-networks/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TechNetworkController.java` |
+| GET | `/api/v1/training-programs` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
+| POST | `/api/v1/training-programs` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
+| DELETE | `/api/v1/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
+| GET | `/api/v1/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
+| PUT | `/api/v1/training-programs/{id}` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\TrainingProgramController.java` |
+| GET | `/api/v1/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
+| POST | `/api/v1/training-programs/{programId}/competencies` | `.\design-software-academic-management-service\academic-adapters\src\main\java\co\sena\academic\adapter\in\rest\CompetencyController.java` |
 
 ## Configuración
 

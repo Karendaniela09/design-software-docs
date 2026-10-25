@@ -230,7 +230,7 @@ SELECT id, ficha_number, status FROM enrollment_ficha WHERE ficha_number = '2758
 
 ```bash
 # Verificar que scheduling-service ya puede leer la ficha
-curl -s http://localhost:8003/fichas/2758369 | jq '.status'
+curl -s -H "Authorization: Bearer <token>" http://localhost:8003/api/v1/fichas/<ficha_id> | jq '.status'
 # Esperado: "EXECUTION"
 ```
 
