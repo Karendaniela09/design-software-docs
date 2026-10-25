@@ -36,12 +36,25 @@ Envío, trazabilidad e idempotencia de notificaciones EMAIL e IN_APP.
 
 Las rutas de `notification-api` siguen el `servers: /api/v1` del contrato (ADR-022 §3, HU-NOTIF-010); `/health` y `/ready` también responden en la raíz porque el edge los enruta como rutas exactas. El health server del worker queda en la raíz.
 
+## Autenticación y autorización (HU-NOTIF-011)
+
+Las rutas de negocio de `notification-api` exigen un token de acceso de IAM (`Authorization: Bearer`, RS256, verificado
+localmente contra el JWKS de IAM, `iss` = `sena-iam-service`, sin `aud`; ver [authentication.md](../../../07-api/authentication.md)).
+`/health` y `/ready` siguen abiertos (`security: []` en el contrato). Cada operación exige además la feature que declara el
+contrato (`x-required-feature`): `POST /api/v1/notifications` → `NOTIFICATION_SEND`, `GET /api/v1/notifications/{id}` →
+`NOTIFICATION_VIEW`. Errores: `401` `MISSING_TOKEN` / `TOKEN_INVALID` / `TOKEN_EXPIRED`, `403` `INSUFFICIENT_PERMISSIONS`, `503`
+`DEPENDENCY_UNAVAILABLE` si no se pueden obtener las llaves de IAM. Detalle en
+[notification-api/contract.md](./components/notification-api/contract.md#seguridad).
+
 ## Configuración
 
 - `ID`
+- `IAM_JWKS_URL` (solo `notification-api`; obligatoria, sin default)
+- `IAM_JWT_ISSUER` (solo `notification-api`; obligatoria, sin default)
 - `NOTIFICATION_AMQP_URL`
 - `NOTIFICATION_DB_DSN`
 - `NOTIFICATION_DEPLOYMENT_ENVIRONMENT`
+- `NOTIFICATION_JWKS_HTTP_ALLOWED_HOSTS` (solo `notification-api`; opcional)
 - `NOTIFICATION_RECIPIENT_STUB_EMAIL`
 - `NOTIFICATION_SMTP_ADDR`
 - `NOTIFICATION_SMTP_FROM`

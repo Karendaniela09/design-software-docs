@@ -9,6 +9,8 @@
 
 ## Responsabilidad
 
+- autenticar con el token de IAM (RS256 + JWKS, emisor `sena-iam-service`) y exigir la feature de cada operación
+  (`NOTIFICATION_SEND` / `NOTIFICATION_VIEW`), ver [contract.md](./contract.md#seguridad);
 - recibir solicitudes manuales/síncronas de notificación;
 - validar DTOs generados desde `shared-contracts`;
 - consultar una notificación por ID;

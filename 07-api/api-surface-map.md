@@ -251,4 +251,4 @@ Nota training-environment: las operaciones del contrato (`training-environment.y
 | GET | `/ready` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
 | GET | `/api/v1/ready` | `.\design-software-notification-service\internal\adapter\in\http\handler.go` |
 
-Nota Notification: `notification-api` sirve las rutas del contrato bajo `/api/v1` (ADR-022 §3, HU-NOTIF-010); `/health` y `/ready` tambien responden en la raiz porque el edge los enruta como rutas exactas. El health server del worker queda en la raiz.
+Nota Notification: `notification-api` sirve las rutas del contrato bajo `/api/v1` (ADR-022 §3, HU-NOTIF-010); `/health` y `/ready` tambien responden en la raiz porque el edge los enruta como rutas exactas. El health server del worker queda en la raiz. Desde HU-NOTIF-011 las dos rutas de negocio exigen token de IAM y la feature del contrato (`POST` -> `NOTIFICATION_SEND`, `GET` -> `NOTIFICATION_VIEW`); `/health` y `/ready` son publicas.

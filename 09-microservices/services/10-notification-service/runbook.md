@@ -29,6 +29,9 @@ curl -sf http://localhost:8081/ready | jq .
 | Variable | Requerida | Default | Descripción |
 |----------|-----------|---------|-------------|
 | `NOTIFICATION_DB_DSN` | Sí | — | DSN PostgreSQL. |
+| `IAM_JWT_ISSUER` | Sí | — | `iss` esperado en el token de acceso (`sena-iam-service`). Sin default: el proceso no arranca sin ella. |
+| `IAM_JWKS_URL` | Sí | — | JWKS de IAM (`.../api/v1/auth/.well-known/jwks.json`). `https`, o `http` solo en loopback o en un host de la lista siguiente. Sin default. |
+| `NOTIFICATION_JWKS_HTTP_ALLOWED_HOSTS` | No | vacía | Hosts exactos, separados por comas, que pueden servir el JWKS por `http` desde la red interna (p. ej. `iam-api`). Vacía = solo `https` o loopback. Una entrada mal formada detiene el arranque. |
 | `PORT` | No | `8080` | Puerto HTTP. |
 | `NOTIFICATION_SMTP_ADDR` | No en API actual | `mailhog:1025` | SMTP para solicitud manual que entrega inmediatamente. |
 | `NOTIFICATION_SMTP_FROM` | No | `notifications@sena.local` | Remitente. |
@@ -58,8 +61,12 @@ curl -sf http://localhost:8081/ready | jq .
 
 ### Solicitud manual
 
+Las rutas de negocio exigen un token de IAM con `NOTIFICATION_SEND` (envío) o `NOTIFICATION_VIEW` (consulta); sin token
+responden `401`. `$TOKEN` es un access token vigente de IAM con esa feature.
+
 ```bash
 curl -i -X POST http://localhost:8080/api/v1/notifications \
+  -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "recipient_id": "3a286fa0-3fdb-48d5-baf2-0dfd0199a542",
@@ -70,13 +77,27 @@ curl -i -X POST http://localhost:8080/api/v1/notifications \
   }'
 ```
 
-Esperado contractualmente: `202 Accepted`. El body no está garantizado por el OpenAPI v0.1.
+Esperado: `202 Accepted` con el body `SentNotification` del contrato (incluye `recipient_email` y `created_at`).
 
 ### Consulta puntual
 
 ```bash
-curl -i http://localhost:8080/api/v1/notifications/<UUID>
+curl -i -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/notifications/<UUID>
 ```
+
+## P1 — La API responde 401, 403 o 503 en las rutas de negocio
+
+| Respuesta | Causa probable | Qué hacer |
+|-----------|----------------|-----------|
+| `401` `MISSING_TOKEN` | El cliente no envía `Authorization: Bearer <jwt>` (o usa otro esquema). | Corregir el cliente. |
+| `401` `TOKEN_INVALID` | Token malformado, firma de otra clave, `kid` fuera del JWKS, algoritmo distinto de RS256 o `iss` distinto de `IAM_JWT_ISSUER`. | Comparar `iss` del token con `IAM_JWT_ISSUER` y el `kid` con el JWKS de IAM. |
+| `401` `TOKEN_EXPIRED` | Access token vencido (TTL 15 min). | Renovar con `POST /auth/refresh`. |
+| `403` `INSUFFICIENT_PERMISSIONS` | Token válido sin `NOTIFICATION_SEND` (POST) o `NOTIFICATION_VIEW` (GET) en `features`. | Revisar los grants del rol en IAM. Hoy IAM no emite esas features (ver la brecha en [contract.md](./components/notification-api/contract.md#seguridad)). |
+| `503` `DEPENDENCY_UNAVAILABLE` | El servicio no alcanza el JWKS de IAM (`IAM_JWKS_URL`): la solicitud se rechaza, nunca se deja pasar. | Verificar que IAM responde el JWKS desde el contenedor y, si es `http`, que el host está en `NOTIFICATION_JWKS_HTTP_ALLOWED_HOSTS`. |
+
+Un `503` **no** es un token inválido: no pedir al usuario que vuelva a iniciar sesión hasta confirmar que el JWKS responde.
+Si el proceso no arranca con `IAM_JWT_ISSUER is required`, `IAM_JWKS_URL is required` o `jwks url must use https ...`,
+falta o está mal la variable correspondiente.
 
 ## P0 — Base de datos no disponible
 
