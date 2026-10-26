@@ -23,7 +23,7 @@ The objectives were to implement an observable path from Monitoring MFE to Postg
 
 The workspace contains 39 repositories. Monitoring Service uses Python/FastAPI, SQLAlchemy/psycopg, and RabbitMQ; the database is migrated with Liquibase; the MFE and shell use React/TypeScript and Module Federation. OTel and Collector + LGTM already existed but were only partially connected. The Monitoring Docker profile, browser instrumentation, explicit RED metrics, and the R3 dashboard/alert were missing. The local BFF returned fixtures instead of real persistence. PostgreSQL serialization and pagination errors were found, together with JWT authentication that decoded tokens without verifying their signature.
 
-The detailed diagnosis and initial matrix are in [01-diagnostico](01-diagnostico/diagnostico.md). A previous local change to `design-software-iam-mfe/vite.config.ts` was kept outside these branches.
+The detailed diagnosis and initial matrix are in the local evidence archive under `01-diagnostico/diagnostico.md`; that artifact is not tracked here. The tracked visual evidence index is [R3 observability images](../assets/images/r3-observability/README.md). A previous local change to `design-software-iam-mfe/vite.config.ts` was kept outside these branches.
 
 ## 4. Part 1 — Product validation
 
@@ -33,7 +33,7 @@ The Playwright test loads the real MFE inside the shell, creates a KPI type, ver
 
 The business test sends an input event identified as `r3-test-producer` to real RabbitMQ. The worker persists tracking, KPI, alert, and outbox data. The script queries the API, creates a plan, resolves the alert, checks the alert counter, and queries the KPI summary. This validates the local consumer and services, but not event emission from Academic Service, IAM login, Notification delivery, or external audit.
 
-HU-MON-008 frontend (#225) is closed and belongs to another learner. HU-INT-MON-001 through HU-INT-MON-004 and several historical stories with duplicate codes remain open. The [remote inventory](03-parte-1/historias-y-pr.md) preserves numbers, owners, statuses, and dates. GitHub Projects could not be read because the `read:project` scope was unavailable; Issues and PRs were consulted without changing their status.
+HU-MON-008 frontend (#225) is closed and belongs to another learner. HU-INT-MON-001 through HU-INT-MON-004 and several historical stories with duplicate codes remain open. The local evidence archive's `03-parte-1/historias-y-pr.md` records numbers, owners, statuses, and dates; it is not tracked in this repository. GitHub Projects could not be read because the `read:project` scope was unavailable; Issues and PRs were consulted without changing their status.
 
 The later extension also verified local IAM login, Academic ficha creation, and browser-session persistence after reload. Actors and Scheduling chains were run with Notification, test SMTP, and Audit. These are separate tests with separate evidence and do not constitute one full-ecosystem UI test. The institutional IdP, external story closure, and execution on merged target branches remain outside the verified scope.
 
@@ -41,7 +41,7 @@ The later extension also verified local IAM login, Academic ficha creation, and 
 
 The MFE starts CLIENT spans and propagates W3C `traceparent` through the injected HTTP client. The shell preserves the headers, Nginx routes them, FastAPI extracts the parent, and SQLAlchemy instruments real operations. `collect_r3_evidence.py` verifies one `trace_id` and walks the INSERT parents back to the frontend span. It also checks a real PostgreSQL conflict trace.
 
-OTel metrics are exported through the Collector to Prometheus: `monitoring_http_requests_total` and `monitoring_http_duration_seconds_{bucket,sum,count}`. Labels contain method, normalized route, and HTTP status; they do not contain UUIDs, query strings, or user identifiers. The histogram supports aggregatable p50/p95/p99 queries. Queries are in [promql.md](05-metricas/promql.md), with real responses in `prometheus-panels.json`.
+OTel metrics are exported through the Collector to Prometheus: `monitoring_http_requests_total` and `monitoring_http_duration_seconds_{bucket,sum,count}`. Labels contain method, normalized route, and HTTP status; they do not contain UUIDs, query strings, or user identifiers. The histogram supports aggregatable p50/p95/p99 queries. Queries are in the local evidence archive's `05-metricas/promql.md`, with real responses in `prometheus-panels.json`; those artifacts are not tracked here.
 
 JSON logs include UTC timestamp, level, service, message, `correlation_id`, `trace_id`, and `span_id`. HTTP completion adds method, route, status, duration, and error type. A `ContextVar` is cleared in `finally`, and concurrent tests verify request isolation. Incoming IDs are validated. Loki receives logs through OTLP and supports searching the browser operation's `correlation_id`. The Collector removes query text, complete URLs, and sensitive exception details from traces.
 
@@ -51,7 +51,7 @@ The alert counts **4xx and 5xx**, excludes liveness/readiness, uses a one-minute
 
 ## 6. Final architecture
 
-See the [Mermaid diagram and propagation model](02-arquitectura/arquitectura.md). The observed HTTP path is `web-shell/Monitoring MFE → Nginx → FastAPI → PostgreSQL`. Export goes to the Collector and then to Tempo, Prometheus, and Loki; Grafana queries those backends. The fixture-based BFF is outside the R3 path. No proxy spans or database operations are invented.
+The Mermaid diagram and propagation model are in the local evidence archive's `02-arquitectura/arquitectura.md`; that artifact is not tracked here. The observed HTTP path is `web-shell/Monitoring MFE → Nginx → FastAPI → PostgreSQL`. Export goes to the Collector and then to Tempo, Prometheus, and Loki; Grafana queries those backends. The fixture-based BFF is outside the R3 path. No proxy spans or database operations are invented.
 
 ## 7. Implementation and files
 
@@ -87,13 +87,13 @@ Pop-Location
 & design-software-monitoring-service/.venv/Scripts/python.exe design-software-monitoring-service/scripts/verify_r3_infra.py
 ```
 
-The [defense guide](09-sustentacion/guia.md) includes installation, startup, tests, and demonstration. For the backend suite with the local database, run `.venv/Scripts/python.exe scripts/record_check.py --database backend-local -- .venv/Scripts/python.exe -m pytest -q` from monitoring-service; the harness loads the URL from the ignored file without printing the password.
+The local evidence archive's `09-sustentacion/guia.md` includes installation, startup, tests, and demonstration; that artifact is not tracked here. For the backend suite with the local database, run `.venv/Scripts/python.exe scripts/record_check.py --database backend-local -- .venv/Scripts/python.exe -m pytest -q` from monitoring-service; the harness loads the URL from the ignored file without printing the password.
 
-The initial Actions failure caused by the missing private contract was corrected with an official SHA-256-pinned snapshot for independent checkout; the test was not disabled. Intermediate failures and corrections remain in [incidencias-corregidas.md](08-pruebas/incidencias-corregidas.md). Non-fatal SQL default and TestClient warnings remain. Retries are not presented as successful prior attempts.
+The initial Actions failure caused by the missing private contract was corrected with an official SHA-256-pinned snapshot for independent checkout; the test was not disabled. Intermediate failures and corrections remain in the local evidence archive's `08-pruebas/incidencias-corregidas.md`; that artifact is not tracked here. Non-fatal SQL default and TestClient warnings remain. Retries are not presented as successful prior attempts.
 
 ## 9. Current results and limitations
 
-The [final matrix](matriz-final.md) is the only current matrix for this dossier. It identifies the latest evidence for each criterion, its date, and its limits. A new E2E validation is not claimed merely because documentation was corrected.
+The local evidence archive's `matriz-final.md` is the only current matrix for this dossier. It identifies the latest evidence for each criterion, its date, and its limits; that artifact is not tracked here. A new E2E validation is not claimed merely because documentation was corrected.
 
 | Preserved local scenario | Result | Evidence relative to the evidence root |
 |---|---|---|
@@ -110,4 +110,4 @@ Limitations: the institutional IdP was not tested; external stories #322–#325 
 
 External stories HU-INT-MON-001 through HU-INT-MON-004 remain OPEN and are evaluated as PARTIAL. The report records the actual remote state without assuming that OPEN means draft or that a GitHub merge commit represents a completed integration.
 
-See [estado-actual.md](estado-actual.md), [architecture](02-arquitectura/arquitectura.md), [final matrix](matriz-final.md), and [defense guide](09-sustentacion/guia.md). The complete original evidence remains in `EVIDENCIAS-PLAN-MEJORAMIENTO-R3/`. Previous documentation PR #330 was closed without merge and was replaced by the `fix/r3-observability` PR.
+The local evidence archive contains `estado-actual.md`, `02-arquitectura/arquitectura.md`, `matriz-final.md`, and `09-sustentacion/guia.md`; those files are not tracked in this repository. The tracked screenshots are listed in [the R3 observability image index](../assets/images/r3-observability/README.md). The complete original evidence remains in `EVIDENCIAS-PLAN-MEJORAMIENTO-R3/`. Previous documentation PR #330 was closed without merge and was replaced by the `fix/r3-observability` PR.

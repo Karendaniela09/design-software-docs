@@ -109,7 +109,7 @@ docker compose --env-file .env.develop --profile iam --profile observability up 
 - **Env vars obligatorias** (sin default de secreto): `IAM_DB_USERNAME`/`IAM_DB_PASSWORD` (usuario de
   aplicación, ver `create-app-user.sh`), `IAM_JWT_PRIVATE_KEY`, `IAM_JWT_ISSUER`. Ver
   [runbook.md del servicio](../09-microservices/services/01-iam-service/runbook.md) para la tabla completa y
-  [.env.example](../../../../infraestructure/design-software-docker-infra/.env.example) para la plantilla.
+  [`.env.example` del repositorio docker-infra](https://github.com/code-sena/design-software-docker-infra/blob/develop/.env.example) para la plantilla.
 - **Trazas**: con `observability` activo, Grafana en `http://localhost:${GRAFANA_PORT:-3000}` → Explore →
   Tempo, buscar por `trace_id` (se ve en las cabeceras de respuesta / logs JSON del `iam-api`, ADR-008). Un
   login + operación autorizada debe mostrarse como **una sola traza** con spans HTTP (edge → iam-api) + DB
