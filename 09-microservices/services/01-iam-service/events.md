@@ -14,6 +14,8 @@ iam-service publica todos sus eventos en el topic `iam-events`.
 | `iam.user.deactivated` | `iam-events` | Se emite cuando un usuario es desactivado | `actors-service`, `audit-service` |
 | `iam.role.assigned` | `iam-events` | Se emite cuando se asigna un rol a un usuario | `audit-service` |
 | `iam.session.started` | `iam-events` | Se emite cuando un usuario inicia sesión exitosamente | `audit-service` |
+| `iam.scope_override.granted` | `iam-events` | Se emite al crear una excepción de autorización por usuario y feature | Consumidores de autorización y auditoría |
+| `iam.scope_override.revoked` | `iam-events` | Se emite al revocar una excepción de autorización por usuario y feature | Consumidores de autorización y auditoría |
 
 ---
 
@@ -173,6 +175,31 @@ Emitido cada vez que un usuario se autentica exitosamente y obtiene un JWT váli
 | `started_at` | `string (ISO 8601)` | Fecha y hora de inicio de la sesión |
 
 ---
+
+### `iam.scope_override.granted`
+
+Se publica cuando IAM crea una excepción de feature para un usuario. El payload corresponde al registro confirmado por el caso de uso; `is_allowed` distingue una concesión de un bloqueo explícito. El esquema versionado está en [`iam.scope_override.granted.schema.json`](https://github.com/code-sena/design-software-shared-contracts/blob/develop/events/iam.scope_override.granted.schema.json).
+
+```json
+{
+  "override_id": "f4c9f76b-235e-4c94-a08c-8015e1a746d8",
+  "user_id": "c31de513-92ab-4a87-9f2c-e91068fbb391",
+  "feature_code": "ACT_LEARNER_MANAGE",
+  "scope_type": "TRAINING_CENTER",
+  "is_allowed": true
+}
+```
+
+### `iam.scope_override.revoked`
+
+Se publica cuando IAM elimina una excepción de feature del usuario. El payload identifica la excepción revocada y al usuario al que pertenecía. El esquema versionado está en [`iam.scope_override.revoked.schema.json`](https://github.com/code-sena/design-software-shared-contracts/blob/develop/events/iam.scope_override.revoked.schema.json).
+
+```json
+{
+  "override_id": "f4c9f76b-235e-4c94-a08c-8015e1a746d8",
+  "user_id": "c31de513-92ab-4a87-9f2c-e91068fbb391"
+}
+```
 
 ## Eventos consumidos
 
