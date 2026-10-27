@@ -1,6 +1,6 @@
 # actors-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-26
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -71,10 +71,13 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 | GET | `/api/v1/productive-stages/{id}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ProductiveStageController.java` |
 | PUT | `/api/v1/productive-stages/{id}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ProductiveStageController.java` |
 | POST | `/api/v1/productive-stages/{id}/visits` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ProductiveStageController.java` |
+| GET | `/api/v1/ops/actors/outbox/status` | `.\design-software-actors-service\actors-api\src\main\java\co\sena\actors\api\ActorsOutboxOperationsController.java` |
+| POST | `/api/v1/ops/actors/outbox/{eventId}/replay` | `.\design-software-actors-service\actors-api\src\main\java\co\sena\actors\api\ActorsOutboxOperationsController.java` |
+| POST | `/api/v1/ops/actors/iam-dlq/replay-one` | `.\design-software-actors-service\actors-api\src\main\java\co\sena\actors\api\IamDeadLetterReplayController.java` |
 | GET | `/api/v1/reports/active-catalog` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\CatalogController.java` |
 | GET | `/api/v1/reports/instructor-load` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
 | GET | `/api/v1/reports/learner-tracking` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
-| GET | `/internal/fichas/{fichaId}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
+| GET | `/internal/fichas/{ficha_id}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
 | GET | `/internal/learners/by-user/{userId}/active-ficha` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalLearnerFichaController.java` |
 
 ## Configuración
@@ -83,7 +86,8 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 - `ACTORS_DB_PASSWORD`
 - `ACTORS_DB_URL`
 - `ACTORS_DB_USER`
-- `IAM_JWKS_URI`
+- `IAM_JWKS_URL` (preferida; URL del JWKS de IAM)
+- `IAM_JWKS_URI` (alias compatible para despliegues existentes)
 - `IAM_JWT_ISSUER`
 - `ACTORS_EVENTS_EXCHANGE`
 - `ACTORS_OUTBOX_ENABLED`

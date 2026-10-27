@@ -71,11 +71,14 @@ Ejemplo: `scheduling.class_session.created`
 
 | Evento | Descripción | Consumidores |
 |--------|-------------|-------------|
-| `actors.instructor.assigned` | Instructor habilitado para ficha/competencia | `audit-service`, `monitoring-service`, `scheduling-service` |
+| `actors.instructor.assigned` | Evento declarado; productor no implementado en actors-service develop | `audit-service`, `monitoring-service`, `scheduling-service` |
 | `actors.instructor.availability_changed` | Disponibilidad del instructor modificada | `audit-service`, `scheduling-service` |
 | `actors.learner.enrolled` | Aprendiz matriculado en ficha | `audit-service`, `monitoring-service` |
-| `actors.productive_stage.started` | Etapa productiva iniciada | `audit-service`, `monitoring-service` |
+| `actors.productive_stage.started` | Evento declarado; productor no implementado en actors-service develop | `audit-service`, `monitoring-service` |
 | `actors.company_visit.completed` | Visita a empresa completada | `audit-service`, `monitoring-service` |
+
+
+Nota: develop de actors-service actualmente emite actors.instructor.availability_changed, actors.learner.enrolled y actors.company_visit.completed. Las filas assigned y productive_stage.started quedan pendientes de decisión de dominio; no se publican hoy.
 
 ### document-service
 

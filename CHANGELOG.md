@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed — Security and event delivery documentation (HU-IAM-010, HU-IAM-018, HU-DOC-002, HU-DOC-008)
+
+- Add IAM issuer/key-rotation and refresh-cookie security notes, including the still-open cross-service audience policy (T-09).
+- Document Document outbox/inbox delivery, dispatcher operation, confirmed DLQ replay, and correct renderer idempotency details.
+- Link Document event payloads to the companion shared-contracts schema proposal.
+
 ### Changed — Scheduling API and emitted-event contracts (HU-SCH-007, HU-SCH-010, HU-INT-SCH-004)
 
 - `07-api/contracts/openapi/scheduling.yaml`: version 1.1.0 reflects the implemented `/health` and `/ready` endpoints.

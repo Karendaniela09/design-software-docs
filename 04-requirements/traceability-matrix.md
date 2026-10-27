@@ -1,6 +1,6 @@
 # Matriz de Trazabilidad
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
+> Estado: 🟡 En progreso | Última actualización: 2026-10-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [functional.md](./functional.md) · [user-stories.md](./user-stories.md) · [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
@@ -129,6 +129,22 @@ Historias efectivamente construidas y verificadas en el ambiente **`dev`**. Esta
 
 ---
 
+## Evidencia publicada de historias de Actors
+
+Esta tabla registra solo historias con issue y evidencia de QA ya publicados en Docs. No asigna RF ni estado de avance sin contrastar el board Project #3, que sigue siendo la fuente de estado.
+
+| HU | Alcance descrito en la evidencia | Issue de Docs | Evidencia |
+|----|----------------------------------|---------------|-----------|
+| HU-ACT-005 | Plan de mejoramiento (Sprint 04) | [#189](https://github.com/code-sena/design-software-docs/issues/189) | [test-evidence-hu-act-005.md](../11-quality/test-evidence-hu-act-005.md) |
+| HU-ACT-025 | Vista MFE del plan de mejoramiento | [#379](https://github.com/code-sena/design-software-docs/issues/379) | [test-evidence-hu-act-005.md](../11-quality/test-evidence-hu-act-005.md) |
+| HU-ACT-012 | API backend de aprendices activos por ficha | [#196](https://github.com/code-sena/design-software-docs/issues/196) | [test-evidence-hu-act-012.md](../11-quality/test-evidence-hu-act-012.md) |
+| HU-ACT-026 | Vista MFE de aprendices activos por ficha | [#380](https://github.com/code-sena/design-software-docs/issues/380) | [test-evidence-hu-act-012.md](../11-quality/test-evidence-hu-act-012.md) |
+| HU-ACT-011 | Backend de reportes de seguimiento | [#195](https://github.com/code-sena/design-software-docs/issues/195) | [test-evidence-hu-act-027.md](../11-quality/test-evidence-hu-act-027.md) |
+| HU-ACT-027 | Vista MFE de reportes de seguimiento | [#381](https://github.com/code-sena/design-software-docs/issues/381) | [test-evidence-hu-act-027.md](../11-quality/test-evidence-hu-act-027.md) |
+| HU-ACT-010 | Backend de planes de mejoramiento | [#194](https://github.com/code-sena/design-software-docs/issues/194) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
+| HU-ACT-028 | Vista MFE de planes de mejoramiento | [#382](https://github.com/code-sena/design-software-docs/issues/382) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
+
+Los IDs anteriores no completan por sí solos HU-ACT-001..028 ni certifican Done·Dev. La lista restante, la asignación HU↔RF y los estados requieren revisión del responsable del board.
 ## Cobertura inversa: HU → RF
 
 Verifica que cada historia esté respaldada por al menos un requisito funcional.
@@ -160,6 +176,24 @@ Verifica que cada historia esté respaldada por al menos un requisito funcional.
 | HU-23 | RF-MON-05 | Coordinador |
 
 ---
+
+## HUs de Document (estado de Project #3 no verificado)
+
+> La siguiente tabla registra el mapeo backlog → RF que figura en los issues activos de Document. No certifica implementación ni estado Done/Dev: GitHub Project #3 no estuvo disponible para esta revisión.
+
+| HU | Issue del backlog | Capacidad | RF | Servicio | Estado en Project #3 |
+|----|-------------------|-----------|----|----------|----------------------|
+| HU-DOC-001 | [docs#133](https://github.com/code-sena/design-software-docs/issues/133) | Registrar un documento ya subido a object storage | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-002 | [docs#135](https://github.com/code-sena/design-software-docs/issues/135) | Generar un documento de forma asíncrona desde plantilla | RF-DOC-01, RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-003 | [docs#136](https://github.com/code-sena/design-software-docs/issues/136) | Consultar y listar documentos | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-004 | [docs#137](https://github.com/code-sena/design-software-docs/issues/137) | Actualizar metadatos con bloqueo optimista | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-005 | [docs#138](https://github.com/code-sena/design-software-docs/issues/138) | Archivar un documento (soft delete) | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-006 | [docs#140](https://github.com/code-sena/design-software-docs/issues/140) | Descargar mediante URL firmada | RF-DOC-01, ADR-003 | `document-service` | No verificado |
+| HU-DOC-007 | [docs#141](https://github.com/code-sena/design-software-docs/issues/141) | Consultar historial y detalle de versiones | RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-008 | [docs#142](https://github.com/code-sena/design-software-docs/issues/142) | Subir una nueva versión | RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-009 | [docs#144](https://github.com/code-sena/design-software-docs/issues/144) | Reportar inventario por dominio y estado | RF-DOC-01, RF-DOC-02 (sin RF de reporting propio) | `document-service` | No verificado |
+
+**Colisión de identificador por resolver:** el issue cerrado [docs#265](https://github.com/code-sena/design-software-docs/issues/265) también usa `HU-DOC-001` para gestionar plantillas. Esta tabla usa el issue activo #133; producto debe confirmar el identificador canónico de la historia histórica antes de consolidar ambas referencias.
 
 ## Trazabilidad de decisiones de arquitectura (ADR → RF)
 

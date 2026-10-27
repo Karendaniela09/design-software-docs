@@ -645,20 +645,6 @@ paths:
   /learning-outcomes/{id}:
     parameters:
       - $ref: '#/components/parameters/LearningOutcomeId'
-    get:
-      operationId: getLearningOutcome
-      tags: [competencies]
-      summary: Detalle de un resultado de aprendizaje.
-      x-required-feature: ACADEMIC_PROGRAM_VIEW
-      responses:
-        '200':
-          description: Resultado de aprendizaje.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/LearningOutcome' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateLearningOutcome
       tags: [competencies]

@@ -1,6 +1,6 @@
 # Runbook — document-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 
 Servicio transversal de generación y ciclo de vida de documentos. Recibe solicitudes de otros servicios (vía eventos o API), genera PDFs y archivos estructurados a partir de plantillas Handlebars, y los almacena en object storage. Nunca almacena binarios en base de datos.
 
@@ -12,6 +12,7 @@ Servicio transversal de generación y ciclo de vida de documentos. Recibe solici
 | `template-api` | 8007 (`/templates`) | CRUD de plantillas HTML/Handlebars |
 | `document-lifecycle-worker` | worker | Consume eventos externos; orquesta ciclo de vida |
 | `pdf-renderer-worker` | worker | Renderiza plantillas y sube binarios a MinIO/S3 |
+| `document-outbox-dispatcher` | worker | Entrega eventos confirmados desde PostgreSQL a RabbitMQ |
 
 ---
 
@@ -43,6 +44,38 @@ aws s3 ls s3://"$S3_BUCKET" --max-items 5
 ```
 
 **SLO de disponibilidad:** 99% mensual (máximo ~7.3 h de downtime/mes).
+
+## Entrega de eventos y recuperación de la DLQ
+
+El `document-outbox-dispatcher` ejecuta `python -m apps.outbox_dispatcher.main`. Requiere
+`DB_URL` (o el alias `DATABASE_URL`) y `AMQP_URL`; opcionalmente usa `EVENTS_EXCHANGE`
+(`document-events` por defecto), `OUTBOX_POLL_SECONDS` (1 segundo) y `LOG_LEVEL`. No elimine filas
+pendientes de `document.event_outbox`: un fallo del broker conserva el evento y aplica backoff para
+reintentar.
+
+Para revisar pendientes:
+
+```sql
+SELECT event_id, event_type, attempts, available_at, last_error
+FROM document.event_outbox
+WHERE published_at IS NULL
+ORDER BY available_at, created_at;
+```
+
+Para revisar mensajes fallidos, inspeccione la cola durable `pdf-renderer.dlq` y su cabecera
+`x-failure-reason`. Después de corregir la causa, reprocesar explícitamente desde el entorno del
+servicio:
+
+```bash
+AMQP_URL="$AMQP_URL" DLQ_QUEUE=pdf-renderer.dlq \
+  GENERATION_QUEUE=document-generation-queue \
+  python -m apps.replay_dlq.main --limit 1
+```
+
+El comando conserva el cuerpo y `correlation_id`, publica con confirmación y solo entonces
+confirma el mensaje original de la DLQ. Aumente `--limit` únicamente después de revisar el volumen y
+la causa de los mensajes. La generación repetida es idempotente mediante `document.message_inbox`
+y `document_version.correlation_id`.
 
 ---
 

@@ -19,7 +19,7 @@ Este índice conserva las capturas R3 de Monitoring y registra las capturas de v
 
 ### Training Environment R6
 
-- [Training Environment R6: capturas de integración](training-environment-r6/README.md).
+Las capturas R6 no están versionadas en este repositorio.
 
 ### Reference Data HU-REF-020 y R1
 

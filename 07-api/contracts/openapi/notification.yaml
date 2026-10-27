@@ -1,7 +1,7 @@
 ﻿openapi: 3.1.0
 info:
   title: Notification Service API - Horarios SENA
-  version: 0.1.0
+  version: 0.2.0
   description: >-
     Solicitud y consulta de entregas de notificaciones. Notification es el propietario de
     sent_notification y de sus canales de entrega. La bandeja GET /notifications permanece
@@ -18,7 +18,7 @@ tags:
 paths:
   /notifications:
     post:
-      operationId: createManualNotification
+      operationId: sendNotification
       tags: [notifications]
       summary: Solicita una notificación manual.
       x-required-feature: NOTIFICATION_SEND
@@ -27,7 +27,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SentNotificationCreate'
+              $ref: '#/components/schemas/SendNotificationRequest'
       responses:
         '202':
           description: Solicitud aceptada para envio.
@@ -38,13 +38,12 @@ paths:
         '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-        '429': { $ref: '_shared.yaml#/components/responses/TooManyRequests' }
+        '503': { $ref: '_shared.yaml#/components/responses/ServiceUnavailable' }
   /notifications/{id}:
     parameters:
       - $ref: '#/components/parameters/NotificationId'
     get:
-      operationId: getNotification
+      operationId: getSentNotification
       tags: [notifications]
       summary: Consulta una notificación por UUID.
       x-required-feature: NOTIFICATION_VIEW
@@ -59,6 +58,7 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '503': { $ref: '_shared.yaml#/components/responses/ServiceUnavailable' }
   /health:
     get:
       operationId: health
@@ -68,7 +68,6 @@ paths:
       responses:
         '200':
           description: Servicio activo.
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
   /ready:
     get:
       operationId: ready
@@ -77,7 +76,6 @@ paths:
       summary: Readiness de dependencias del API.
       responses:
         '200': { description: Servicio listo. }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
         '503': { description: Dependencia no disponible. }
 components:
   securitySchemes:
@@ -98,7 +96,6 @@ components:
       required: [id, recipient_id, recipient_email, channel, subject, send_status, created_at]
       properties:
         id: { type: string, format: uuid }
-        generated_alert_id: { type: [string, 'null'], format: uuid }
         recipient_id: { type: string, format: uuid }
         recipient_email: { type: string, format: email }
         channel: { type: string, enum: [EMAIL, IN_APP] }
@@ -108,7 +105,7 @@ components:
         failure_reason: { type: [string, 'null'] }
         sent_at: { type: [string, 'null'], format: date-time }
         created_at: { type: string, format: date-time }
-    SentNotificationCreate:
+    SendNotificationRequest:
       type: object
       required: [recipient_id, recipient_email, channel, subject]
       properties:
@@ -116,8 +113,10 @@ components:
         recipient_email: { type: string, format: email }
         channel: { type: string, enum: [EMAIL, IN_APP] }
         subject: { type: string, maxLength: 300 }
-        body_summary: { type: string }
         template_code: { type: string }
+        template_vars:
+          type: object
+          additionalProperties: { type: string }
         source_service: { type: string }
         source_event_id: { type: string, format: uuid }
 

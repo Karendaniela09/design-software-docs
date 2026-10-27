@@ -34,8 +34,8 @@ convierte en **decisiones técnicas versionadas**.
   (mayoría / conflicto).
 - Los ✅ con consenso pasan a implementación por capa (REQ → BD → Mockup).
 - Los 💬 y los divididos van a reunión de cierre.
-- La Sección E de todas se junta en [`CONSOLIDADO.md`](CONSOLIDADO.md) → **backlog bloqueante de backend**
-  (debe quedar en **cero** para arrancar a codificar).
+- La Sección E de todas se consolida en `CONSOLIDADO.md` → **backlog bloqueante de backend**
+  (debe quedar en **cero** para arrancar a codificar). Ese archivo aún no se ha generado.
 
 ## Estructura
 

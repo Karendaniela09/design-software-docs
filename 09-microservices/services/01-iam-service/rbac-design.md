@@ -118,6 +118,7 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 | `ACT_INSTRUCTOR_MANAGE` | CRUD de instructores | WRITE |
 | `ACT_LEARNER_VIEW` | Ver lista y perfil de aprendices | READ |
 | `ACT_LEARNER_VIEW_OWN` | Ver solo el propio perfil (aprendiz) | READ |
+| `ACT_LEARNER_MANAGE` | YES GLOBAL | YES TRAINING_CENTER | YES TRAINING_CENTER | NO | NO | NO |
 | `ACT_LEARNER_MANAGE` | CRUD de aprendices | WRITE |
 | `ACT_COMPETENCY_VIEW` | Ver competencias asignadas a instructores | READ |
 | `ACT_COMPETENCY_ASSIGN` | Asignar/revocar competencias a instructores | WRITE |
@@ -284,6 +285,21 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 
 ---
 
+## Asignaciones RBAC pendientes de decision (auditoria 2026-10-26)
+
+El catalogo de features no define por si solo roles ni scopes. No se deben emitir estas autoridades hasta que Producto/Arquitectura confirme quien puede usarlas y con que alcance. El estado de las historias del board Project #3 no pudo verificarse desde este entorno.
+
+| Feature sin asignacion en el seed | Pendiente |
+|------------------------------------|-----------|
+| `DOC_VIEW` | Roles y scopes de consulta de documentos |
+| `DOC_DOWNLOAD` | Roles y scopes para descargar documentos |
+| `DOC_CREATE` | Roles y scopes para generar documentos |
+| `DOC_TEMPLATE_MANAGE` | Roles y scopes para administrar plantillas |
+| `DOC_ARCHIVE` | Roles y scopes para archivar documentos |
+| `ENV_RESERVATION_MANAGE` | Roles y scopes para gestionar reservas |
+| `MON_TRACKING_SESSION_VIEW` | Roles y scopes para consultar seguimiento |
+
+La asignacion de `ACT_LEARNER_MANAGE` sigue HU-11 (gestion de aprendices por ficha) y HU-ACT-007 (inscripcion en ficha): `SYSTEM_ADMIN` con scope `GLOBAL`, y `CENTER_DIRECTOR`/`COORDINATOR` con scope `TRAINING_CENTER`. El seed aditivo vive en `design-software-iam-db`.
 ## Cómo se aplica el scope en cada servicio
 
 El JWT del usuario lleva pre-calculado:

@@ -1,6 +1,6 @@
 # Diccionario de datos
 
-> Estado: 🟡 En progreso | Última actualización: 2026-10-24
+> Estado: 🟡 En progreso | Última actualización: 2026-10-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Datos
 
 Índice transversal del modelo de datos. **La fuente de verdad de cada tabla (columnas, tipos, PII, retención, índices, seeds) es el `data-model.md` de cada servicio.** Este documento no duplica esas definiciones: las referencia y fija las reglas comunes.
@@ -72,3 +72,17 @@ El servicio `reference-data-service` es el propietario de la jerarquía instituc
 | Revoke inbox/projection | Permisos sobrantes de reference_writer/reference_reader | `r1-reference-inbox-projection-grants-002` | Quita los privilegios heredados de los grants globales para que lo efectivo sea lo documentado |
 
 Estado: diseño documentado antes del código; ejecución y revisión del changeset en el macroproyecto pendientes. El índice global no duplica todos los campos: el modelo del servicio contiene la definición completa, rollback y límites de retención.
+
+## Actualización Document — HU-DOC-002 a HU-DOC-004 y mensajería R1
+
+Los cambios de esquema de Document entre los changesets 970 y 975 se reflejan en el modelo canónico del servicio. Esta tabla identifica las entregas y sus objetos; columnas, constraints, índices y relaciones están detallados en [`07-document-service/data-model.md`](../09-microservices/services/07-document-service/data-model.md).
+
+| Changeset | Objetos | Cambio documentado | Historia |
+|---|---|---|---|
+| `refinamiento-document-d9-template-versions-970` | `document_template_version`, `document_template_variable`, `document.template_version_id` | Versiones de plantilla, catálogo de variables y vínculo de la versión usada por cada documento | D-9 |
+| `hu-doc-002-document-generating-nullable-storage-972` | `document.storage_key`, `document.mime_type` | Permite persistir el estado `GENERATING`; `ck_document_storage_when_available` exige ambos valores al completar la generación | HU-DOC-002 |
+| `hu-doc-003-document-access-and-filters-973` | `document.training_center_id` | Alcance de acceso por centro y sus índices de consulta | HU-DOC-003 |
+| `hu-doc-004-version-idempotency-974` | `document_version.correlation_id` | Evita crear dos versiones para el mismo mensaje de generación | HU-DOC-004 |
+| `document-r1-outbox-inbox-975` | `document.event_outbox`, `document.message_inbox` | Publicación transaccional de eventos, reintentos y deduplicación de mensajes procesados | R1 |
+
+Los cambios 970 y 972–975 están registrados en los changelogs de `design-software-document-db`; el modelo del servicio es la fuente de detalle de esquema y no se replica aquí.
