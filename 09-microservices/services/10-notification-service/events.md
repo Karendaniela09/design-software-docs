@@ -1,6 +1,6 @@
 # Eventos — notification-service
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-26
+> Estado: 🟡 En progreso | Última actualización: 2026-10-26
 > Transporte: RabbitMQ / AMQP · Entrega: at-least-once
 
 > **Fuente global:** [event-catalog.md](../../event-catalog.md). Todos los mensajes usan el envelope versionado de `shared-contracts`.
@@ -73,15 +73,20 @@ Se publica **solo después de una entrega exitosa** y mediante Outbox.
   "version": "1.0",
   "timestamp": "2026-08-26T20:00:00Z",
   "source_service": "notification-service",
-  "correlation_id": "e91b6d1f-1a53-4701-9499-f616eec95ed1",
   "payload": {
     "notification_id": "a6a9e772-7784-4ffb-9359-2857f8101d74",
     "recipient_id": "3a286fa0-3fdb-48d5-baf2-0dfd0199a542",
     "channel": "EMAIL",
-    "sent_at": "2026-08-26T20:00:00Z"
+    "sent_at": "2026-08-26T20:00:00Z",
+    "trace_parent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
   }
 }
 ```
+
+Payload schema: `events/notification.notification.sent.schema.json` in shared-contracts (proposed in
+[shared-contracts PR #18](https://github.com/code-sena/design-software-shared-contracts/pull/18)).
+The current envelope has no `correlation_id`; trace propagation uses AMQP headers, while the
+optional `trace_parent` payload field lets the outbox relay continue the original trace.
 
 Consumidor: `audit-service`.
 
