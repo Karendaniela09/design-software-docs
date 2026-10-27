@@ -879,7 +879,10 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+                additionalProperties: false
 
   /ready:
     get:
