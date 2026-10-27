@@ -13,7 +13,7 @@
 | **Official rubric** | Acta 02, Section 10 |
 | **Official pull request** | [PR #19](https://github.com/code-sena/design-software-training-environment-service/pull/19) |
 | **Technical branch** | `feature/r3-observability` |
-| **Related architecture decision** | [ADR-012: End-to-end Observability in Training Environment](../../../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md) |
+| **Related architecture decision** | [ADR-012: End-to-end Observability in Training Environment](../05-architecture/decisions/records/ADR-012-training-environment-r3-observability.md) |
 | **Execution date** | October 18, 2026 |
 | **Report version** | 2.0 — QA revalidation: official OpenTelemetry SDK, MFE → API → PostgreSQL tracing, and RED metrics |
 | **Technical result** | **100% successful / PASS:** all rubric criteria implemented, QA blockers remediated, and automated tests validated |

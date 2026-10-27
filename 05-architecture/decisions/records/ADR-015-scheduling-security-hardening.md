@@ -89,6 +89,6 @@ Specifically:
 ## References
 
 - [05-architecture/security-threat-model.md](../../security-threat-model.md)
-- [09-microservices/services/05-scheduling-service/security.md](../../09-microservices/services/05-scheduling-service/security.md)
-- [11-quality/qa-report-r4-security-scheduling.md](../../11-quality/qa-report-r4-security-scheduling.md)
+- [09-microservices/services/05-scheduling-service/security.md](../../../09-microservices/services/05-scheduling-service/security.md)
+- [11-quality/qa-report-r4-security-scheduling.md](../../../11-quality/qa-report-r4-security-scheduling.md)
 - OWASP Application Security Verification Standard (ASVS v4.0.3) Level 1

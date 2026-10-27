@@ -150,12 +150,18 @@ def main() -> int:
     base_index = TreeIndex(base_commit)
 
     if args.all:
-        targets = [(p, None) for p in sorted(head_index.files) if p.lower().endswith(".md")]
+        targets = [
+            (p, None)
+            for p in sorted(head_index.files)
+            if p.lower().endswith(".md") and not posixpath.basename(p).startswith("_template-")
+        ]
     else:
         targets = [
             (c.path, c.old_path or c.path if c.status != "A" else None)
             for c in changed_files(base_commit, args.head)
-            if c.status in "AMRCT" and c.path.lower().endswith(".md")
+            if c.status in "AMRCT"
+            and c.path.lower().endswith(".md")
+            and not posixpath.basename(c.path).startswith("_template-")
         ]
 
     checked = 0

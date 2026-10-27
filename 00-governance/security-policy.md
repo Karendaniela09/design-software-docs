@@ -395,9 +395,8 @@ La org `code-sena` está en **GitHub Team** (beneficio educativo, plan verificad
   ajuste fino de teams/permisos (Read/Write/Admin) según el organigrama.
 
 Sube el nº de aprobaciones a 2 exportando `REQUIRED_APPROVALS=2` antes de correr el
-script. El rollout técnico se ejecuta (idempotente) con
-[`delivery/utils/protect-parent-branches.sh`](../../../delivery/utils/protect-parent-branches.sh),
-que crea o actualiza el ruleset en los 12 repos.
+script de rollout `delivery/utils/protect-parent-branches.sh`, que crea o actualiza el ruleset
+en los 12 repos. Ese script pertenece al workspace de entrega y no está versionado en este repo.
 
 ---
 
