@@ -8,6 +8,12 @@
 - Document Document outbox/inbox delivery, dispatcher operation, confirmed DLQ replay, and correct renderer idempotency details.
 - Link Document event payloads to the companion shared-contracts schema proposal.
 
+### Changed — Scheduling API and emitted-event contracts (HU-SCH-007, HU-SCH-010, HU-INT-SCH-004)
+
+- `07-api/contracts/openapi/scheduling.yaml`: version 1.1.0 reflects the implemented `/health` and `/ready` endpoints.
+- `09-microservices/services/05-scheduling-service/events.md`: add `schedule.created` and `schedule.validated`, align published event envelopes/payloads with `ScheduleEvents` and `OutboxRelay`, and correct the retry/DLQ description to current outbox behavior.
+- Keep the unimplemented `scheduling.conflict.detected` event explicitly marked pending producer verification.
+
 ### Changed — Integración de Reference Data: alcance GLOBAL y entorno reproducible (HU-INT-REF-001)
 
 - `07-api/contracts/openapi/reference-data.yaml`: declara `x-reference-scope: GLOBAL` y la respuesta `503 DEPENDENCY_UNAVAILABLE` (claves JWKS de IAM no disponibles) en las operaciones protegidas, con la respuesta reutilizable `DependencyUnavailable`.

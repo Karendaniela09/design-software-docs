@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Scheduling Service API — Horarios SENA
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     Construcción y publicación de horarios académicos: agregado `schedule` (borrador →
     revisión → publicado → archivado), sesiones de clase (`class_session`), franjas
@@ -1390,6 +1390,3 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
-
-
-

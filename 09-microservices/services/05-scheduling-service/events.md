@@ -1,6 +1,6 @@
 # Eventos — scheduling-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 
 ---
 
@@ -18,27 +18,24 @@ Se emite cuando el `scheduling-engine-workflow` crea una nueva sesión de clase 
 
 ```json
 {
-  "event": "scheduling.class_session.created",
-  "version": "1.0",
-  "source": "scheduling-service",
   "event_id": "uuid-v4",
+  "event_type": "scheduling.class_session.created",
+  "version": "1.0",
   "timestamp": "2026-06-20T10:00:00Z",
-  "data": {
-    "session_id": "uuid-v4",
-    "schedule_id": "uuid-v4",
-    "ficha_id": "uuid-v4",
-    "competency_id": "uuid-v4",
-    "instructor_id": "uuid-v4",
-    "environment_id": "uuid-v4",
-    "session_date": "2026-07-01",
-    "start_time": "08:00",
-    "end_time": "12:00",
-    "day_of_week": "TUESDAY",
-    "created_by": "uuid-v4",
-    "created_at": "2026-06-20T10:00:00Z"
+  "source_service": "scheduling-service",
+  "payload": {
+    "sessionId": "uuid-v4",
+    "scheduleId": "uuid-v4",
+    "competencyId": "uuid-v4",
+    "instructorId": "uuid-v4",
+    "environmentId": "uuid-v4",
+    "timeSlotId": "uuid-v4",
+    "sessionDate": "2026-07-01"
   }
 }
 ```
+
+Payload schema: `events/scheduling.class_session.created.schema.json` in shared-contracts.
 
 ---
 
@@ -52,26 +49,27 @@ Se emite cuando una sesión de clase es cancelada. Puede originarse desde `sched
 
 ```json
 {
-  "event": "scheduling.class_session.cancelled",
-  "version": "1.0",
-  "source": "scheduling-service",
   "event_id": "uuid-v4",
+  "event_type": "scheduling.class_session.cancelled",
+  "version": "1.0",
   "timestamp": "2026-06-20T11:30:00Z",
-  "data": {
-    "session_id": "uuid-v4",
-    "schedule_id": "uuid-v4",
-    "reason": "Ambiente en mantenimiento no programado",
-    "cancelled_by": "uuid-v4",
-    "cancelled_at": "2026-06-20T11:30:00Z"
+  "source_service": "scheduling-service",
+  "payload": {
+    "sessionId": "uuid-v4",
+    "scheduleId": "uuid-v4",
+    "cancelledAt": "2026-06-20T11:30:00Z"
   }
 }
 ```
+
+Payload schema: `events/scheduling.class_session.cancelled.schema.json` in shared-contracts.
 
 ---
 
 ### `scheduling.conflict.detected`
 
-Se emite por el `conflict-validator-worker` cuando detecta una colisión de recursos (instructor, ambiente o ficha) entre dos sesiones dentro de un mismo periodo.
+> Pendiente de verificación: el `OutboxRelay` actual no registra este tipo de evento. No debe
+> considerarse emitido hasta que se identifique un productor en el código desplegable.
 
 **Consumidores:** `monitoring-service`, `audit-service`
 
@@ -116,23 +114,75 @@ Se emite cuando un horario en estado `UNDER_REVIEW` es promovido a `PUBLISHED`. 
 
 ```json
 {
-  "event": "scheduling.schedule.published",
-  "version": "1.0",
-  "source": "scheduling-service",
   "event_id": "uuid-v4",
+  "event_type": "scheduling.schedule.published",
+  "version": "1.0",
   "timestamp": "2026-06-20T14:00:00Z",
-  "data": {
-    "schedule_id": "uuid-v4",
-    "ficha_id": "uuid-v4",
+  "source_service": "scheduling-service",
+  "payload": {
+    "scheduleId": "uuid-v4",
+    "fichaId": "uuid-v4",
     "period": "2026-1",
-    "session_count": 48,
-    "published_by": "uuid-v4",
-    "published_at": "2026-06-20T14:00:00Z",
-    "instructor_ids": ["uuid-v4", "uuid-v4"],
-    "environment_ids": ["uuid-v4", "uuid-v4"]
+    "sessionCount": 48,
+    "publishedBy": "uuid-v4",
+    "publishedAt": "2026-06-20T14:00:00Z",
+    "instructorIds": ["uuid-v4", "uuid-v4"],
+    "environmentIds": ["uuid-v4", "uuid-v4"]
   }
 }
 ```
+
+Payload schema: `events/scheduling.schedule.published.schema.json` in shared-contracts.
+
+---
+
+### `scheduling.schedule.created`
+
+Se emite al crear el borrador del horario. El payload reproduce los campos de `ScheduleEvents.ScheduleCreated`.
+
+```json
+{
+  "event_id": "uuid-v4",
+  "event_type": "scheduling.schedule.created",
+  "version": "1.0",
+  "timestamp": "2026-06-20T09:00:00Z",
+  "source_service": "scheduling-service",
+  "payload": {
+    "scheduleId": "uuid-v4",
+    "fichaId": "uuid-v4",
+    "period": "2026-1",
+    "name": "Horario 2026-1",
+    "createdBy": "uuid-v4",
+    "createdAt": "2026-06-20T09:00:00Z"
+  }
+}
+```
+
+Payload schema: `events/scheduling.schedule.created.schema.json` in shared-contracts.
+
+---
+
+### `scheduling.schedule.validated`
+
+Se emite cuando la validación de un horario termina. El payload reproduce los campos de `ScheduleEvents.ScheduleValidated`.
+
+```json
+{
+  "event_id": "uuid-v4",
+  "event_type": "scheduling.schedule.validated",
+  "version": "1.0",
+  "timestamp": "2026-06-20T09:30:00Z",
+  "source_service": "scheduling-service",
+  "payload": {
+    "scheduleId": "uuid-v4",
+    "fichaId": "uuid-v4",
+    "period": "2026-1",
+    "validatedAt": "2026-06-20T09:30:00Z"
+  }
+}
+```
+
+Payload schema: `events/scheduling.schedule.validated.schema.json` in shared-contracts.
 
 ---
 
@@ -199,36 +249,32 @@ Todos los eventos publicados por `scheduling-service` siguen este envelope está
 
 ```json
 {
-  "event":     "<dominio>.<entidad>.<acción>",
-  "version":   "1.0",
-  "source":    "scheduling-service",
   "event_id":  "<uuid-v4 único por evento>",
+  "event_type": "<dominio>.<entidad>.<acción>",
+  "version":   "1.0",
   "timestamp": "<ISO-8601 UTC>",
-  "data":      { }
+  "source_service": "scheduling-service",
+  "payload":   { }
 }
 ```
 
 | Campo | Tipo | Descripción |
 |---|---|---|
-| `event` | string | Nombre del evento en notación `dominio.entidad.acción` |
-| `version` | string | Versión del esquema del evento |
-| `source` | string | Servicio que origina el evento; siempre `scheduling-service` |
 | `event_id` | UUID v4 | Identificador único del evento, usado para deduplicación |
+| `event_type` | string | Nombre del evento en notación `dominio.entidad.acción` |
+| `version` | string | Versión del esquema del evento |
 | `timestamp` | ISO-8601 | Momento en que ocurrió el hecho de negocio (no el de publicación al broker) |
-| `data` | object | Payload específico del evento |
+| `source_service` | string | Servicio que origina el evento; siempre `scheduling-service` |
+| `payload` | object | Payload específico del evento |
 
 ---
 
-## Política de reintentos
+## Política de entrega
 
-| Evento | Criticidad | Estrategia |
-|---|---|---|
-| `scheduling.class_session.created` | Media | Reintento exponencial: 3 intentos, backoff 1 s / 5 s / 30 s |
-| `scheduling.class_session.cancelled` | Media | Reintento exponencial: 3 intentos, backoff 1 s / 5 s / 30 s |
-| `scheduling.conflict.detected` | Media | Reintento exponencial: 3 intentos, backoff 1 s / 5 s / 30 s |
-| `scheduling.schedule.published` | **Crítica** | **Outbox pattern** — at-least-once garantizado (ver sección siguiente) |
-
-Los eventos de criticidad media que agotan reintentos se envían a la dead-letter queue `scheduling-events-dlq`. El `monitoring-service` consume esa cola y genera una alerta operacional.
+El `OutboxRelay` publica los eventos pendientes con confirmación de RabbitMQ. Si la publicación falla,
+la fila queda en estado `PENDING` y vuelve a intentarse en el siguiente ciclo de polling; el código
+actual no limita el número de intentos ni envía estos registros a una DLQ. La entrega es at-least-once,
+por lo que los consumidores deduplican por `event_id`.
 
 Para los eventos consumidos (`environment.availability.changed`, `environment.maintenance.started`), el `conflict-validator-worker` aplica procesamiento idempotente usando `event_id` para evitar duplicar actualizaciones en el read model.
 
@@ -236,7 +282,9 @@ Para los eventos consumidos (`environment.availability.changed`, `environment.ma
 
 ## Outbox pattern
 
-`scheduling.schedule.published` se publica vía Outbox pattern (tabla `outbox` en `scheduling_db`) para garantizar at-least-once delivery incluso si el broker falla durante la publicación.
+Los cinco tipos de evento publicados por `scheduling-service` se guardan en la tabla `outbox` de
+`scheduling_db` dentro de la transacción del cambio de estado. El relay los publica con entrega
+at-least-once incluso si RabbitMQ falla temporalmente.
 
 **Flujo:**
 
