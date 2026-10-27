@@ -1,37 +1,43 @@
 # document-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
-> Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
+> Estado: implementacion parcial documentada; ultima revision contra el codigo: 2026-10-26.
+> El estado de las historias en GitHub Project #3 no se pudo verificar desde este entorno.
+> Equipo: Arquitectura.
 
 | Campo | Valor |
 |---|---|
-| Módulo | Transversal |
+| Modulo | Transversal |
 | App repo | `design-software-document-service` |
 | DB repo | `design-software-document-db` |
 | Stack | Python / FastAPI |
-| Deployables | document_api, template_api, pdf_renderer_worker, document_lifecycle_worker |
-| Estado observado | Esqueleto hexagonal con APIs FastAPI y workers definidos. |
+| Deployables observados | `document-api`, `template-api`, `pdf-renderer-worker`, `document-lifecycle-worker`, `outbox-dispatcher` y el comando de reproceso de DLQ |
+| Evidencia de operacion | Los detalles de rutas, variables y estados implementados estan en las fichas por componente enlazadas abajo. |
 
 ## Responsabilidad
 
-Documentos, versiones, plantillas, variables de plantilla, renderizado PDF y ciclo de vida documental.
+Gestiona documentos, versiones y plantillas; genera archivos en object storage y entrega eventos de dominio. La base de datos conserva metadatos y claves de almacenamiento, no el contenido del archivo.
 
 ## Persistencia
 
-- Esquemas: document
-- Tablas: document.document, document.document_template, document.document_template_variable, document.document_template_version, document.document_version
+- Esquema: `document`.
+- Tablas principales: `document`, `document_template`, `document_template_variable`, `document_template_version` y `document_version`.
+- La evidencia del modelo fisico esta en [data-model.md](./data-model.md).
 
-## API detectada
+## API y componentes
 
-| Metodo | Ruta | Fuente |
-|---|---|---|
-| GET | `/health` | `.\design-software-document-service\apps\template_api\main.py` |
-| GET | `/health` | `.\design-software-document-service\apps\document_api\main.py` |
+| Componente | Evidencia y alcance |
+|---|---|
+| `document-api` | [Contrato narrativo](./components/document-api/contract.md). El codigo implementa generacion asincrona, consulta/listado, historial de versiones y URL firmada. |
+| `template-api` | [README del componente](./components/template-api/README.md), con las operaciones y variables de entorno observadas. |
+| `pdf-renderer-worker` | [README operativo](./components/pdf-renderer-worker/README.md), con renderizado, reintentos y entrega de eventos. |
+| Outbox, inbox y reproceso | [Eventos](./events.md) y [runbook](./runbook.md). La actualizacion de estas instrucciones operativas sigue en Docs PR #437. |
 
-## Configuración
+El contrato OpenAPI publicado esta en [document.yaml](../../../07-api/contracts/openapi/document.yaml). El contrato narrativo distingue las rutas implementadas de las operaciones documentadas que siguen sin implementacion; las seis operaciones pendientes no se dan por cerradas sin decision de dominio.
 
-- Sin variables detectadas automáticamente en archivos de configuración/código.
+## Salud y configuracion
 
-## Notas
+El despliegue expone sondas de salud en las APIs. La matriz de rutas y las variables se documentan por componente y en [docker-infra](https://github.com/code-sena/design-software-docker-infra/blob/develop/docker-compose.yml); ya no se considera que el servicio carezca de configuracion por el hecho de que el README anterior no la inventariara.
 
-Aún tiene endpoints minimos de health en las APIs.
+## Trazabilidad
+
+Las HUs de Document y sus referencias a RF se registran en [traceability-matrix.md](../../../04-requirements/traceability-matrix.md). El mapeo documental se pudo actualizar con el backlog; el estado Done/Dev de Project #3 queda sin certificar porque el tablero no estuvo disponible.
