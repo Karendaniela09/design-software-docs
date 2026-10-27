@@ -1,6 +1,6 @@
 # Modelo de datos — document-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 
 ## Convenciones de modelado (transversales)
@@ -65,6 +65,8 @@ Documento generado en el sistema. Los binarios NO se almacenan aquí.
 
 **Relación `storage_key` ↔ `document_version`:** `document.storage_key` apunta siempre a la versión vigente; `document_version` guarda el historial. Es una desnormalización intencional para evitar un JOIN al leer la versión actual (ver decisions.md).
 
+El changeset `refinamiento-document-d9-template-versions-970` añade `document.template_version_id`, FK nullable a `document_template_version.id`, para conservar la versión de plantilla usada al generar el documento.
+
 ### `document_version`
 
 Historial de versiones de un documento.
@@ -79,6 +81,73 @@ Historial de versiones de un documento.
 | `created_at` | TIMESTAMPTZ | No | |
 | `notes` | TEXT | Sí | Observaciones sobre esta versión |
 | `correlation_id` | VARCHAR(100) | Sí | `correlation_id` del mensaje de generación que creó la versión; idempotencia del `pdf-renderer-worker` |
+
+### `document_template_version`
+
+Versión inmutable del contenido HTML/CSS de una plantilla, creada por el changeset `refinamiento-document-d9-template-versions-970`.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK; default `gen_random_uuid()` |
+| `template_id` | UUID | No | FK a `document_template.id` |
+| `version_number` | INTEGER | No | Versión única por plantilla |
+| `status` | VARCHAR(15) | No | Default `DRAFT`; `DRAFT`, `UNDER_REVIEW`, `PUBLISHED` o `OBSOLETE` |
+| `html_content` | TEXT | No | Plantilla HTML versionada |
+| `css_content` | TEXT | Sí | Estilos de la versión |
+| `change_summary` | TEXT | Sí | Resumen del cambio |
+| `checksum` | VARCHAR(64) | Sí | Checksum del contenido |
+| `created_at` | TIMESTAMPTZ | No | Default `now()` |
+| `created_by` | UUID | Sí | Actor que creó la versión |
+| `reviewed_at`, `published_at`, `obsolete_at` | TIMESTAMPTZ | Sí | Fechas de transición |
+| `reviewed_by`, `published_by` | UUID | Sí | Actores de revisión y publicación |
+
+`UNIQUE (template_id, version_number)` evita duplicar el número dentro de una plantilla; `ck_document_template_version_status` limita los estados.
+
+### `document_template_variable`
+
+Catálogo de variables disponibles para cada plantilla, creado por el changeset `refinamiento-document-d9-template-versions-970`.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK; default `gen_random_uuid()` |
+| `template_id` | UUID | No | FK a `document_template.id` |
+| `variable_name` | VARCHAR(100) | No | Nombre de variable |
+| `data_type` | VARCHAR(30) | No | Default `STRING` |
+| `required` | BOOLEAN | No | Default `true` |
+| `description` | TEXT | Sí | Descripción para quien administra la plantilla |
+
+`UNIQUE (template_id, variable_name)` impide repetir una variable en una plantilla.
+
+### `event_outbox`
+
+Outbox para la publicación de eventos del servicio (changeset `document-r1-outbox-inbox-975`). La fila se persiste junto con el cambio de dominio; el dispatcher procesa las pendientes según `available_at`.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `event_id` | UUID | No | PK e identidad idempotente del evento |
+| `event_type` | VARCHAR(120) | No | Tipo de evento |
+| `routing_key` | VARCHAR(120) | No | Clave de enrutamiento del broker |
+| `payload` | JSONB | No | Payload serializado |
+| `created_at`, `available_at` | TIMESTAMPTZ | No | Defaults `now()`; `available_at` habilita reintentos diferidos |
+| `published_at` | TIMESTAMPTZ | Sí | Momento de confirmación de publicación |
+| `attempts` | INTEGER | No | Default `0`; `ck_document_event_outbox_attempts` exige valor no negativo |
+| `last_error` | TEXT | Sí | Último error del dispatcher |
+
+El índice parcial `ix_document_event_outbox_pending` cubre `(available_at, created_at)` para filas aún no publicadas.
+
+### `message_inbox`
+
+Registro de mensajes ya procesados para evitar efectos duplicados (changeset `document-r1-outbox-inbox-975`).
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `consumer_name` | VARCHAR(100) | No | Consumidor que procesó el mensaje |
+| `message_id` | VARCHAR(100) | No | Identificador del mensaje recibido |
+| `document_id` | UUID | No | FK a `document.id`, con `ON DELETE CASCADE` |
+| `version_id` | UUID | No | FK a `document_version.id`, con `ON DELETE CASCADE` |
+| `processed_at` | TIMESTAMPTZ | No | Momento de procesamiento; default `now()` |
+
+La clave primaria compuesta `(consumer_name, document_id, message_id)` hace idempotente el registro por consumidor, documento y mensaje.
 
 ## Notas
 

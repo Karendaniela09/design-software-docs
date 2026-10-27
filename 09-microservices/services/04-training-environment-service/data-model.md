@@ -1,6 +1,6 @@
 # Modelo de datos — training-environment-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 
 ## Convenciones de modelado (transversales)
@@ -117,6 +117,35 @@ ALTER TABLE reservation ADD CONSTRAINT ex_reservation_overlap
 Requiere la extensión `btree_gist` (necesaria para combinar el operador de igualdad `=` sobre `environment_id` con el operador de solapamiento `&&` sobre el rango temporal dentro del mismo índice GiST).
 
 Esta protección a nivel de BD **complementa, no reemplaza**, la validación de conflictos del scheduling-service: el scheduling-service ofrece la validación temprana y la experiencia de usuario, mientras que la `EXCLUDE` constraint actúa como última línea de defensa frente a condiciones de carrera o escrituras concurrentes.
+
+### `item_type`
+
+Catálogo técnico de tipos de elementos inventariables, creado por HU-005 junto con el dominio de inventario aprobado en ADR-001.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK; se genera con `gen_random_uuid()` |
+| `name` | VARCHAR(100) | No | Nombre único del tipo |
+| `category` | VARCHAR(50) | Sí | Categoría opcional |
+| `created_at` | TIMESTAMPTZ | No | Alta del catálogo |
+
+`name` tiene restricción `UNIQUE`.
+
+### `inventory_item`
+
+Unidad física inventariada por ambiente, identificada de forma única por su placa o serial (`asset_tag`).
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK; se genera con `gen_random_uuid()` |
+| `environment_id` | UUID | No | FK interna a `environment.id` |
+| `item_type_id` | UUID | No | FK interna a `item_type.id` |
+| `asset_tag` | VARCHAR(50) | No | Placa/serial único |
+| `status` | VARCHAR(20) | No | Default `AVAILABLE`; valores `AVAILABLE`, `DAMAGED`, `LOST`, `IN_MAINTENANCE` |
+| `acquired_at` | DATE | Sí | Fecha de adquisición |
+| `created_at` | TIMESTAMPTZ | No | Alta del registro |
+
+`asset_tag` es único; `status` está limitado por `chk_inventory_item_status`. Las FK internas se llaman `fk_inventory_item_environment` y `fk_inventory_item_item_type`; los índices `ix_inventory_item_environment_id` y `ix_inventory_item_item_type_id` permiten filtrar por ambiente y tipo.
 
 ## Referencias externas
 
