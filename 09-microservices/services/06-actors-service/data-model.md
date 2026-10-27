@@ -1,6 +1,6 @@
 # Modelo de datos — actors-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-10-24
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 > Fuente de dominio: análisis M7 (Instructores, Aprendices, Empresas)
 
@@ -15,6 +15,39 @@
 - **Nomenclatura de constraints:** `pk_<tabla>`, `uq_<tabla>_<cols>`, `fk_<tabla>_<ref>`, `ck_<tabla>_<regla>`, `ix_<tabla>_<cols>`.
 
 ## Entidades propias
+
+### `status_category`, `status` y `status_transition`
+
+Tablas de estados de negocio en `actors_parameterization`. `status_category` agrupa los estados por entidad; `status` define cada estado y su presentación; `status_transition` registra transiciones permitidas y el feature requerido. Los campos y restricciones descritos aquí siguen las migraciones del servicio.
+
+| Tabla | Campos | Notas |
+|-------|--------|-------|
+| `status_category` | `id` UUID, `code` VARCHAR(50), `name` VARCHAR(120), `description` TEXT, `applies_to_entity` VARCHAR(80), `is_active` BOOLEAN, auditoría `created_at`/`created_by`/`updated_at`/`updated_by` | Categoriza los estados de negocio. |
+| `status` | `id` UUID, `status_category_id` UUID, `code` VARCHAR(50), `name` VARCHAR(120), `description` TEXT, `is_initial` BOOLEAN, `is_terminal` BOOLEAN, `display_order` SMALLINT, `color_hex` VARCHAR(7), `is_active` BOOLEAN, auditoría de creación y actualización | `color_hex` admite `NULL` o `#RRGGBB`. |
+| `status_transition` | `id` UUID, `status_category_id` UUID, `from_status_id` UUID, `to_status_id` UUID, `required_feature_code` VARCHAR(60), `is_active` BOOLEAN, auditoría de creación y actualización | Declara el feature IAM requerido para la transición, si aplica. |
+
+### `catalog` y `catalog_detail`
+
+Tablas del esquema `parameterization`, consultadas por `CatalogController` para la parametrización interna usada por el servicio.
+
+| Tabla | Campos | Notas |
+|-------|--------|-------|
+| `parameterization.catalog` | `id` UUID, `code` VARCHAR(100), `name` VARCHAR(200), `description` TEXT, `is_active` BOOLEAN, `created_at`, `updated_at` | `id` es PK; `code` es único. |
+| `parameterization.catalog_detail` | `id` UUID, `catalog_id` UUID, `code` VARCHAR(100), `name` VARCHAR(200), `description` TEXT, `display_order` INTEGER, `is_active` BOOLEAN, `created_at`, `updated_at` | FK a `catalog.id`; `code` es único dentro de `catalog_id`. |
+
+### `iam_processed_event`
+
+Tabla `actors_tracking.iam_processed_event` de deduplicación para los eventos consumidos desde IAM. La clave primaria `event_id` evita procesar el mismo evento más de una vez; `user_id`, `event_type` y `processed_at` registran el resultado. Hay índices sobre `user_id` y `processed_at`.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `event_id` | UUID | No | PK e identificador idempotente del evento IAM. |
+| `user_id` | UUID | No | Usuario al que se refiere el evento. |
+| `event_type` | VARCHAR(60) | No | Tipo de evento IAM procesado. |
+| `processed_at` | TIMESTAMPTZ | No | DEFAULT `now()`. |
+
+---
+
 
 ---
 

@@ -303,7 +303,7 @@ SELECT event_id, event_type, attempts, last_error FROM actors_tracking.company_v
 
 1. En el tablero, ver qué ruta concentra los errores y si son 4xx (clientes: token vencido o sin permiso, validación) o 5xx (servicio o base de datos).
 2. Con un `correlation_id` de una petición fallida, abrir su traza en Tempo y filtrar los logs por ese valor.
-3. 401/403 en bloque: revisar `IAM_JWKS_URI` e `IAM_JWT_ISSUER` y que iam-service responda. 5xx en bloque: ver [Falla de base de datos](#falla-de-base-de-datos) y los eventos del outbox si el fallo es al guardar un evento.
+3. 401/403 en bloque: revisar `IAM_JWKS_URL` (o el alias compatible `IAM_JWKS_URI`), `IAM_JWT_ISSUER` y que iam-service responda. 5xx en bloque: ver [Falla de base de datos](#falla-de-base-de-datos) y los eventos del outbox si el fallo es al guardar un evento.
 4. Si el aviso es por pruebas con entradas inválidas a propósito, la alerta vuelve a normal sola cuando el ratio baja del 5 %.
 
 ---

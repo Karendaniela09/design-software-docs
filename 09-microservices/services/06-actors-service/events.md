@@ -1,164 +1,34 @@
 # Eventos — actors-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-10-24
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 
 ---
 
 ## Eventos publicados
 
-Broker: **RabbitMQ** (ADR-001). Exchange tipo topic **`actors-events`**, durable. La clave de enrutamiento es el `event_type` del evento y el `message_id` de AMQP es su `event_id`. El mensaje es JSON persistente y se publica con confirmaciones del broker (publisher confirms) y modo `mandatory`: un mensaje sin ruta o sin confirmación se reintenta, no se pierde. Los eventos se guardan primero en el outbox transaccional (ver [data-model.md](./data-model.md), `company_visit_outbox`) y se entregan después; la entrega se activa con `ACTORS_OUTBOX_ENABLED=true`.
+Broker: RabbitMQ, exchange tipo topic actors-events. Cada mensaje usa el envelope compartido definido en events/event-envelope.schema.json. La tabla company_visit_outbox conserva el envelope completo y el dispatcher lo publica sin modificarlo.
 
-### `actors.instructor.assigned`
+### actors.instructor.availability_changed
 
-Instructor habilitado para dictar una competencia en una ficha de formación.
+Se emite al registrar o retirar una excepción de disponibilidad. El payload es el agregado InstructorAvailabilityException serializado por Jackson en camelCase: id, instructorId, exceptionType, startDatetime, endDatetime, description, approvedBy, createdAt, updatedAt, active, deletedAt, deletedBy, createdBy, updatedBy, rowVersion y status. Las fechas locales se publican como cadenas ISO 8601. El esquema compartido es events/actors.instructor.availability_changed.schema.json.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `instructor_id` | `uuid` | Identificador del instructor en actors-service |
-| `competency_id` | `uuid` | Identificador interno de la competencia |
-| `competency_code` | `string` | Código oficial de la competencia (ej. `220501046`) |
-| `ficha_id` | `uuid` | Ficha de caracterización a la que se asigna |
-| `assigned_by` | `uuid` | `user_id` del coordinador que realizó la asignación |
-| `assigned_at` | `datetime` | ISO 8601 — momento de la asignación |
+Consumidores declarados: audit-service y scheduling-service.
 
-**Ejemplo de payload:**
+### actors.learner.enrolled
 
-```json
-{
-  "instructor_id": "a1b2c3d4-0001-0000-0000-000000000000",
-  "competency_id": "e5f6a7b8-0002-0000-0000-000000000000",
-  "competency_code": "220501046",
-  "ficha_id": "c9d0e1f2-0003-0000-0000-000000000000",
-  "assigned_by": "f3a4b5c6-0004-0000-0000-000000000000",
-  "assigned_at": "2026-06-20T10:00:00Z"
-}
-```
+Se emite al crear una inscripción de aprendiz. El payload corresponde al record LearnerFichaEnrollment serializado en camelCase: id, learnerId, fichaId, enrollmentStatusId, stage, enrollmentDate, completionDate, isCurrent y transferReason. completionDate y transferReason pueden ser null. El esquema compartido es events/actors.learner.enrolled.schema.json.
 
-**Consumidores:** `audit-service`, `monitoring-service`, `scheduling-service`
+Consumidores declarados: audit-service y monitoring-service.
 
----
+### actors.company_visit.completed
 
-### `actors.instructor.availability_changed`
+Se emite al registrar una visita. El payload SQL contiene visit_id, productive_stage_id, learner_id, instructor_id, assigned_instructor_id, ficha_id y productive_stage_progress; ficha_id y productive_stage_progress pueden ser null. El esquema compartido es events/actors.company_visit.completed.schema.json.
 
-Excepción de disponibilidad del instructor creada o dada de baja (permisos, vacaciones, comisiones). Se publica con la misma regla de entrega que el resto.
+Consumidores declarados: audit-service y monitoring-service.
 
-**Payload publicado hoy:** el agregado `InstructorAvailabilityException` serializado en camelCase: `id`, `instructorId`, `exceptionType`, `startDatetime`, `endDatetime`, `description`, `approvedBy`, `active`, `deletedAt`, `deletedBy`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `rowVersion` y, con la migración R6 (HU-ACT-023), `status`. Los nombres no siguen todavía la convención `snake_case` de esta página; alinearlos es un cambio de contrato que se acuerda con los consumidores antes de hacerlo.
+### Eventos declarados sin productor en develop
 
-**Consumidores:** `audit-service`, `scheduling-service`
-
----
-
-### `actors.learner.enrolled`
-
-Aprendiz matriculado en una ficha de caracterización.
-
-> **Nota de alineación.** El payload que el servicio publica hoy es el registro de matrícula en camelCase (`id`, `learnerId`, `fichaId`, `enrollmentStatusId`, `stage`, `enrollmentDate`, `completionDate`, `isCurrent`, `transferReason`); la tabla de abajo describe el contrato objetivo y no se ha alineado con el emisor. Es una deuda previa a la migración de broker, registrada para acordarla con `audit-service` y `monitoring-service`.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `learner_id` | `uuid` | Identificador del aprendiz en actors-service |
-| `ficha_id` | `uuid` | Ficha en la que se matricula |
-| `ficha_number` | `string` | Número de ficha visible (ej. `2879431`) |
-| `stage` | `enum` | `LECTIVA` \| `PRODUCTIVA` |
-| `enrollment_date` | `date` | Fecha efectiva de matrícula (`YYYY-MM-DD`) |
-| `enrolled_by` | `uuid` | `user_id` del funcionario que registró la matrícula |
-| `enrolled_at` | `datetime` | ISO 8601 — momento del registro en el sistema |
-
-**Ejemplo de payload:**
-
-```json
-{
-  "learner_id": "b2c3d4e5-0010-0000-0000-000000000000",
-  "ficha_id": "c9d0e1f2-0003-0000-0000-000000000000",
-  "ficha_number": "2879431",
-  "stage": "LECTIVA",
-  "enrollment_date": "2026-06-20",
-  "enrolled_by": "f3a4b5c6-0004-0000-0000-000000000000",
-  "enrolled_at": "2026-06-20T10:15:00Z"
-}
-```
-
-**Consumidores:** `audit-service`, `monitoring-service`
-
----
-
-### `actors.productive_stage.started`
-
-Etapa productiva iniciada: el aprendiz comienza su práctica en una empresa.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `productive_stage_id` | `uuid` | Identificador de la etapa productiva |
-| `learner_id` | `uuid` | Aprendiz que inicia la etapa |
-| `company_id` | `uuid` | Empresa receptora |
-| `company_name` | `string` | Nombre legal de la empresa |
-| `supervisor_instructor_id` | `uuid` | Instructor de seguimiento asignado |
-| `start_date` | `date` | Fecha de inicio (`YYYY-MM-DD`) |
-| `planned_end_date` | `date` | Fecha de finalización estimada (`YYYY-MM-DD`) |
-| `total_hours_required` | `integer` | Total de horas de etapa requeridas por el programa |
-| `created_by` | `uuid` | `user_id` que registró la etapa |
-| `created_at` | `datetime` | ISO 8601 — momento de creación del registro |
-
-**Ejemplo de payload:**
-
-```json
-{
-  "productive_stage_id": "d4e5f6a7-0020-0000-0000-000000000000",
-  "learner_id": "b2c3d4e5-0010-0000-0000-000000000000",
-  "company_id": "e5f6a7b8-0030-0000-0000-000000000000",
-  "company_name": "Tecnologías del Valle S.A.S.",
-  "supervisor_instructor_id": "a1b2c3d4-0001-0000-0000-000000000000",
-  "start_date": "2026-07-01",
-  "planned_end_date": "2026-12-31",
-  "total_hours_required": 880,
-  "created_by": "f3a4b5c6-0004-0000-0000-000000000000",
-  "created_at": "2026-06-20T11:00:00Z"
-}
-```
-
-**Consumidores:** `audit-service`, `monitoring-service`
-
----
-
-### `actors.company_visit.completed`
-
-Visita de seguimiento del instructor a la empresa registrada como completada.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `visit_id` | `uuid` | Identificador de la visita |
-| `productive_stage_id` | `uuid` | Etapa productiva a la que pertenece la visita |
-| `learner_id` | `uuid` | Aprendiz visitado |
-| `company_id` | `uuid` | Empresa visitada |
-| `instructor_id` | `uuid` | Instructor que realizó la visita |
-| `visit_date` | `date` | Fecha de la visita (`YYYY-MM-DD`) |
-| `visit_number` | `integer` | Número secuencial de visita dentro de la etapa (1, 2, 3…) |
-| `visit_type` | `enum` | `SEGUIMIENTO` \| `EVALUACION_FINAL` |
-| `learner_performance` | `enum` | `SATISFACTORIO` \| `EN_RIESGO` \| `INSATISFACTORIO` |
-| `has_improvement_plan` | `boolean` | `true` si se generó plan de mejoramiento en la visita |
-| `recorded_at` | `datetime` | ISO 8601 — momento en que el instructor cerró el registro |
-
-**Ejemplo de payload:**
-
-```json
-{
-  "visit_id": "f6a7b8c9-0040-0000-0000-000000000000",
-  "productive_stage_id": "d4e5f6a7-0020-0000-0000-000000000000",
-  "learner_id": "b2c3d4e5-0010-0000-0000-000000000000",
-  "company_id": "e5f6a7b8-0030-0000-0000-000000000000",
-  "instructor_id": "a1b2c3d4-0001-0000-0000-000000000000",
-  "visit_date": "2026-09-15",
-  "visit_number": 2,
-  "visit_type": "SEGUIMIENTO",
-  "learner_performance": "SATISFACTORIO",
-  "has_improvement_plan": false,
-  "recorded_at": "2026-09-15T16:45:00Z"
-}
-```
-
-**Consumidores:** `audit-service`, `monitoring-service`
-
----
+actors.instructor.assigned y actors.productive_stage.started siguen descritos como eventos de dominio en la documentación funcional. No se encontró un emisor de esos event_type en el código de actors-service develop. Su producción o retiro requiere decisión de dominio; esta entrega no agrega funcionalidad ni los presenta como publicados.
 
 ## Eventos consumidos
 
@@ -195,7 +65,7 @@ Todos los eventos siguen el envelope estándar del ecosistema:
 ```json
 {
   "event_id": "uuid-v4",
-  "event_type": "actors.instructor.assigned",
+  "event_type": "actors.instructor.availability_changed",
   "version": "1.0",
   "timestamp": "2026-06-20T10:00:00Z",
   "source_service": "actors-service",

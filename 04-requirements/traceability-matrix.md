@@ -129,6 +129,22 @@ Historias efectivamente construidas y verificadas en el ambiente **`dev`**. Esta
 
 ---
 
+## Evidencia publicada de historias de Actors
+
+Esta tabla registra solo historias con issue y evidencia de QA ya publicados en Docs. No asigna RF ni estado de avance sin contrastar el board Project #3, que sigue siendo la fuente de estado.
+
+| HU | Alcance descrito en la evidencia | Issue de Docs | Evidencia |
+|----|----------------------------------|---------------|-----------|
+| HU-ACT-005 | Plan de mejoramiento (Sprint 04) | [#189](https://github.com/code-sena/design-software-docs/issues/189) | [test-evidence-hu-act-005.md](../11-quality/test-evidence-hu-act-005.md) |
+| HU-ACT-025 | Vista MFE del plan de mejoramiento | [#379](https://github.com/code-sena/design-software-docs/issues/379) | [test-evidence-hu-act-005.md](../11-quality/test-evidence-hu-act-005.md) |
+| HU-ACT-012 | API backend de aprendices activos por ficha | [#196](https://github.com/code-sena/design-software-docs/issues/196) | [test-evidence-hu-act-012.md](../11-quality/test-evidence-hu-act-012.md) |
+| HU-ACT-026 | Vista MFE de aprendices activos por ficha | [#380](https://github.com/code-sena/design-software-docs/issues/380) | [test-evidence-hu-act-012.md](../11-quality/test-evidence-hu-act-012.md) |
+| HU-ACT-011 | Backend de reportes de seguimiento | [#195](https://github.com/code-sena/design-software-docs/issues/195) | [test-evidence-hu-act-027.md](../11-quality/test-evidence-hu-act-027.md) |
+| HU-ACT-027 | Vista MFE de reportes de seguimiento | [#381](https://github.com/code-sena/design-software-docs/issues/381) | [test-evidence-hu-act-027.md](../11-quality/test-evidence-hu-act-027.md) |
+| HU-ACT-010 | Backend de planes de mejoramiento | [#194](https://github.com/code-sena/design-software-docs/issues/194) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
+| HU-ACT-028 | Vista MFE de planes de mejoramiento | [#382](https://github.com/code-sena/design-software-docs/issues/382) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
+
+Los IDs anteriores no completan por sí solos HU-ACT-001..028 ni certifican Done·Dev. La lista restante, la asignación HU↔RF y los estados requieren revisión del responsable del board.
 ## Cobertura inversa: HU → RF
 
 Verifica que cada historia esté respaldada por al menos un requisito funcional.
