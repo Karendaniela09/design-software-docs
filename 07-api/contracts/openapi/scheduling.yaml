@@ -1390,6 +1390,3 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
-
-
-
