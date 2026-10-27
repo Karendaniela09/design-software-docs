@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Audit Service API — Horarios SENA
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     API de **solo lectura** del event-store append-only `audit_record` (schema `audit`).
     El servicio persiste eventos vía `audit-worker` (fan-out de todos los topics, solo
@@ -19,6 +19,8 @@ security:
 tags:
   - name: audit
     description: Registros de auditoría (`audit_record`), solo lectura.
+  - name: health
+    description: Estado operativo del servicio.
 
 paths:
   # ---------------------------------------------------------------- audit-records
@@ -180,7 +182,10 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+                additionalProperties: false
 
 components:
   securitySchemes:
