@@ -14,8 +14,8 @@ Renderizar documentos a PDF a partir de una plantilla y sus datos, almacenar el 
 ## Tecnologías
 | Capa | Tecnología |
 |------|-----------|
-| Runtime | Agnóstico — cualquier backend (a definir) |
-| Framework | A definir |
+| Runtime | Python 3.11 |
+| Framework | Worker de Python; el API HTTP del mismo paquete usa FastAPI |
 | Persistencia | PostgreSQL 16 · schema `document` (metadatos) |
 | Binarios | Object storage S3-compatible (MinIO DEV/QA, S3 PROD) |
 | Transporte | Broker AMQP (RabbitMQ, ADR-001) |
@@ -38,7 +38,7 @@ Renderizar documentos a PDF a partir de una plantilla y sus datos, almacenar el 
 
 ## Idempotencia
 
-Deduplica por `correlation_id` (`document_version.correlation_id`, único por documento): un mensaje repetido no renderiza ni versiona de nuevo. DLQ `pdf-renderer.dlq` ante fallo persistente. Ver el [contrato](./contract.md).
+Deduplica por `correlation_id` con `document.message_inbox` y el índice de versión por documento; un mensaje repetido no renderiza ni versiona de nuevo. Los eventos salientes quedan en `document.event_outbox` hasta la confirmación de RabbitMQ. Los mensajes que agotan reintentos se retienen en `pdf-renderer.dlq` para reproceso manual. Ver el [contrato](./contract.md) y el [runbook de entrega/reproceso](../../runbook.md#entrega-de-eventos-y-recuperacion-de-la-dlq).
 
 ## Contrato
 Ver [contract.md](./contract.md) · [storage-adapters.md](../../storage-adapters.md)

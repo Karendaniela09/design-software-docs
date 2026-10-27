@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed — Security and event delivery documentation (HU-IAM-010, HU-IAM-018, HU-DOC-002, HU-DOC-008)
+
+- Add IAM issuer/key-rotation and refresh-cookie security notes, including the still-open cross-service audience policy (T-09).
+- Document Document outbox/inbox delivery, dispatcher operation, confirmed DLQ replay, and correct renderer idempotency details.
+- Link Document event payloads to the companion shared-contracts schema proposal.
+
 ### Changed — Integración de Reference Data: alcance GLOBAL y entorno reproducible (HU-INT-REF-001)
 
 - `07-api/contracts/openapi/reference-data.yaml`: declara `x-reference-scope: GLOBAL` y la respuesta `503 DEPENDENCY_UNAVAILABLE` (claves JWKS de IAM no disponibles) en las operaciones protegidas, con la respuesta reutilizable `DependencyUnavailable`.
