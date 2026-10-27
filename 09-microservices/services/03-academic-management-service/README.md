@@ -71,7 +71,7 @@ Todos los listados responden con el envelope único del contrato: `{ "data": [..
 - `DB_PASSWORD`
 - `DB_URL`
 - `DB_USER`
-- `IAM_JWKS_URI`
+- `IAM_JWKS_URL` (legacy alias: `IAM_JWKS_URI`)
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 - `OTEL_TRACES_SAMPLING`
 - `RABBITMQ_HOST`
