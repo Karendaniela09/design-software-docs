@@ -86,7 +86,8 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 - `ACTORS_DB_PASSWORD`
 - `ACTORS_DB_URL`
 - `ACTORS_DB_USER`
-- `IAM_JWKS_URL` (legacy alias: `IAM_JWKS_URI`)
+- `IAM_JWKS_URL` (preferida; URL del JWKS de IAM)
+- `IAM_JWKS_URI` (alias compatible para despliegues existentes)
 - `IAM_JWT_ISSUER`
 - `ACTORS_EVENTS_EXCHANGE`
 - `ACTORS_OUTBOX_ENABLED`

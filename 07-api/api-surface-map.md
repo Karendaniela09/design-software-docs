@@ -198,7 +198,7 @@ Nota training-environment: las operaciones del contrato (`training-environment.y
 | GET | `/api/v1/reports/active-catalog` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\CatalogController.java` |
 | GET | `/api/v1/reports/instructor-load` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
 | GET | `/api/v1/reports/learner-tracking` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\ReportsController.java` |
-| GET | `/internal/fichas/{fichaId}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
+| GET | `/internal/fichas/{ficha_id}/active-learners/count` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalFichaLearnerController.java` |
 | GET | `/internal/learners/by-user/{userId}/active-ficha` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalLearnerFichaController.java` |
 
 ## document-service
