@@ -1,9 +1,9 @@
 # template-api
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-01
+> Estado: 🟡 En progreso | Última actualización: 2026-10-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Arquitectura
 
-> **Implementado** en `design-software-document-service` (HU-DOC-001). Contrato a nivel de protocolo (REST/JSON).
+> **Implementado** en `design-software-document-service`; la referencia histórica es [docs#265](https://github.com/code-sena/design-software-docs/issues/265), que reutiliza `HU-DOC-001` para gestión de plantillas. El issue activo [docs#133](https://github.com/code-sena/design-software-docs/issues/133) usa el mismo ID para registrar documentos. La colisión queda pendiente de reconciliación en [traceability-matrix.md](../../../../../04-requirements/traceability-matrix.md).
 
 ## Tipo de componente
 

@@ -1,6 +1,6 @@
 # Matriz de Trazabilidad
 
-> Estado: 🟡 En progreso | Última actualización: 2026-08-28
+> Estado: 🟡 En progreso | Última actualización: 2026-10-26
 > Autor: Jesús Ariel González Bonilla (PM + Arquitecto) | Equipo: Producto
 
 > Fuente: [functional.md](./functional.md) · [user-stories.md](./user-stories.md) · [02-domain/entities-and-rules.md](../02-domain/entities-and-rules.md)
@@ -160,6 +160,24 @@ Verifica que cada historia esté respaldada por al menos un requisito funcional.
 | HU-23 | RF-MON-05 | Coordinador |
 
 ---
+
+## HUs de Document (estado de Project #3 no verificado)
+
+> La siguiente tabla registra el mapeo backlog → RF que figura en los issues activos de Document. No certifica implementación ni estado Done/Dev: GitHub Project #3 no estuvo disponible para esta revisión.
+
+| HU | Issue del backlog | Capacidad | RF | Servicio | Estado en Project #3 |
+|----|-------------------|-----------|----|----------|----------------------|
+| HU-DOC-001 | [docs#133](https://github.com/code-sena/design-software-docs/issues/133) | Registrar un documento ya subido a object storage | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-002 | [docs#135](https://github.com/code-sena/design-software-docs/issues/135) | Generar un documento de forma asíncrona desde plantilla | RF-DOC-01, RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-003 | [docs#136](https://github.com/code-sena/design-software-docs/issues/136) | Consultar y listar documentos | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-004 | [docs#137](https://github.com/code-sena/design-software-docs/issues/137) | Actualizar metadatos con bloqueo optimista | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-005 | [docs#138](https://github.com/code-sena/design-software-docs/issues/138) | Archivar un documento (soft delete) | RF-DOC-01 | `document-service` | No verificado |
+| HU-DOC-006 | [docs#140](https://github.com/code-sena/design-software-docs/issues/140) | Descargar mediante URL firmada | RF-DOC-01, ADR-003 | `document-service` | No verificado |
+| HU-DOC-007 | [docs#141](https://github.com/code-sena/design-software-docs/issues/141) | Consultar historial y detalle de versiones | RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-008 | [docs#142](https://github.com/code-sena/design-software-docs/issues/142) | Subir una nueva versión | RF-DOC-02 | `document-service` | No verificado |
+| HU-DOC-009 | [docs#144](https://github.com/code-sena/design-software-docs/issues/144) | Reportar inventario por dominio y estado | RF-DOC-01, RF-DOC-02 (sin RF de reporting propio) | `document-service` | No verificado |
+
+**Colisión de identificador por resolver:** el issue cerrado [docs#265](https://github.com/code-sena/design-software-docs/issues/265) también usa `HU-DOC-001` para gestionar plantillas. Esta tabla usa el issue activo #133; producto debe confirmar el identificador canónico de la historia histórica antes de consolidar ambas referencias.
 
 ## Trazabilidad de decisiones de arquitectura (ADR → RF)
 
