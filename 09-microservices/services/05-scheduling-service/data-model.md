@@ -1,6 +1,6 @@
 # Modelo de datos — scheduling-service
 
-> Estado: 🟢 Estable | Última actualización: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 > Naming: entidades y atributos en inglés (HALT-DB-NAMING)
 
 ## Convenciones de modelado (transversales)
@@ -94,9 +94,79 @@ Conflicto detectado durante la validación del horario en estado DRAFT.
 
 **`class_session`** añade `execution_status` VARCHAR(15) `CHECK (PENDING/EXECUTED/NOT_EXECUTED/CANCELLED)` (default PENDING) — hecho de ejecución, distinto de `status` de programación *(D-4; asistencia individual = V2)*.
 
-**`site_travel_time`** *(D-11)* — matriz de tiempos de traslado entre sedes para el conflicto `INSTRUCTOR_TRAVEL_CONFLICT`: `id`, `origin_site_id` (ref lógica), `destination_site_id` (ref lógica), `travel_minutes`, `is_active`, timestamps. `UNIQUE(origin_site_id, destination_site_id)`.
 
-**`ficha_training_center_projection`** — proyección local de `ficha_id` a `training_center_id` usada por lecturas con scope `TRAINING_CENTER`; guarda `updated_at` y no tiene FK hacia Academic porque la ficha y el centro pertenecen a otro servicio. La tabla ya existe en `develop` de `design-software-scheduling-db` (`01_ddl/03_tables/0008_create_ficha_training_center_projection.sql`); el PR de R4 no la crea ni agrega ningún changeset de scheduling-db. La integración que sincroniza esta proyección desde Academic debe mantenerla actualizada; sin fila para una ficha, la consulta scoped no devuelve sesiones.
+
+### `environment_availability_projection`
+
+Read model local de disponibilidad de ambientes usado por la validación de horarios (HU-SCH-004 / ADR-002). `environment_id` es una referencia lógica al servicio de Training Environment; no tiene FK física entre servicios.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `environment_id` | UUID | No | Ambiente proyectado; único |
+| `available` | BOOLEAN | No | Disponibilidad efectiva |
+| `effective_from` | TIMESTAMPTZ | Sí | Inicio de vigencia conocido |
+| `reason` | TEXT | Sí | Motivo de indisponibilidad |
+| `last_event_id` | UUID | No | Último evento aplicado; único para deduplicar la proyección |
+| `updated_at` | TIMESTAMPTZ | No | Actualización, default `now()` |
+
+### `instructor_availability_projection`
+
+Read model local de disponibilidad de instructores por competencia (HU-SCH-004 / ADR-002). `instructor_id` y `competency_id` son referencias lógicas, sin FK física a Actors o Academic Management.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `instructor_id` | UUID | No | Instructor proyectado |
+| `competency_id` | UUID | Sí | Competencia; null cuando la disponibilidad no se limita a una competencia |
+| `available` | BOOLEAN | No | Disponibilidad efectiva |
+| `last_event_id` | UUID | No | Último evento aplicado; único para deduplicar la proyección |
+| `updated_at` | TIMESTAMPTZ | No | Actualización, default `now()` |
+
+Tiene una restricción única en `(instructor_id, competency_id)`.
+
+### `outbox`
+
+Staging transaccional del evento `scheduling.class_session.cancelled` (HU-SCH-003). Esta tabla guarda el evento de dominio en la misma transacción que el cambio; el relay/broker está fuera de este changeset y pertenece al alcance posterior de HU-SCH-007.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK |
+| `event_id` | UUID | No | Identidad única del evento |
+| `event_type` | VARCHAR(128) | No | Tipo del evento |
+| `payload` | JSONB | No | Payload del evento |
+| `status` | VARCHAR(16) | No | `PENDING`, `PUBLISHED` o `FAILED` |
+| `created_at` | TIMESTAMPTZ | No | Alta del evento |
+| `published_at` | TIMESTAMPTZ | Sí | Momento de publicación |
+
+`event_id` tiene restricción única; `ck_outbox_status` limita los estados permitidos.
+
+### `site_travel_time`
+
+Matriz de tiempos de traslado entre sedes, usada para detectar `INSTRUCTOR_TRAVEL_CONFLICT` (D-11).
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `id` | UUID | No | PK; default `gen_random_uuid()` |
+| `origin_site_id` | UUID | No | Referencia lógica a la sede de origen |
+| `destination_site_id` | UUID | No | Referencia lógica a la sede de destino |
+| `travel_minutes` | INT | No | Tiempo de traslado; no puede ser negativo |
+| `is_active` | BOOLEAN | No | Default `true` |
+| `created_at`, `updated_at` | TIMESTAMPTZ | No | Defaults `now()` |
+
+La pareja origen/destino es única (`uq_site_travel_time`); `ck_site_travel_time_minutes` exige `travel_minutes >= 0`.
+
+### `ficha_training_center_projection`
+
+Proyección local de `ficha_id` a `training_center_id` para filtrar lecturas con scope `TRAINING_CENTER` (HU-SCH-008). Academic Management es dueño de la relación de negocio; la integración debe sincronizar la proyección. No hay FK física entre bases.
+
+| Campo | Tipo | Nullable | Descripción |
+|---|---|---|---|
+| `ficha_id` | UUID | No | PK; ficha proyectada |
+| `training_center_id` | UUID | No | Centro de formación asociado |
+| `updated_at` | TIMESTAMPTZ | No | Actualización, default `now()` |
+
+El índice `idx_ficha_training_center_projection_center` cubre `(training_center_id, ficha_id)`.
 
 ## Referencias externas
 
