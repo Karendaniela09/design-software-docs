@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: IAM Service API — Horarios SENA
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     Autenticación (JWT RS256/JWKS), gestión de usuarios, roles/features (RBAC
     feature+scope), sesiones, overrides de scope y reporte de auditoría de login.
@@ -16,6 +16,10 @@ security:
 tags:
   - name: auth
     description: Autenticación y sesión.
+  - name: m2m
+    description: Emisión de tokens para servicios allowlisted.
+  - name: jwks
+    description: Publicación de claves públicas de firma.
   - name: users
     description: Gestión de cuentas de usuario.
   - name: sessions
@@ -26,13 +30,15 @@ tags:
     description: Catálogo de módulos y features (solo lectura).
   - name: reports
     description: Reportes propios del dominio IAM.
+  - name: health
+    description: Sondas públicas de liveness y readiness.
 
 paths:
   # ---------------------------------------------------------------- auth
   /auth/token:
     post:
       operationId: issueServiceAccessToken
-      tags: [auth]
+      tags: [m2m]
       summary: Issues a short-lived audience-bound M2M token for an allowlisted service.
       description: >-
         Accepts client_credentials with HTTP Basic authentication and an allowlisted
@@ -595,6 +601,8 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 
   /health:
+    servers:
+      - url: /
     get:
       operationId: health
       tags: [health]
@@ -607,8 +615,13 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [status]
+                properties:
+                  status: { type: string, const: UP }
+                additionalProperties: false
   /ready:
+    servers:
+      - url: /
     get:
       operationId: ready
       tags: [health]
@@ -621,18 +634,28 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [db, status]
+                properties:
+                  db: { type: string, enum: [ok, down] }
+                  broker: { type: string, enum: [ok, down] }
+                  status: { type: string, enum: [READY, NOT_READY] }
+                additionalProperties: false
         '503':
           description: Alguna dependencia no está lista.
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [db, status]
+                properties:
+                  db: { type: string, enum: [ok, down] }
+                  broker: { type: string, enum: [ok, down] }
+                  status: { type: string, enum: [READY, NOT_READY] }
+                additionalProperties: false
   /auth/.well-known/jwks.json:
     get:
       operationId: getJwks
-      tags: [auth]
+      tags: [jwks]
       summary: Publica el JWKS vigente para validar access tokens emitidos por IAM.
       security: []
       responses:
@@ -642,7 +665,22 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [keys]
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      required: [kty, use, alg, kid, n, e]
+                      properties:
+                        kty: { type: string, const: RSA }
+                        use: { type: string, const: sig }
+                        alg: { type: string, const: RS256 }
+                        kid: { type: string }
+                        n: { type: string }
+                        e: { type: string }
+                      additionalProperties: false
+                additionalProperties: false
 
 components:
   parameters:
