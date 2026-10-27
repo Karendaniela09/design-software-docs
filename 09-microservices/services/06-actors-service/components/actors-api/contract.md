@@ -85,6 +85,17 @@ ficha dispara `actors.learner.enrolled`.
 | Método | Path | Descripción | Seguridad |
 |--------|------|-------------|-----------|
 | `GET` | `/internal/learners/by-user/{user_id}/active-ficha` | Resuelve la ficha activa de un aprendiz activo a partir del `user_id` de IAM. Retorna `200` con `learner_id` y `ficha_id`, `204` si no tiene ficha activa, `404` si no existe perfil activo de aprendiz, `409` si hay más de una ficha activa y `500` ante error técnico controlado. | mTLS |
+| `GET` | `/internal/fichas/{ficha_id}/active-learners/count` | Cuenta las matrículas activas de una ficha para Academic Management. | Bearer JWT + `ACT_INTERNAL_FICHA_LEARNER_COUNT` |
+
+### Endpoints internos de operación
+
+Las rutas de operación requieren `ACT_INSTRUCTOR_MANAGE` y no deben publicarse a usuarios finales en el edge.
+
+| Método | Path | Resultado |
+|--------|------|-----------|
+| `GET` | `/ops/actors/outbox/status` | Conteo de filas del outbox por estado. |
+| `POST` | `/ops/actors/outbox/{eventId}/replay` | Reintenta un evento del outbox en estado `DEAD`; retorna `202` o `404`. |
+| `POST` | `/ops/actors/iam-dlq/replay-one` | Reintenta un mensaje IAM de la DLQ; disponible cuando el consumidor IAM está habilitado. |
 
 ### Seguimiento (tracking)
 `company_visit` se anida bajo `/productive-stages/{id}` (la visita solo existe en el
@@ -95,8 +106,7 @@ un instructor **o** un aprendiz (arco exclusivo), no un único padre.
 |--------|------|-------------|---------|
 | `GET/POST` | `/productive-stages` | Listar (filtros `learner_id`, `company_id`, `status`) / registrar inicio de etapa | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
 | `GET/PUT` | `/productive-stages/{id}` | Detalle / actualizar avance, cierre o interrupción | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
-| `GET/POST` | `/productive-stages/{id}/visits` | Visitas de seguimiento / registrar visita | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
-| `GET/PUT` | `/productive-stages/{id}/visits/{visit_id}` | Detalle / corregir visita | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
+| `POST` | `/productive-stages/{id}/visits` | Registra una visita de seguimiento | `ACT_PRODUCTIVE_STAGE_MANAGE` |
 | `GET/POST` | `/improvement-plans` | Listar (filtros `instructor_id`, `learner_id`, `status`) / crear plan | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
 | `GET/PUT` | `/improvement-plans/{id}` | Detalle / actualizar avance o cierre | `ACT_TRACKING_VIEW` / `ACT_TRACKING_MANAGE` |
 

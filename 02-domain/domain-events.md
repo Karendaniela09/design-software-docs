@@ -67,10 +67,12 @@ Ejemplo: `scheduling.schedule.published`
 
 | Evento | Disparado por | Significado de negocio | Cambio de estado |
 |--------|---------------|------------------------|------------------|
-| `actors.instructor.assigned` | Asignación de competencia/contrato | Un instructor quedó habilitado para impartir | scheduling actualiza su read model de instructores |
-| `actors.learner.enrolled` | Matrícula de aprendiz | Un aprendiz se vinculó a una ficha | monitoring lo cuenta en la ficha |
-| `actors.productive_stage.started` | Inicio de etapa productiva | Un aprendiz pasó a fase de empresa | monitoring inicia seguimiento de etapa productiva |
-| `actors.company_visit.completed` | Registro de visita | Se cumplió una visita de seguimiento empresarial | monitoring actualiza KPIs de etapa productiva |
+| actors.instructor.assigned | Asignación de competencia/contrato | Un instructor quedó habilitado para impartir | scheduling actualiza su read model de instructores |
+| actors.learner.enrolled | Matrícula de aprendiz | Un aprendiz se vinculó a una ficha | monitoring lo cuenta en la ficha |
+| actors.productive_stage.started | Inicio de etapa productiva | Un aprendiz pasó a fase de empresa | monitoring inicia seguimiento de etapa productiva |
+| actors.company_visit.completed | Registro de visita | Se cumplió una visita de seguimiento empresarial | monitoring actualiza KPIs de etapa productiva |
+
+Verificación contra actors-service develop: el código emite actors.instructor.availability_changed, actors.learner.enrolled y actors.company_visit.completed. No se encontró productor para actors.instructor.assigned ni actors.productive_stage.started. Resolver si se implementan o se retiran del catálogo requiere decisión de dominio.
 
 ### document-service (Documentos)
 

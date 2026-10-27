@@ -73,7 +73,7 @@ Prefijos de módulo: `IAM` (identidad), `REF` (datos de referencia), `ACAD` (aca
 | ID | Requisito | Regla / Nota |
 |----|-----------|--------------|
 | **RF-ACT-01** | El sistema debe gestionar instructores con su tipo de vinculación (`STAFF` 40 h, `CONTRACTOR`, `HOURLY`) y las competencias que están habilitados a impartir (`CompetencyAssignment`). | RN-ACT-01, RN-ACT-02 |
-| **RF-ACT-02** | El sistema debe registrar la disponibilidad y las excepciones del instructor, insumo de la detección de `INSTRUCTOR_UNAVAILABLE`. Debe emitir `actors.instructor.assigned`. | RN-ACT-02, RN-SCH-03 |
+| **RF-ACT-02** | El sistema debe registrar la disponibilidad y las excepciones del instructor, insumo de la detección de `INSTRUCTOR_UNAVAILABLE`. Debe emitir `actors.instructor.assigned`. El productor aún no aparece en actors-service develop; hoy se emite `actors.instructor.availability_changed`. La implementación o retiro de assigned queda pendiente de decisión de dominio. | RN-ACT-02, RN-SCH-03 |
 | **RF-ACT-03** | El sistema debe exponer `GET /instructors/available` (por competencia y franja) en **< 300 ms (p95)**. | NFR-PERF-02 |
 | **RF-ACT-04** | El sistema debe gestionar aprendices y su estado (`ACTIVE`, `DROPOUT`, `TRANSFERRED`, `GRADUATED`); solo los `ACTIVE` reciben clases y aparecen en el horario. | RN-ACT-03 |
 | **RF-ACT-05** | El sistema debe soportar empresas y etapa productiva (visitas de seguimiento, convenios). *(Alcance parcial en MVP; ver [scope.md](../01-context/scope.md)).* | RN-ACT-04, RN-ACT-05 |

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Monitoring Service API — Horarios SENA
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     Seguimiento de fichas en ejecución: KPIs medidos, alertas por umbral, sesiones de
     seguimiento periódico y planes de mejoramiento a nivel de ficha. Alineado con el modelo
@@ -461,8 +461,7 @@ paths:
       summary: Mediciones de KPI (paginación por cursor; colección de crecimiento continuo).
       description: >-
         `kpi_tracking` se produce por el `alert-worker` a partir de eventos de dominio
-        y también puede registrarse por REST mediante `POST /kpi-trackings` para
-        conciliación con el endpoint implementado RecordKpi. Particionada por `measured_at`.
+        y también se puede registrar por REST para conciliación. Particionada por `measured_at`.
       x-required-feature: MON_KPI_VIEW
       parameters:
         - $ref: '_shared.yaml#/components/parameters/cursor'
@@ -511,16 +510,14 @@ paths:
       tags: [kpis]
       summary: Registra una medición KPI.
       description: >-
-        Endpoint de escritura rastreado como RecordKpi en el servicio. Crea una medición
-        `kpi_tracking` y deja al ciclo de vida de alertas/estado a cargo del
-        `alert-worker`.
+        Crea una medición `kpi_tracking`; el ciclo de vida de alertas y estados sigue a cargo
+        del `alert-worker`.
+      x-required-feature: MON_TRACKING_SESSION_CREATE
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              additionalProperties: true
+            schema: { $ref: '#/components/schemas/KpiTrackingCreate' }
       responses:
         '201':
           description: Medición de KPI registrada.
@@ -531,7 +528,6 @@ paths:
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-
   /kpi-trackings/{id}:
     parameters:
       - $ref: '#/components/parameters/KpiTrackingId'
@@ -883,7 +879,10 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+                additionalProperties: false
 
   /ready:
     get:
@@ -1131,6 +1130,22 @@ components:
         curriculum_progress_percentage: { type: number, minimum: 0, maximum: 100 }
         observations: { type: string }
         requires_follow_up: { type: boolean, default: false }
+
+    KpiTrackingCreate:
+      type: object
+      required: [ficha_tracking_id, kpi_type_id, current_value, threshold_value, kpi_status_id, period_start, period_end]
+      properties:
+        ficha_tracking_id: { type: string, format: uuid }
+        kpi_type_id: { type: string, format: uuid }
+        current_value: { type: number, minimum: 0 }
+        threshold_value: { type: number, minimum: 0 }
+        kpi_status_id: { type: string, format: uuid }
+        period_start: { type: string, format: date }
+        period_end:
+          type: string
+          format: date
+          description: Must be greater than or equal to period_start.
+        measured_at: { type: [string, 'null'], format: date-time }
 
     KpiTracking:
       type: object

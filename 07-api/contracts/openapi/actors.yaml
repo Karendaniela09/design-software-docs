@@ -25,6 +25,11 @@ tags:
   - name: reports
     description: Reportes propios del dominio de actores.
 
+  - name: catalogs
+    description: Catálogos de parametrización usados por el dominio de actores.
+  - name: ops
+    description: Operaciones internas de administración.
+
 paths:
   /companies:
     get:
@@ -820,7 +825,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
 
-  /internal/fichas/{fichaId}/rap-assessments/coverage:
+  /internal/fichas/{ficha_id}/rap-assessments/coverage:
     post:
       servers: [{ url: / }]
       operationId: getFichaRapCoverage
@@ -835,7 +840,7 @@ paths:
         audience actors-service.
       x-required-feature: ACT_INTERNAL_FICHA_RAP_COVERAGE
       parameters:
-        - name: fichaId
+        - name: ficha_id
           in: path
           required: true
           schema: { type: string, format: uuid }
@@ -1088,22 +1093,6 @@ paths:
   /productive-stages/{id}/visits:
     parameters:
       - $ref: '#/components/parameters/ProductiveStageId'
-    get:
-      operationId: listCompanyVisits
-      tags: [tracking]
-      summary: Visitas de seguimiento registradas en la etapa productiva.
-      x-required-feature: ACT_ACTIVITY_LOG_VIEW
-      responses:
-        '200':
-          description: Lista de visitas.
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/CompanyVisit' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     post:
       operationId: createCompanyVisit
       tags: [tracking]
@@ -1117,49 +1106,6 @@ paths:
       responses:
         '201':
           description: Visita registrada.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CompanyVisit' }
-        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-        '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
-
-  /productive-stages/{id}/visits/{visit_id}:
-    parameters:
-      - $ref: '#/components/parameters/ProductiveStageId'
-      - name: visit_id
-        in: path
-        required: true
-        schema: { type: string, format: uuid }
-    get:
-      operationId: getCompanyVisit
-      tags: [tracking]
-      summary: Detalle de una visita de seguimiento.
-      x-required-feature: ACT_ACTIVITY_LOG_VIEW
-      responses:
-        '200':
-          description: Visita.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CompanyVisit' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
-    put:
-      operationId: updateCompanyVisit
-      tags: [tracking]
-      summary: Corrige o completa el registro de una visita.
-      x-required-feature: ACT_PRODUCTIVE_STAGE_MANAGE
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CompanyVisitUpdate' }
-      responses:
-        '200':
-          description: Visita actualizada.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/CompanyVisit' }
@@ -1386,6 +1332,24 @@ paths:
       operationId: listActorCatalogs
       tags: [catalogs]
       summary: Lista catálogos internos usados por el dominio de actores.
+      x-required-feature: SCOPE_REF_CATALOG_VIEW
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema: { type: string }
+        - name: isActive
+          in: query
+          required: false
+          schema: { type: boolean }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 10 }
       responses:
         '200':
           description: Catálogos disponibles.
@@ -1401,11 +1365,20 @@ paths:
       operationId: listActorCatalogDetails
       tags: [catalogs]
       summary: Lista detalles de un catálogo interno del dominio de actores.
+      x-required-feature: SCOPE_REF_CATALOG_VIEW
       parameters:
         - name: catalog_id
           in: path
           required: true
-          schema: { type: string }
+          schema: { type: string, format: uuid }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: size
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 10 }
       responses:
         '200':
           description: Detalles del catálogo.
@@ -1421,15 +1394,72 @@ paths:
       operationId: reportActorActiveCatalog
       tags: [reports]
       summary: Reporte de catálogos activos usados por actores.
+      x-required-feature: SCOPE_REF_CATALOG_VIEW
+      parameters:
+        - name: catalogCode
+          in: query
+          required: false
+          schema: { type: string }
       responses:
         '200':
           description: Reporte generado.
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                type: array
+                items: { type: object, additionalProperties: true }
 
+  /ops/actors/outbox/status:
+    get:
+      operationId: getActorsOutboxStatus
+      tags: [ops]
+      summary: Counts outbox rows by delivery status for operators.
+      description: Internal operator API. The edge must not expose it to end users.
+      x-internal: true
+      x-required-feature: ACT_INSTRUCTOR_MANAGE
+      responses:
+        '200':
+          description: Number of outbox rows by status.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: integer, minimum: 0 }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+
+  /ops/actors/outbox/{eventId}/replay:
+    post:
+      operationId: replayActorsDeadOutboxEvent
+      tags: [ops]
+      summary: Replays a dead Actors outbox event.
+      description: Internal operator API. The edge must not expose it to end users.
+      x-internal: true
+      x-required-feature: ACT_INSTRUCTOR_MANAGE
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202': { description: Replay accepted. }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
+  /ops/actors/iam-dlq/replay-one:
+    post:
+      operationId: replayOneIamDeadLetter
+      tags: [ops]
+      summary: Replays one supported IAM dead-letter message.
+      description: Internal operator API, available only when the IAM event consumer is enabled.
+      x-internal: true
+      x-required-feature: ACT_INSTRUCTOR_MANAGE
+      responses:
+        '202': { description: Dead-letter message replay accepted. }
+        '204': { description: No dead-letter message was available. }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
 components:
   parameters:
     CompanyId:

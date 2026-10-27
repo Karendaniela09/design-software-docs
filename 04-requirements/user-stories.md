@@ -362,3 +362,13 @@ DoR: repositorio responsable y variables de integración identificados. DoD: tes
 ### R1 de Reference Data — complemento individual de ingeniería
 
 R1 es el reto asignado, no una HU nueva ni un reemplazo del ID HU-REF-020. Se exige outbox transaccional, consumidor idempotente con tabla de deduplicación, backoff exponencial, DLQ/replay y caos automatizado con cero pérdidas/efectos duplicados en el escenario medido. El efecto se define como actualización de la proyección operativa. Véanse [ADR-021](../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md) y [casos de prueba](../11-quality/reference-data-hu-ref-020-r1-validation.md).
+## Referencias de ejecucion de Actors identificadas en QA
+
+Los IDs y criterios de estas historias se mantienen en Project #3. Este indice enlaza solamente historias presentes en la evidencia publicada; no declara su estado.
+
+| HU | Issue | Evidencia QA |
+|----|-------|--------------|
+| HU-ACT-005 / HU-ACT-025 | [#189](https://github.com/code-sena/design-software-docs/issues/189) / [#379](https://github.com/code-sena/design-software-docs/issues/379) | [Plan de mejoramiento](../11-quality/test-evidence-hu-act-005.md) |
+| HU-ACT-012 / HU-ACT-026 | [#196](https://github.com/code-sena/design-software-docs/issues/196) / [#380](https://github.com/code-sena/design-software-docs/issues/380) | [Aprendices activos por ficha](../11-quality/test-evidence-hu-act-012.md) |
+| HU-ACT-011 / HU-ACT-027 | [#195](https://github.com/code-sena/design-software-docs/issues/195) / [#381](https://github.com/code-sena/design-software-docs/issues/381) | [Reportes de seguimiento](../11-quality/test-evidence-hu-act-027.md) |
+| HU-ACT-010 / HU-ACT-028 | [#194](https://github.com/code-sena/design-software-docs/issues/194) / [#382](https://github.com/code-sena/design-software-docs/issues/382) | [Planes de mejoramiento](../11-quality/test-evidence-hu-act-028.md) |
