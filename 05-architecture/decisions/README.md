@@ -58,6 +58,7 @@ La renumeración no equivale a aceptación. Arquitectura debe ratificar las resp
 | [ADR-023](./records/ADR-023-web-shell-owns-login-and-session.md) | El web-shell es dueño del login y de la sesión | ACCEPTED |
 | [ADR-024](./records/ADR-024-monitoring-r2-performance.md) | Optimización de lecturas de Monitoring para R2 | PROPOSED |
 | [ADR-025](./records/ADR-025-academic-resilient-messaging.md) | Mensajería resiliente para academic-management | PROPOSED |
+| [ADR-027](./records/ADR-027-scheduling-r2-performance.md) | Rendimiento de consultas de Scheduling para R2 | PROPOSED |
 | [ADR-030](./records/ADR-030-academic-ficha-lifecycle-preconditions.md) | Academic Management R4 security, lifecycle preconditions (RAP approval), cancellation and MFE integration | ACCEPTED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.

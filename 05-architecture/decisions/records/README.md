@@ -1,5 +1,14 @@
 # Registros de decisiones
 
+- [ADR-001: Selección del broker de mensajes (RabbitMQ)](ADR-001-message-broker.md) — ACCEPTED.
+- [ADR-002: Read models para reducir dependencias síncronas de scheduling](ADR-002-scheduling-read-models.md) — PROPOSED.
+- [ADR-003: Estrategia de almacenamiento de objetos (MinIO/S3)](ADR-003-object-storage.md) — PROPOSED.
+- [ADR-004: Parametrización de estados y estándar de auditoría](ADR-004-status-parametrization-and-audit-standard.md) — PROPOSED.
+- [ADR-005: Topología de microservicios y capacidades transversales](ADR-005-microservices-topology-and-transversal-capabilities.md) — ACCEPTED.
+- [ADR-006: Estrategia de stack polyglot (Go, Java, Python, Node)](ADR-006-polyglot-stack-strategy.md) — ACCEPTED.
+- [ADR-007: Edge gateway y convención de puertos](ADR-007-edge-gateway-and-port-convention.md) — ACCEPTED.
+- [ADR-008: Observabilidad — OpenTelemetry + Grafana (LGTM)](ADR-008-observability-opentelemetry.md) — ACCEPTED.
+- [ADR-009: Framework de frontend y estrategia de build para micro-frontends](ADR-009-frontend-framework-and-build-strategy.md) — ACCEPTED.
 - [ADR-010: Observabilidad de Monitoring para R3](ADR-010-monitoring-r3-observability.md) — propuesta.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](ADR-011-document-outbox-inbox-resilience.md) — aceptada.
 - [ADR-012: Observabilidad de Training Environment para R3](ADR-012-training-environment-r3-observability.md) — aceptada.
@@ -16,4 +25,5 @@
 - [ADR-023: El web-shell es dueño del login y de la sesión](ADR-023-web-shell-owns-login-and-session.md) — aceptada.
 - [ADR-024: Optimización de lecturas de Monitoring para R2](ADR-024-monitoring-r2-performance.md) — propuesta (PROPOSED).
 - [ADR-025: Mensajería resiliente para academic-management](ADR-025-academic-resilient-messaging.md) — propuesta (PROPOSED).
+- [ADR-027: Rendimiento de consultas de Scheduling para R2](ADR-027-scheduling-r2-performance.md) — PROPOSED; decisión pendiente de Arquitectura.
 - [ADR-030: Seguridad de Academic Management R4, precondiciones del ciclo de la ficha (aprobación de RAP), cancelación e integración del MFE](ADR-030-academic-ficha-lifecycle-preconditions.md) — aceptada (ACCEPTED) por el dueño el 2026-10-24.
