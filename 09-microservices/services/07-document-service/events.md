@@ -1,6 +1,6 @@
 # Eventos — document-service
 
-> Estado: 🟢 Estable | Ultima actualizacion: 2026-06-20
+> Estado: 🟢 Estable | Última actualización: 2026-10-26
 
 ---
 
@@ -48,6 +48,9 @@ Se publica solo con la primera version del documento.
 
 **Consumidores conocidos:** `audit-service`
 
+**Esquema del payload:** `events/document.document.generated.schema.json` en
+`design-software-shared-contracts` (PR #17).
+
 ---
 
 ### `document.version.created`
@@ -79,6 +82,9 @@ Se publica con cada version, incluida la primera.
 | `created_at` | `string (ISO 8601)` | Marca de tiempo de creacion de la version |
 
 **Consumidores conocidos:** `audit-service`
+
+**Esquema del payload:** `events/document.version.created.schema.json` en
+`design-software-shared-contracts` (PR #17).
 
 ---
 
@@ -294,3 +300,23 @@ El `document-lifecycle-worker` no publica `document.document.generated` ni `docu
 | `GENERATION_FAILED` | Todos los reintentos agotados; el mensaje queda en la DLQ y requiere intervencion manual |
 | `ARCHIVED` | Documento archivado |
 | `EXPIRED` | Documento vencido por la politica de retencion |
+
+## Entrega durable e idempotencia (HU-DOC-002 / HU-DOC-008)
+
+Cuando el render termina, `document.document.generated` (solo para la primera versión) y
+`document.version.created` (para cada versión) se guardan en `document.event_outbox` junto con la
+versión del documento dentro de la misma transacción. `document.message_inbox` registra la
+correlación procesada por `pdf-renderer-worker`; su clave identifica el consumidor, el documento y
+el `correlation_id`. Esto evita volver a crear una versión al recibir o reprocesar el mismo mensaje.
+
+El proceso `outbox_dispatcher` selecciona filas aún no publicadas y disponibles, bloqueándolas con
+`SKIP LOCKED` para permitir más de una instancia. Publica el envelope al exchange durable
+`document-events`, con `event_type` como routing key, y marca `published_at` solo después de la
+confirmación del broker. Si RabbitMQ falla, conserva la fila, aumenta `attempts` y programa un
+reintento con backoff exponencial hasta 300 segundos. Puede haber redelivery si el proceso cae tras
+la confirmación y antes de confirmar la transacción; por eso los consumidores deduplican por
+`event_id`.
+
+Los mensajes de generación que agotan sus reintentos se conservan en `pdf-renderer.dlq`. El
+reproceso es manual y confirmado: revisar primero la causa indicada por `x-failure-reason` y luego
+usar el comando documentado en el [runbook](./runbook.md#entrega-de-eventos-y-recuperacion-de-la-dlq).

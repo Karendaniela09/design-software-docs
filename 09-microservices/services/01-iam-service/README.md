@@ -1,6 +1,6 @@
 # iam-service
 
-> Estado: 🟡 Revisión | Última actualización: 2026-10-07
+> Estado: 🟡 Revisión | Última actualización: 2026-10-26
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
 | Campo | Valor |
@@ -47,3 +47,9 @@ Identidad, autenticación, sesiones, RBAC, JWT/JWKS y auditoría de login.
 ## Notas
 
 Publica eventos IAM por outbox/RabbitMQ; expone JWKS para validación de JWT por otros servicios.
+
+## Seguridad
+
+La configuración del emisor RS256, la publicación JWKS, la rotación de claves, las cookies de
+refresh y los límites operativos están documentados en [security.md](./security.md). La política
+común de audiencia entre servicios continúa pendiente de decisión transversal (T-09).
