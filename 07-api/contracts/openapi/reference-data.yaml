@@ -934,21 +934,6 @@ paths:
         required: true
         description: UUID del valor de catálogo.
         schema: { type: string, format: uuid }
-    get:
-      operationId: getCatalogDetail
-      tags: [catalogs]
-      summary: Detalle de un valor de catálogo.
-      x-required-feature: REF_CATALOG_VIEW
-      responses:
-        '200':
-          description: Valor de catálogo.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/CatalogDetail' }
-        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
-        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
-        '503': { $ref: '#/components/responses/DependencyUnavailable' }
-        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
     put:
       operationId: updateCatalogDetail
       tags: [catalogs]
@@ -1554,6 +1539,3 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: JWT RS256 emitido por iam-service; verificado localmente vía JWKS.
-
-
-

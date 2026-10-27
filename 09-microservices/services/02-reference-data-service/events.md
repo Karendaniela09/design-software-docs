@@ -10,6 +10,8 @@ Este servicio publica eventos al topic **`reference-data-events`**.
 
 ### `reference.catalog.updated`
 
+El payload está versionado en `shared-contracts/events/reference.catalog.updated.schema.json` y usa el envelope compartido `event-envelope.schema.json`.
+
 Se emite cada vez que se modifica un catalogo del sistema (MODALITY, SHIFT, u otro).
 
 | Campo | Tipo | Descripcion |
@@ -62,6 +64,8 @@ Se emite cada vez que se modifica un catalogo del sistema (MODALITY, SHIFT, u ot
 ---
 
 ### `reference.training_center.created`
+
+El payload está versionado en `shared-contracts/events/reference.training_center.created.schema.json` y usa el envelope compartido `event-envelope.schema.json`.
 
 Se emite cuando se crea un nuevo centro de formacion en la jerarquia institucional.
 

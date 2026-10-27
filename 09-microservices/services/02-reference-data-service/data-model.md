@@ -183,6 +183,25 @@ PK compuesta `(consumer_name,event_id)`; registro técnico append-only, sin esta
 
 PK `(aggregate_type,aggregate_id)`. Read model técnico, no una segunda tabla de catálogos ni un agregado de negocio. No necesita FK al catálogo para conservar independencia de la proyección. Pertenece al mismo changeset DDL.
 
+### `parameterization.outbox_event`
+
+La tabla existente implementa el transactional outbox para eventos publicados por Reference Data. El servicio inserta la fila junto con la escritura de dominio; el relay conserva `event_id`, payload y timestamp al reintentar la publicación.
+
+| Columna | Tipo | Nulo | Propósito |
+|---|---|---|---|
+| `id` | UUID | No | PK técnica, `DEFAULT gen_random_uuid()` |
+| `event_id` | UUID | No | Identidad del evento, `UNIQUE` |
+| `aggregate_type` | VARCHAR(80) | No | Tipo de agregado |
+| `aggregate_id` | VARCHAR(100) | No | Identificador del agregado |
+| `event_type` | VARCHAR(120) | No | Tipo de evento publicado |
+| `payload` | JSONB | No | Payload serializado del evento |
+| `status` | VARCHAR(30) | No | `pending`, `publishing`, `published` o `failed`; default `pending` |
+| `attempts` | INTEGER | No | Intentos de publicación, default `0` |
+| `created_at`, `updated_at` | TIMESTAMPTZ | No | Tiempos de creación y actualización, default `NOW()` |
+| `sent_at` | TIMESTAMPTZ | Sí | Momento de publicación exitosa |
+| `last_error` | TEXT | Sí | Último error de publicación |
+
+Tiene índices `ix_outbox_event_status_created_at` (`status`, `created_at`), `ix_outbox_event_event_id` (`event_id`) e `ix_outbox_event_status_attempts_created_at` (`status`, `attempts`, `created_at`), además de la restricción `chk_outbox_status`.
 ### Grants, rollback y retención
 
 Changeset **`r1-reference-inbox-projection-grants-001`**, SQL `03_dcl/01_grants/004_grant_inbox_projection.sql`: `reference_writer` SELECT/INSERT en inbox y SELECT/INSERT/UPDATE en proyección; `reference_reader` SELECT en proyección. No conceder DELETE de deduplicación al flujo de aplicación.
