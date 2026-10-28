@@ -14,4 +14,3 @@
 ## Criterio de resultado
 
 `APROBADO` se usa únicamente cuando se ejecutó la prueba indicada. `PENDIENTE` requiere sesión o despliegue. `BLOQUEADO` requiere acceso de infraestructura o un cambio efectivo del entorno publicado.
-

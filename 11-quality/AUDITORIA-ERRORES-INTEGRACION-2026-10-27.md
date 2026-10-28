@@ -54,4 +54,3 @@ El Web Shell entrega a los remotes un cliente HTTP de sesión. Ese cliente añad
 2. La corrección del MFE de Training Environments requiere la imagen del remote actualizada en el despliegue para hacerse visible.
 3. Las verificaciones funcionales de fichas, Reference Data y Scheduling requieren una sesión real con roles, features y `training_center_id` coherentes.
 4. La captura de logs de `audit-worker` mostró timeouts del exporter OTLP; debe tratarse como señal de observabilidad y no como prueba de causa raíz de Monitoring sin revisar los logs de `monitoring-api`.
-

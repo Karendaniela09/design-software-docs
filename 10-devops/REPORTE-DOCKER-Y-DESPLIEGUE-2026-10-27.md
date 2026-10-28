@@ -50,4 +50,3 @@ La evidencia es compatible con un despliegue cuyo proxy/stack no corresponde al 
 ## Estado final de esta auditoría
 
 La corrección del MFE de Training Environments está disponible para revisión. Monitoring y OTLP permanecen bloqueados hasta revisar el runtime de la VPS y desplegar configuración/imágenes consistentes. Las APIs Academic Management y Reference Data son alcanzables, pero requieren una sesión autorizada para validación funcional completa.
-

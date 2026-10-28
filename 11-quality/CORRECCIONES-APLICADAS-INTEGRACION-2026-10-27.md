@@ -34,4 +34,3 @@
 ## Siguiente validación obligatoria después del despliegue
 
 Con una sesión real autorizada desde el Shell, comprobar disponibilidad, reservas, tipos de ambiente, mantenimiento y reporte de utilización. La red debe producir solicitudes a `/training-environment/api/v1/...`, y ninguna respuesta HTML debe ser interpretada como JSON.
-
