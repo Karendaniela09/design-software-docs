@@ -23,6 +23,7 @@ Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambi
 | [environments.md](./environments.md) | Los 4 ambientes (`develop`/`qa`/`staging`/`main`), variables por `.env.<ambiente>` y advertencia de secretos | 🟡 |
 | [frontend-images.md](./frontend-images.md) | Las 10 imágenes estáticas del frontend (shell y 9 MFE) que sirve el edge: cómo se construyen, qué sirven y cómo se verifican | 🟡 |
 | [runtime-configuration-map.md](./runtime-configuration-map.md) | Mapa de variables de configuración runtime detectadas por repositorio | 🟡 |
+| [REPORTE-DOCKER-Y-DESPLIEGUE-2026-10-27.md](./REPORTE-DOCKER-Y-DESPLIEGUE-2026-10-27.md) | Evidencia de rutas publicadas, diagnóstico de proxy y pasos seguros de inspección de la VPS | 🟡 |
 
 ## Plantillas
 

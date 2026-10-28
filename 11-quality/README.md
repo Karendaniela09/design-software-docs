@@ -38,6 +38,9 @@ Define prácticas de pruebas, revisión de código y criterios de calidad.
 | [qa-report-r6-monitoring-db.md](./qa-report-r6-monitoring-db.md) | Informe técnico y evidencias QA de la migración R6 de Monitoring DB | 🟡 |
 | [academic-r1-validation-report.md](./academic-r1-validation-report.md) | Validación integrada de Academic Management y R1 | 🟡 |
 | [test-evidence-document-mfe-acta-01.md](./test-evidence-document-mfe-acta-01.md) | Test evidence of document-mfe (HU-DOC-011): unit, coverage, tokens and bundle budget re-run on the final head; E2E, accessibility, Lighthouse and Pact pending | 🟡 |
+| [AUDITORIA-ERRORES-INTEGRACION-2026-10-27.md](./AUDITORIA-ERRORES-INTEGRACION-2026-10-27.md) | Auditoría de rutas, autenticación, remotes y errores de integración observados en la VPS | 🟡 |
+| [CORRECCIONES-APLICADAS-INTEGRACION-2026-10-27.md](./CORRECCIONES-APLICADAS-INTEGRACION-2026-10-27.md) | Corrección validada de Training Environments y límites de despliegue | 🟡 |
+| [EVIDENCIAS-QA-INTEGRACION-2026-10-27.md](./EVIDENCIAS-QA-INTEGRACION-2026-10-27.md) | Matriz de pruebas, evidencias y bloqueos de integración | 🟡 |
 
 ## Plantillas
 
