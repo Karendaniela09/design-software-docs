@@ -3,6 +3,8 @@
 > Estado: 🟡 Revisión | Última actualización: 2026-10-07
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
+> Este mapa registra dependencias de diseño/configuración, no prueba que todos los listeners, bindings o llamadas estén activos en el runtime. Para los riesgos y el estado reportado por ambiente al 2026-10-30, véase el [baseline DS-001](../15-project-control/ds-001-architecture-baseline.md).
+
 ## Criterio
 
 - `sync`: llamada HTTP directa necesaria para resolver una operación de negocio.

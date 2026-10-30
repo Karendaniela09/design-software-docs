@@ -60,6 +60,7 @@ La renumeración no equivale a aceptación. Arquitectura debe ratificar las resp
 | [ADR-025](./records/ADR-025-academic-resilient-messaging.md) | Mensajería resiliente para academic-management | PROPOSED |
 | [ADR-027](./records/ADR-027-scheduling-r2-performance.md) | Rendimiento de consultas de Scheduling para R2 | PROPOSED |
 | [ADR-030](./records/ADR-030-academic-ficha-lifecycle-preconditions.md) | Academic Management R4 security, lifecycle preconditions (RAP approval), cancellation and MFE integration | ACCEPTED |
+| [ADR-031](./records/ADR-031-stabilization-routing-baseline.md) | Baseline de rutas durante la estabilización | PROPOSED |
 
 - [ADR-010: Observabilidad de Monitoring para R3](./records/ADR-010-monitoring-r3-observability.md) — propuesta, pendiente de revisión.
 - [ADR-011: Outbox transaccional e inbox idempotente para document-service](./records/ADR-011-document-outbox-inbox-resilience.md) — aceptada.

@@ -7,7 +7,7 @@
 
 ## Estado real del sistema
 
-El diseño describe una plataforma de **9 microservicios** con DDD + Hexagonal, comunicación REST síncrona y eventos asíncronos. **Hoy solo existe la capa de datos**: los repositorios `*-db` con migraciones **Liquibase** sobre **PostgreSQL 16** en **Docker**, con una única base de datos y un **schema por módulo**. La capa de aplicación (APIs, workers, broker, gateway) está **prevista, no construida**. Los documentos de esta sección distinguen de forma explícita lo que existe de lo que está planificado.
+La plataforma tiene **10 microservicios** y 10 dominios API detrás del edge. El estado depende del ambiente: según el registro de [ambientes](../10-devops/environments.md), `develop` dispone de perfiles de aplicación y Traefik, mientras que `qa`, `staging` y `main` están documentados como capa de datos pendiente de promoción de aplicaciones. El operador reportó el 2026-10-30 HTTP 200 en los health checks de los diez servicios locales; este estado básico no certifica acceso autenticado a cada función. Para rutas, dependencias, inventario de responsables y riesgos del corte, véase el [baseline DS-001](../15-project-control/ds-001-architecture-baseline.md). Los documentos deben distinguir explícitamente configuración objetivo, estado reportado y verificación independiente.
 
 ## Archivos
 

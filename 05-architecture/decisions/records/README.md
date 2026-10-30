@@ -27,3 +27,4 @@
 - [ADR-025: Mensajería resiliente para academic-management](ADR-025-academic-resilient-messaging.md) — propuesta (PROPOSED).
 - [ADR-027: Rendimiento de consultas de Scheduling para R2](ADR-027-scheduling-r2-performance.md) — PROPOSED; decisión pendiente de Arquitectura.
 - [ADR-030: Seguridad de Academic Management R4, precondiciones del ciclo de la ficha (aprobación de RAP), cancelación e integración del MFE](ADR-030-academic-ficha-lifecycle-preconditions.md) — aceptada (ACCEPTED) por el dueño el 2026-10-24.
+- [ADR-031: Baseline de rutas durante la estabilización](ADR-031-stabilization-routing-baseline.md) — propuesta (PROPOSED); pendiente de revisión de Arquitectura.

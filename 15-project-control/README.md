@@ -9,7 +9,7 @@ Agrupa backlog técnico, riesgos, dependencias y preguntas abiertas del proyecto
 
 ## Estado del proyecto
 
-La plataforma tiene **10 microservicios backend** con madurez heterogénea: **2 con capa de aplicación completa en `develop`** (`iam-service` 12/12 HU Done·Dev, `notification-service` 8/8 HU Done·Dev) y **8 aún sólo en capa `-db`**. El broker **RabbitMQ está provisionado y validado E2E en `develop`**. El backlog registra brechas de datos, aplicación, contratos e infraestructura por servicio; la separación de `notification-service` se controla en [notification-service-refactor.md](./notification-service-refactor.md). El **estado vivo del avance por HU se lleva en el board (GitHub Project #3 = SSOT)**.
+El último corte de estado consolidado aquí es del **2026-08-28**; las cifras de madurez de ese corte no deben usarse como estado vigente sin revalidación. Para la fotografía documental y los riesgos reportados el 2026-10-30, véase el [baseline DS-001](./ds-001-architecture-baseline.md). El **estado vivo del avance por HU se lleva en el board (GitHub Project #3 = SSOT)**.
 
 ## Archivos
 
@@ -18,6 +18,7 @@ La plataforma tiene **10 microservicios backend** con madurez heterogénea: **2 
 | [technical-backlog.md](./technical-backlog.md) | Pendientes técnicos y deuda documentada | 🟡 |
 | [risks.md](./risks.md) | Riesgos, impacto, probabilidad y mitigación | 🟡 |
 | [dependencies.md](./dependencies.md) | Dependencias internas y externas | 🟡 |
+| [ds-001-architecture-baseline.md](./ds-001-architecture-baseline.md) | Inventario de servicios, rutas por entorno, dependencias y riesgos al corte 2026-10-30 | 🟡 |
 | [open-questions.md](./open-questions.md) | Preguntas pendientes de decisión o aclaración (PA-01…PA-04) | 🟡 |
 
 ## Plantillas
