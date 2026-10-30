@@ -3,6 +3,8 @@
 > Estado: 🟡 Revisión | Última actualización: 2026-10-07
 > Autor: Kevin Andrey Culma (Arquitecto) | Equipo: Arquitectura.
 
+> La tabla de implementación observada más abajo es el corte histórico registrado el 2026-10-07; sus commits y conteos no certifican el estado actual. Para la convención de rutas, estado por ambiente y responsables del corte 2026-10-30, véase el [baseline DS-001](../15-project-control/ds-001-architecture-baseline.md).
+
 ## Resumen ejecutivo
 
 La topología backend vigente tiene 10 microservicios desplegables y 10 repositorios de datos/infra relacionados. Hay 9 módulos funcionales de producto; document-service, audit-service y notification-service son capacidades transversales.
