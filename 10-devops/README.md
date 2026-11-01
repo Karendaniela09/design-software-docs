@@ -45,3 +45,5 @@ Las páginas marcan lo implementado frente a lo previsto, distinguiendo por ambi
 - [reference-data-integration.md](./reference-data-integration.md): secuencia docs-first, repositorios responsables y ejecución/revisión de HU-REF-020 y R1 en el macroproyecto; en revisión.
 
 - [HU-INT-REF-001 integration](./reference-data-int-ref-001.md): canonical contract, GLOBAL scope policy, public URLs and isolated acceptance runner; in review.
+
+- [HU-INT-REF-002 hierarchy integration](./reference-data-int-ref-002.md): contractual CRUD, complete UUID selectors, immutable center identity, durable event validation and pending deactivation policy; in review.

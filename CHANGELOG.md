@@ -21,6 +21,13 @@
 - `10-devops/reference-data-int-ref-001.md`, `11-quality/reference-data-hu-int-ref-001-validation.md` y `11-quality/qa-handoff-hu-int-ref-001.md`: guía de integración (rutas públicas del edge, base de datos, JWT/JWKS), evidencia de los diez criterios y entrega a QA. El ejecutor reproducible vive en `docker-infra/validation/int-ref-001`.
 - Trabajo: HU-INT-REF-001 (docs#294) con docs#426, frontend-platform#11, web-shell#27, reference-data-mfe#16, reference-data-service#29 y docker-infra#55.
 
+### Changed — Jerarquía institucional de Reference Data: identidad inmutable del centro y errores (HU-INT-REF-002)
+
+- `07-api/contracts/openapi/reference-data.yaml`: documenta `400`, `404` y `409` en las operaciones de la jerarquía y marca `center_code` y `municipality_id` de `TrainingCenterUpdate` como `deprecated` (solo se aceptan si repiten el valor almacenado). **Cambio de comportamiento incompatible:** un `PUT /training-centers/{id}` que cambia el municipio (antes aceptado) o el código responde `409 IMMUTABLE_FIELD` (RN-REF-01/02). Sin datos que migrar; sin ADR nuevo.
+- `09-microservices/services/02-reference-data-service/decisions.md` (DEC-007) y `components/reference-data-api/contract.md`: la decisión, las alternativas y la tabla de errores de la jerarquía. `design-software-shared-contracts` refleja el mismo contrato.
+- `10-devops/reference-data-int-ref-002.md` y `11-quality/reference-data-hu-int-ref-002-validation.md`: guía de integración y evidencia de ocho de los nueve criterios; el criterio 6 (qué usos bloquean la desactivación) sigue pendiente de decisión de dominio y no se inventa un veto. El ejecutor reproducible vive en `docker-infra/validation/int-ref-002`.
+- Trabajo: HU-INT-REF-002 (docs#295) con docs#428, shared-contracts#12, reference-data-service#30, reference-data-mfe#17, web-shell#28 y docker-infra#56.
+
 ### Added — Decisiones y evidencia de document-mfe (HU-DOC-011)
 
 - `09-microservices/services/07-document-service/decisions.md`: filas 06 a 09 con las decisiones internas del front end (estado en hooks sobre puertos de salida, errores con reintento y sin listas vacías falsas, sesión y base `/document/api/v1` por el `httpClient` que inyecta el shell, permisos de la sesión con el backend como autoridad). Sin ADR nuevo: salen de ADR-022 y ADR-023.

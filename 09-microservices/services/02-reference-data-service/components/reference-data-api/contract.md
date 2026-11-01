@@ -49,6 +49,10 @@ Los seis features `REF_*` se exigen **solo con alcance `GLOBAL`** ([DEC-006](../
 | `GET/POST` | `/institutional-units` | Listar (filtro `training_center_id`, `unit_type`) / crear | `REF_HIERARCHY_VIEW` / `REF_HIERARCHY_MANAGE` |
 | `GET/PUT/DELETE` | `/institutional-units/{id}` | Detalle / actualizar / desactivar | `REF_HIERARCHY_VIEW` / `REF_HIERARCHY_MANAGE` |
 
+**Identidad inmutable del centro (RN-REF-01/02, [DEC-007](../../decisions.md)).** `PUT /training-centers/{id}` no cambia `center_code` ni `municipality_id`: ambos campos siguen aceptándose solo si repiten el valor almacenado (están `deprecated` en el contrato) y un valor distinto responde `409 IMMUTABLE_FIELD` sin modificar el registro. Los clientes nuevos los omiten.
+
+**Errores de la jerarquía** (envelope estándar, ver "Formato de error estándar"): `400 BAD_REQUEST` (cuerpo, filtro o UUID inválido, `unit_type` fuera de `ACADEMIC`/`ADMINISTRATIVE`/`MIXED`), `404 NOT_FOUND` (recurso o padre inexistente), `409 CONFLICT` (dato duplicado), `409 IMMUTABLE_FIELD`, `401`, `403` y `503 DEPENDENCY_UNAVAILABLE`. El `409` documentado en `DELETE` describe cómo se representaría un veto de desactivación futuro; hoy ningún uso bloquea la baja lógica (decisión de dominio pendiente, [guía de HU-INT-REF-002](../../../../../10-devops/reference-data-int-ref-002.md)).
+
 ### Catálogos parametrizables
 `catalog_detail` se modela **anidado** bajo su `catalog` (no tiene sentido fuera de su catálogo padre, `code` es único solo dentro del catálogo — guidelines §3).
 

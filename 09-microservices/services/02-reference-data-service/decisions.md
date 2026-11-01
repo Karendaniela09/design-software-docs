@@ -15,6 +15,7 @@
 | DEC-004 | Jerarquia institucional como arbol simple sin closure table | 🟢 Estable |
 | DEC-005 | Tabla parameter para valores de configuracion del sistema | 🟢 Estable |
 | DEC-006 | Alcance GLOBAL exclusivo para los features REF_* | 🟢 Estable |
+| DEC-007 | Identidad inmutable del centro de formacion en las actualizaciones (RN-REF-01/02) | 🟢 Estable |
 
 ---
 
@@ -130,3 +131,22 @@
 - La presentacion aplica la misma regla. `/auth/me` entrega codigos sin alcance; `@sena/frontend-platform` los cruza con los grants `CODE:SCOPE_TYPE` del JWT en memoria y solo `REF_*:GLOBAL` se vuelve permiso de navegacion para el remote. Esa lectura del JWT solo decide que se muestra: la firma RS256, el emisor, la expiracion y el alcance los verifica el backend en cada operacion.
 - Si un rol futuro necesita datos de referencia por centro, primero hacen falta un contrato y una decision nuevos; solo despues se pueden conceder alcances estrechos en IAM.
 - El contrato (`reference-data.yaml`) declara `x-reference-scope: GLOBAL` y la respuesta `503` en las operaciones protegidas. Guia de integracion: [reference-data-int-ref-001.md](../../../10-devops/reference-data-int-ref-001.md).
+
+---
+
+### DEC-007: Identidad inmutable del centro de formacion en las actualizaciones (RN-REF-01/02)
+
+**Decision:** `PUT /training-centers/{id}` no puede cambiar `center_code` ni `municipality_id`. Ambos campos siguen aceptandose en el cuerpo solo para compatibilidad (el contrato los marca `deprecated`) y unicamente cuando repiten el valor almacenado (el UUID se compara sin distinguir mayusculas). Un valor distinto responde `409 IMMUTABLE_FIELD` y deja el registro intacto. Los clientes nuevos omiten ambos campos. El codigo de error es distinto de `409 CONFLICT`, que sigue siendo el de los datos duplicados.
+
+**Contexto:** [RN-REF-01 y RN-REF-02](../../../02-domain/entities-and-rules.md) prohiben reasignar un centro a otro municipio y declaran inmutable el `center_code`. El esquema `TrainingCenterUpdate` los listaba como modificables; la API ya rechazaba un `center_code` distinto con un `409 CONFLICT` generico, pero aceptaba un `municipality_id` distinto. La HU-INT-REF-002 ([docs#295](https://github.com/code-sena/design-software-docs/issues/295)) planteo la pregunta; el unico cliente conocido, `reference-data-mfe`, ya bloqueaba el codigo.
+
+**Alternativas consideradas:**
+- **Quitar los dos campos del esquema de actualizacion:** descartada por ahora. Rompe de inmediato a cualquier cliente que reenvie el objeto completo; se deja `deprecated` para retirarlos en una version mayor del contrato.
+- **Permitir reasignar el municipio:** descartada. Contradice RN-REF-01.
+- **Mantener el `409 CONFLICT` generico:** descartada. No distingue "dato duplicado" de "campo inmutable" y obliga al cliente a adivinar.
+- **Rechazar tambien el valor repetido:** descartada. Un valor identico al almacenado no cambia nada y conserva la compatibilidad.
+
+**Consecuencias:**
+- Cambio de comportamiento incompatible, declarado aqui y en `reference-data.yaml`: una actualizacion que cambiaba el municipio de un centro (permitida hasta ahora) responde `409 IMMUTABLE_FIELD`. No hay datos que migrar. `design-software-shared-contracts` refleja el mismo texto.
+- La comprobacion ocurre dentro de la transaccion de la actualizacion, con la fila bloqueada, para que dos actualizaciones concurrentes no cambien la identidad.
+- La politica de desactivacion (criterio 6 de la HU) sigue sin decidir: ningun uso de municipio, centro o unidad bloquea hoy la baja logica y no se inventa un veto. Guia: [reference-data-int-ref-002.md](../../../10-devops/reference-data-int-ref-002.md).

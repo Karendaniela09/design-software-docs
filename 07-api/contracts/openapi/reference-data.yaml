@@ -85,6 +85,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
 
   /macroregions/{id}:
     parameters:
@@ -104,6 +105,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateMacroregion
       tags: [institutional-hierarchy]
@@ -126,6 +128,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
     delete:
       operationId: deleteMacroregion
       tags: [institutional-hierarchy]
@@ -139,6 +142,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- microregions
   /microregions:
@@ -205,6 +209,7 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+
   /microregions/{id}:
     parameters:
       - $ref: '#/components/parameters/MicroregionId'
@@ -223,6 +228,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateMicroregion
       tags: [institutional-hierarchy]
@@ -245,6 +251,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
     delete:
       operationId: deleteMicroregion
       tags: [institutional-hierarchy]
@@ -258,6 +265,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- departments
   /departments:
@@ -325,6 +333,7 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+
   /departments/{id}:
     parameters:
       - $ref: '#/components/parameters/DepartmentId'
@@ -343,6 +352,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateDepartment
       tags: [institutional-hierarchy]
@@ -365,6 +375,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
     delete:
       operationId: deleteDepartment
       tags: [institutional-hierarchy]
@@ -378,6 +389,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- municipalities
   /municipalities:
@@ -445,6 +457,7 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+
   /municipalities/{id}:
     parameters:
       - $ref: '#/components/parameters/MunicipalityId'
@@ -463,6 +476,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateMunicipality
       tags: [institutional-hierarchy]
@@ -485,6 +499,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
     delete:
       operationId: deleteMunicipality
       tags: [institutional-hierarchy]
@@ -498,6 +513,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- training-centers
   /training-centers:
@@ -565,6 +581,7 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+
   /training-centers/{id}:
     parameters:
       - $ref: '#/components/parameters/TrainingCenterId'
@@ -583,6 +600,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateTrainingCenter
       tags: [institutional-hierarchy]
@@ -604,7 +622,9 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+
     delete:
       operationId: deleteTrainingCenter
       tags: [institutional-hierarchy]
@@ -618,6 +638,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- institutional-units
   /institutional-units:
@@ -686,6 +707,7 @@ paths:
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
 
+
   /institutional-units/{id}:
     parameters:
       - $ref: '#/components/parameters/InstitutionalUnitId'
@@ -704,6 +726,7 @@ paths:
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
     put:
       operationId: updateInstitutionalUnit
       tags: [institutional-hierarchy]
@@ -726,6 +749,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '422': { $ref: '_shared.yaml#/components/responses/UnprocessableEntity' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
     delete:
       operationId: deleteInstitutionalUnit
       tags: [institutional-hierarchy]
@@ -739,6 +763,7 @@ paths:
         '503': { $ref: '#/components/responses/DependencyUnavailable' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
         '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
 
   # ---------------------------------------------------------------- catalogs
   /catalogs:
@@ -1367,9 +1392,10 @@ components:
 
     TrainingCenterUpdate:
       type: object
+      description: Center code and municipality are immutable (RN-REF-01/02). Supplying a different value returns 409 IMMUTABLE_FIELD.
       properties:
-        municipality_id: { type: string, format: uuid }
-        center_code: { type: string, maxLength: 10 }
+        municipality_id: { type: string, format: uuid, deprecated: true, description: May only repeat the current immutable value. }
+        center_code: { type: string, maxLength: 10, deprecated: true, description: May only repeat the current immutable value. }
         name: { type: string, maxLength: 200 }
         address:
           type: [string, 'null']

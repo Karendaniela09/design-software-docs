@@ -75,3 +75,5 @@ limitations. The business rules were approved by the project owner on
 - [Acceptance evidence](./reference-data-hu-int-ref-001-validation.md): ten-criterion local validation with real IAM, PostgreSQL, the canonical edge and the production Reference Data remote. Independent approval and promotion remain pending.
 
 - [HU-INT-REF-001 QA handoff](./qa-handoff-hu-int-ref-001.md): entrega basada en la plantilla, seis PRs, ramas/commits, diez criterios, evidencias y pendientes de CI/revisión.
+
+- [HU-INT-REF-002 validation](./reference-data-hu-int-ref-002-validation.md): real hierarchy CRUD, IAM read/write separation, complete selectors, event outage/recovery evidence and pending deactivation policy; in review.
