@@ -139,7 +139,7 @@ Información del usuario autenticado con todos sus features calculados.
 }
 ```
 
-`modules` lista los módulos donde el usuario tiene al menos un feature activo (para construir el menú de la UI).
+`modules` lista los módulos donde el usuario tiene al menos un feature activo (informativo; desde HU-SHELL-019 el menú de la UI NO se deriva de `modules` sino de `features` + `actor_type`, ver [visual-spec §4.2](../../../../../12-ux-ui/visual-spec.md); `modules` se conserva solo como respaldo).
 
 ### `POST /auth/password-reset/request`
 

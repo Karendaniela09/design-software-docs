@@ -63,7 +63,7 @@ sesión expirada, tenía una sesión válida que venció).
 1. **Login** (`01-auth` · **#1** · `iam-mfe`) → ingresa correo + contraseña, clic **Ingresar** →
    `POST /auth/login` exitoso → `TokenResponse{ user.roles[] }`.
 2. **App Shell** (`01-auth` · **#4** · `shell-host`) **[composición]** → se monta con `GET
-   /auth/me` (`modules[]` construye el nav lateral); el cliente redirige según `user.roles`
+   /auth/me` (`features[]` + `actor_type` construyen el nav lateral, ver visual-spec §4.2; `modules[]` solo respaldo); el cliente redirige según `user.roles`
    ([navigation-map.md](../navigation-map.md)):
    - `COORDINATOR` → **Dashboard / Inicio** (`02-coordinador` · **#1** · `shell-host`+
      `scheduling-mfe`+`academic-mfe`) **[composición]**.

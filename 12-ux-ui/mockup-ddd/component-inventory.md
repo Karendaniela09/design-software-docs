@@ -23,7 +23,7 @@ halts_registrados: ninguno
 |---|---|---|
 | `AppShell` | top bar + nav lateral por rol + área de contenido | colapsado/expandido, móvil (drawer) |
 | `TopBar` | marca · buscador (opc) · campana notificaciones (badge) · menú de usuario | — |
-| `SideNav` | ítems por rol (desde `modules`) | activo, colapsado, hamburguesa móvil |
+| `SideNav` | ítems por `features` + `actor_type` (visual-spec §4.2) | activo, colapsado, hamburguesa móvil |
 | `UserMenu` | nombre + rol + cerrar sesión | abierto/cerrado |
 | `NotificationsBell` + `NotificationsPanel` | badge + overlay top-N + "Ver todas" | vacío, con ítems |
 | `OfflineBanner` | "Sin conexión — datos guardados" | **condicional** (solo offline) |

@@ -6,7 +6,7 @@
 
 - `12-ux-ui/visual-spec.md` (new): normative spec for type (Inter with system fallback, 4-size scale), color roles, density, role-filtered sectioned navigation, page anatomy and do/don't, including 44 px touch targets at <=768 px, a sticky row action on mobile and the mobile drawer accessibility contract
 - `12-ux-ui/mockup-ddd/design-tokens.md`: tokens aligned with the spec (Inter, 4-size scale, density tokens, motion, `color-text-subtle`, `color-surface-subtle`)
-- Shell navigation is derived from `me.features` plus `me.actor_type` and grouped in sections, replacing the HU-001 E2 criterion (`me.modules`): `04-requirements/user-stories.md`, `traceability-matrix.md`, `12-ux-ui/navigation-map.md`, `mockup-ddd/{sitemap,micro-frontends,flows/01-auth}.md`
+- Shell navigation is derived from `me.features` plus `me.actor_type` and grouped in sections, replacing the HU-001 E2 criterion (`me.modules`): `04-requirements/user-stories.md`, `traceability-matrix.md`, `12-ux-ui/navigation-map.md`, `mockup-ddd/{sitemap,micro-frontends,flows/01-auth}.md`; follow-up: the remaining `modules`-driven menu statements in `mockup-ddd/{ux-flows,component-inventory}.md`, `flows/01-auth.md` and the IAM service doc `09-microservices/services/01-iam-service/components/iam-api/contract.md` (`modules` kept only as fallback; contract schema unchanged)
 
 ### Changed — Shared frontend packages keep a source-based contract (DS-016, DS-017, DS-018)
 
