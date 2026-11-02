@@ -231,7 +231,9 @@ Reportes propios del dominio scheduling (guidelines §11). **Solo lectura**; nun
 
 Carga de sesiones agregada por instructor.
 
-- **Feature requerido:** `SCH_REPORT_VIEW`.
+- **Feature requerido:** `SCH_REPORT_VIEW` (cualquier instructor) **o** `SCH_VIEW_OWN` con scope `OWN_SCHEDULE`.
+  Sin `SCH_REPORT_VIEW`, `instructor_id` es obligatorio y debe ser igual al claim `actor_id` del JWT; si no, `403 FORBIDDEN`
+  (lo usa "Mi horario" del instructor para su resumen semanal). Los demás reportes siguen exigiendo `SCH_REPORT_VIEW`.
 - **Filtros:** `instructor_id`, `from`, `to` (rango de `session_date`).
 - **Inventario:** Usuarios: coordinadores académicos y jefes de área · Frecuencia: on-demand/semanal · Formato: JSON · Fuente: `class_session`.
 
