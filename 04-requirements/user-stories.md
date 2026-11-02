@@ -372,3 +372,19 @@ Los IDs y criterios de estas historias se mantienen en Project #3. Este indice e
 | HU-ACT-012 / HU-ACT-026 | [#196](https://github.com/code-sena/design-software-docs/issues/196) / [#380](https://github.com/code-sena/design-software-docs/issues/380) | [Aprendices activos por ficha](../11-quality/test-evidence-hu-act-012.md) |
 | HU-ACT-011 / HU-ACT-027 | [#195](https://github.com/code-sena/design-software-docs/issues/195) / [#381](https://github.com/code-sena/design-software-docs/issues/381) | [Reportes de seguimiento](../11-quality/test-evidence-hu-act-027.md) |
 | HU-ACT-010 / HU-ACT-028 | [#194](https://github.com/code-sena/design-software-docs/issues/194) / [#382](https://github.com/code-sena/design-software-docs/issues/382) | [Planes de mejoramiento](../11-quality/test-evidence-hu-act-028.md) |
+
+## HU-SHELL-019 — Menú por rol y por secciones (basado en features)
+
+> Épica: EP-E2E-DEV | Issue: [docs#493](https://github.com/code-sena/design-software-docs/issues/493) | Dominio: shell | Estado: Backlog (docs-first: este criterio se actualiza antes que el código).
+
+**Como** usuario del portal, **quiero** un menú lateral agrupado en secciones que solo muestre lo que mi rol puede usar, **para** encontrar mi trabajo rápido sin ver opciones de otros roles.
+
+| Criterio | Aceptación exigida |
+|---|---|
+| E1 | El ítem es visible si el usuario tiene al menos uno de los features que exige (tabla de [visual-spec.md](../12-ux-ui/visual-spec.md) §4.2); `me.modules` ya no decide la visibilidad. **Reemplaza el criterio E2 de HU-001** ("el menú se deriva de `me.modules`") |
+| E2 | Los ítems personales exigen además `me.actor_type`: "Mi horario" y "Mi disponibilidad" de instructor solo con `INSTRUCTOR`; "Mi horario" de aprendiz solo con `LEARNER`. COORDINATOR, CENTER_DIRECTOR y SYSTEM_ADMIN no los ven aunque tengan `SCH_VIEW_OWN` |
+| E3 | Secciones Planeación, Formación, Documentos y Administración; el primer grupo (Inicio y lo personal) no lleva rótulo; una sección sin ítems visibles no muestra rótulo |
+| E4 | Con los grants sembrados de develop: INSTRUCTOR 8 ítems, COORDINATOR 7, SYSTEM_ADMIN 13, LEARNER 3 |
+| E5 | "Inicio" siempre visible; ninguna ruta cambia; el ítem activo expone `aria-current="page"`; el drawer móvil cumple el contrato de accesibilidad de visual-spec §4.1 |
+
+**Razón:** con los grants reales y el filtro por módulo, un COORDINATOR veía 11 ítems (incluidos los dos "Mi …" ajenos) y un APRENDIZ veía "Horarios", "Parametrización" y "Datos de referencia". `SCH_VIEW_OWN` lo tienen también los roles de alcance GLOBAL o TRAINING_CENTER, así que el feature solo no basta: los ítems personales usan `actor_type`. `MeResponse` ya trae `features` y `actor_type`; no cambia el contrato. El filtro es solo de presentación: el backend sigue autorizando cada endpoint y cada MFE conserva sus guardas. Refina el Scenario 2 de HU-SHELL-018 (docs#490). Fuera de alcance: ítems o rutas nuevas, renombrar "Disponibilidad" (decisión abierta del dueño), tokens y anatomía de página.

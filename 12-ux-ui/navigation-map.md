@@ -66,7 +66,7 @@ Visibilidad y métricas.
 
 ## Reglas de navegación
 
-1. **Segmentación por rol:** el JWT determina las áreas visibles; no se muestran rutas fuera del rol.
+1. **Segmentación por rol:** el JWT determina las áreas visibles; no se muestran rutas fuera del rol. Desde HU-SHELL-019 el menú del shell se deriva de `me.features` (feature requerido por ítem) y de `me.actor_type` para los ítems personales "Mi …", y se agrupa en secciones; ya no se deriva de `me.modules` (criterio E2 de HU-001, reemplazado). Detalle y tabla por ítem en [visual-spec.md](./visual-spec.md) §4.
 2. **El estado guía el flujo:** desde un horario en BORRADOR se llega a Validar y Publicar; un PUBLICADO es de solo lectura y ofrece "crear nueva versión".
 3. **Rutas críticas cortas:** el flujo Crear → Validar → Publicar es el camino principal del coordinador y debe minimizar saltos.
 4. **Ámbito por centro:** el coordinador opera dentro de su centro de formación ([discovery M2](../03-product/discovery-brief.md)).

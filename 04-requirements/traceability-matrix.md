@@ -242,3 +242,9 @@ Enlaza los criterios funcionales (CF-*) de [problem-framing.md](../03-product/pr
 | R1 Reference Data | NFR-REC-03; outbox/deduplicación/retry/DLQ/caos | reference-data-service, reference-data-db, docker-infra | Reto del plan individual, relacionado con docs#250; no se inventa una HU nueva | [ADR-021](../05-architecture/decisions/records/ADR-021-reference-data-resilient-messaging.md) | En progreso; PASS local y CI del shell en SHA probado; CI propio MFE, revisión de Arquitectura y merges pendientes |
 
 La trazabilidad se completa con [casos y evidencia](../11-quality/reference-data-hu-ref-020-r1-validation.md). Los resultados en repositorios personales no acreditan Done·Dev en code-sena. El board Project #3 sigue siendo la fuente del estado vivo.
+
+## Trazabilidad HU-SHELL-019
+
+| Entrega | Requisitos | Servicio / repositorios | Tracker | Decisión | Gate actual |
+|---|---|---|---|---|---|
+| HU-SHELL-019, EP-E2E-DEV | RF-IAM-01 (autorización por feature); menú por rol | web-shell, frontend-platform (sin cambio de contrato IAM) | [docs#493](https://github.com/code-sena/design-software-docs/issues/493) | [visual-spec.md](../12-ux-ui/visual-spec.md) §4; reemplaza el criterio E2 de HU-001 | Backlog; docs primero, código después |

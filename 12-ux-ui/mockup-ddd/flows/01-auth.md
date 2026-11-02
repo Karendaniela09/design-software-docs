@@ -6,7 +6,7 @@ estado: draft
 dependencias_entrada: 09-microservices/services/01-iam-service/components/iam-api/openapi.yaml; 01-iam-service/data-model.md; 12-ux-ui/design-system.md, navigation-map.md; 04-requirements/user-stories.md
 consumidores_siguientes: Google Stitch; validación de diseño
 tldr: Pantallas de autenticación y el app shell por rol, derivadas del contrato iam y el modelo de datos, con prompts listos para Stitch.
-decisiones_clave: 202 siempre en reset (no revela si el email existe); shell con nav por rol desde /auth/me.modules
+decisiones_clave: 202 siempre en reset (no revela si el email existe); shell con nav por rol desde /auth/me.features + actor_type (HU-SHELL-019)
 halts_registrados: ninguno
 -->
 
@@ -132,7 +132,7 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 
 - **Ruta:** `/` (contenedor de todas las áreas autenticadas)
 - **Endpoint:** `GET /api/v1/auth/me` → `{ id, email, full_name, actor_type, roles[], features[], modules[] }`.
-- **Deriva:** `modules[]` construye el menú lateral; el rol determina el área de aterrizaje ([navigation-map.md](../../navigation-map.md)).
+- **Deriva:** `features[]` + `actor_type` construyen el menú lateral ([visual-spec §4.2](../../visual-spec.md), HU-SHELL-019; `modules[]` queda solo como respaldo, no deriva el menú); el rol determina el área de aterrizaje ([navigation-map.md](../../navigation-map.md)).
 - **MFE:** `shell-host` ([micro-frontends.md](../micro-frontends.md)) — marco, sesión, nav y notificaciones (contenedor); sin lógica de dominio.
 
 **Propósito:** marco común (top bar + nav lateral por rol) donde se montan todas las pantallas.
@@ -140,11 +140,12 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
 **Layout:**
 - **Top bar:** marca SENA · buscador (opcional) · icono de **notificaciones** con badge · menú de
   usuario (nombre, rol, cerrar sesión).
-- **Nav lateral (según `modules`):** ítems por rol —
-  Coordinador: Inicio, Horarios, Disponibilidad, Fichas;
-  Instructor: Mi horario, Mi disponibilidad, Seguimiento;
+- **Nav lateral (según `features` + `actor_type`):** cada ítem es visible si el usuario tiene alguno de los features requeridos
+  y, cuando aplica, el `actor_type` indicado; la tabla de ítems por sección está en [visual-spec §4.2](../../visual-spec.md).
+  Ejemplos: Coordinador: Inicio, Horarios, Disponibilidad, Fichas, Seguimiento, Indicadores, Documentos;
+  Instructor: Mi horario, Mi disponibilidad, Notificaciones, Fichas (propias);
   Aprendiz: Mi horario, Notificaciones;
-  Administrador: Indicadores, Administración.
+  Administrador: Usuarios, Datos de referencia, Parametrización, Auditoría, Indicadores (según features concedidos).
 - **Área de contenido** a la derecha.
 
 **Estados:** *loading* (skeleton de nav y top bar) · *sin conexión* (banner offline básico, tolerante a conectividad).
