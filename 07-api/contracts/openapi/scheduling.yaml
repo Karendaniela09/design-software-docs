@@ -748,8 +748,10 @@ paths:
         Reporte propio del dominio scheduling sobre `class_session`, agregado por
         `instructor_id`. Solo lectura. Inventario — Usuarios: coordinadores académicos
         y jefes de área; Frecuencia: on-demand/semanal; Formato: JSON; Fuente:
-        `class_session`.
-      x-required-feature: SCH_REPORT_VIEW
+        `class_session`. Accepts SCH_REPORT_VIEW (any instructor) or SCH_VIEW_OWN
+        with the OWN_SCHEDULE scope; without SCH_REPORT_VIEW, `instructor_id` is
+        required and must equal the token's `actor_id` claim, otherwise 403 FORBIDDEN.
+      x-required-feature-any: [SCH_REPORT_VIEW, SCH_VIEW_OWN]
       parameters:
         - $ref: '_shared.yaml#/components/parameters/page'
         - $ref: '_shared.yaml#/components/parameters/page_size'
