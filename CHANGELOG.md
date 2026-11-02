@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed — Unified visual spec for the Web Shell and the MFEs (HU-SHELL-019)
+
+- `12-ux-ui/visual-spec.md` (new): normative spec for type (Inter with system fallback, 4-size scale), color roles, density, role-filtered sectioned navigation, page anatomy and do/don't, including 44 px touch targets at <=768 px, a sticky row action on mobile and the mobile drawer accessibility contract
+- `12-ux-ui/mockup-ddd/design-tokens.md`: tokens aligned with the spec (Inter, 4-size scale, density tokens, motion, `color-text-subtle`, `color-surface-subtle`)
+- Shell navigation is derived from `me.features` plus `me.actor_type` and grouped in sections, replacing the HU-001 E2 criterion (`me.modules`): `04-requirements/user-stories.md`, `traceability-matrix.md`, `12-ux-ui/navigation-map.md`, `mockup-ddd/{sitemap,micro-frontends,flows/01-auth}.md`
+
 ### Changed — Shared frontend packages keep a source-based contract (DS-016, DS-017, DS-018)
 
 - `10-devops/frontend-images.md`: `@sena/design-system` and `@sena/frontend-platform` keep `exports`, `main` and `types` on committed `src/` files, because the images, each consumer CI and `npm run dev` link them with `file:../` without building them. An export to the uncommitted `dist/` broke every consumer build (design-system#11, reverted by design-system#17). Publishing the built package is deferred past v1 and needs an ADR plus consumer `Dockerfile` and CI changes first.

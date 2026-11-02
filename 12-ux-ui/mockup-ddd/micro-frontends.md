@@ -28,7 +28,7 @@ provistos por **varios micro-frontends**. Espeja el backend: 9 microservicios (d
 ## Componentes de la arquitectura
 
 - **`shell-host`** (contenedor / orquestador): app shell (barra superior, notificaciones, menú de
-  usuario), **navegación por rol** (derivada de `GET /auth/me.modules` + RBAC), enrutamiento,
+  usuario), **navegación por rol** (derivada de `GET /auth/me.features` + `actor_type` + RBAC, agrupada en secciones; ver [visual-spec.md](../visual-spec.md) §4 y HU-SHELL-019), enrutamiento,
   sesión/JWT, tema/design-system, estados globales (offline). **No** contiene lógica de dominio.
 - **Un micro-frontend (MFE) por dominio**, dueño de las pantallas/componentes de SU dominio y que
   consume **su** `openapi.yaml`. Se montan dentro del shell según la ruta/rol.

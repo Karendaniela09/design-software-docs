@@ -30,7 +30,7 @@ halts_registrados: ninguno
 /reset-password?token=…     → Nueva contraseña (01-auth P3)
 ```
 
-### Autenticado — `shell-host` (marco común, nav por rol desde /auth/me.modules)
+### Autenticado — `shell-host` (marco común, nav por rol desde /auth/me.features + actor_type, HU-SHELL-019)
 ```
 /                           → landing según rol (redirige)
 · overlay notificaciones    → Panel de notificaciones (01-auth P5)  [campana del top bar]

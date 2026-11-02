@@ -17,6 +17,7 @@ Documenta sistema de diseño, navegación y wireframes del producto.
 | [navigation-map.md](./navigation-map.md) | Mapa de navegación y jerarquía de pantallas | 🟡 |
 | [wireframes.md](./wireframes.md) | Wireframes y referencias de interacción | 🟡 |
 | [academic-ficha-screens-spec.md](./academic-ficha-screens-spec.md) | UI spec de las pantallas de Academic Management para editar una ficha, cambiar su estado y consultar reportes (HU-ACAD-020) | 🟡 |
+| [visual-spec.md](./visual-spec.md) | Spec visual normativa del Web Shell y los MFE: tipografía, color, densidad, navegación, anatomía de página y qué hacer/evitar (aprobada 2026-11-02) | 🟢 |
 
 ## Plantillas
 

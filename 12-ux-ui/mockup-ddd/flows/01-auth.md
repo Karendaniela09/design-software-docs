@@ -6,7 +6,7 @@ estado: draft
 dependencias_entrada: 09-microservices/services/01-iam-service/components/iam-api/openapi.yaml; 01-iam-service/data-model.md; 12-ux-ui/design-system.md, navigation-map.md; 04-requirements/user-stories.md
 consumidores_siguientes: Google Stitch; validación de diseño
 tldr: Pantallas de autenticación y el app shell por rol, derivadas del contrato iam y el modelo de datos, con prompts listos para Stitch.
-decisiones_clave: 202 siempre en reset (no revela si el email existe); shell con nav por rol desde /auth/me.modules
+decisiones_clave: 202 siempre en reset (no revela si el email existe); shell con nav por rol desde /auth/me.features + actor_type (HU-SHELL-019)
 halts_registrados: ninguno
 -->
 
