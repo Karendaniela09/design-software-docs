@@ -60,6 +60,8 @@ docker build \
 
 El `Dockerfile` copia de cada hermano solo `package.json` y `src/` (lo único que lee el build) a `/workspace`, y construye el repo en `/workspace/app`, de modo que `../design-software-*` resuelve igual que en la máquina del desarrollador. El `Dockerfile` de los 9 MFE es idéntico; solo `vite.config.ts` conoce el dominio.
 
+**Contrato de los paquetes compartidos.** Como ningún consumidor compila `@sena/design-system` ni `@sena/frontend-platform` antes de instalarlos (ni la imagen, ni la CI de cada repo, ni `npm run dev`), sus `exports`, `main` y `types` apuntan a archivos de `src/` versionados. Un `exports` hacia `dist/`, que no se versiona, rompe el build de todos los consumidores. Pasó el 2026-11-01 con design-system#11 (`ENOENT '@sena/design-system/tokens.css'`), que se revirtió con design-system#17. Publicar el paquete compilado queda para después de v1 (DS-017/DS-018) y exige antes un ADR y cambiar el `Dockerfile` y la CI de los consumidores para que compilen ambos paquetes.
+
 Otras formas de pasar el contexto:
 
 - **Compose** (`docker-infra`): `build.additional_contexts`.

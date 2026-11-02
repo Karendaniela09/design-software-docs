@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed — Shared frontend packages keep a source-based contract (DS-016, DS-017, DS-018)
+
+- `10-devops/frontend-images.md`: `@sena/design-system` and `@sena/frontend-platform` keep `exports`, `main` and `types` on committed `src/` files, because the images, each consumer CI and `npm run dev` link them with `file:../` without building them. An export to the uncommitted `dist/` broke every consumer build (design-system#11, reverted by design-system#17). Publishing the built package is deferred past v1 and needs an ADR plus consumer `Dockerfile` and CI changes first.
+
 ### Changed — Security and event delivery documentation (HU-IAM-010, HU-IAM-018, HU-DOC-002, HU-DOC-008)
 
 - Add IAM issuer/key-rotation and refresh-cookie security notes, including the still-open cross-service audience policy (T-09).
