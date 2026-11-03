@@ -255,7 +255,10 @@ Carga de sesiones agregada por ambiente de formación.
 
 ### `GET /reports/schedule-conflicts`
 
-Conflictos de horario detectados en toda la plataforma. **Paginación por cursor** (colección
+Conflictos de horario detectados, acotados al scope del llamante (`SCH_REPORT_VIEW`):
+`GLOBAL` ve todos; `TRAINING_CENTER` ve solo los conflictos de horarios cuya ficha pertenece a
+`jwt.training_center_id` (proyección `ficha_training_center_projection`; un `schedule_id` de otro
+centro devuelve página vacía); cualquier otro scope responde `403 FORBIDDEN`. **Paginación por cursor** (colección
 grande/continua, guidelines §6) a diferencia de `GET /schedules/{id}/conflicts` (por horario,
 offset).
 
