@@ -289,21 +289,58 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 
 ---
 
-## Asignaciones RBAC pendientes de decision (auditoria 2026-10-26)
+## Features sin duena funcional: concedidas a SYSTEM_ADMIN (2026-11-02)
 
-El catalogo de features no define por si solo roles ni scopes. No se deben emitir estas autoridades hasta que Producto/Arquitectura confirme quien puede usarlas y con que alcance. El estado de las historias del board Project #3 no pudo verificarse desde este entorno.
+Regla del dueno: ningun feature del catalogo puede quedar huerfano (sin fila en `rbac.role_feature`). Los 9 features de la tabla no tenian ninguna asignacion; el changeset aditivo `ds-orphan-features-system-admin-014` (`design-software-iam-db`) los concede **solo a `SYSTEM_ADMIN` con scope `GLOBAL`**. Los demas roles NO reciben nada todavia: la columna "Propuesta" es solo una recomendacion pendiente de decision del dueno. El scope `GLOBAL` no activa `requiresTrainingCenterScope`.
 
-| Feature sin asignacion en el seed | Pendiente |
-|------------------------------------|-----------|
-| `DOC_VIEW` | Roles y scopes de consulta de documentos |
-| `DOC_DOWNLOAD` | Roles y scopes para descargar documentos |
-| `DOC_CREATE` | Roles y scopes para generar documentos |
-| `DOC_TEMPLATE_MANAGE` | Roles y scopes para administrar plantillas |
-| `DOC_ARCHIVE` | Roles y scopes para archivar documentos |
-| `ENV_RESERVATION_MANAGE` | Roles y scopes para gestionar reservas |
-| `MON_TRACKING_SESSION_VIEW` | Roles y scopes para consultar seguimiento |
+| Feature | Servicio dueno | Que hace | Propuesta (pendiente de decision) | Por que |
+|---------|----------------|----------|-----------------------------------|---------|
+| `SCH_VIEW_FICHA` | scheduling-service | Ver el horario de una ficha concreta. El controller hoy NO lo exige (usa `SCH_VIEW_ALL`/`SCH_VIEW_OWN`; el contrato dice "sin SCH_VIEW_FICHA") | Decidir si se elimina del catalogo o se usa para `INSTRUCTOR` (`OWN_FICHAS`) | Sin consumidor real; evitar un permiso muerto |
+| `MON_TRACKING_SESSION_VIEW` | monitoring-service | Consultar sesiones de seguimiento (listado y detalle) | `CENTER_DIRECTOR`/`COORDINATOR` `TRAINING_CENTER`; `INSTRUCTOR` `OWN_FICHAS` | Espejo de `MON_TRACKING_SESSION_CREATE` (mismos roles y scopes) |
+| `MON_NOTIFICATION_SEND` | monitoring-service / notification-service | Enviar notificaciones desde monitoreo | `CENTER_DIRECTOR`/`COORDINATOR` `TRAINING_CENTER` | Espejo de `NOTIF_SEND`; accion de escritura de gestion |
+| `ENV_RESERVATION_MANAGE` | training-environment-service | Crear, editar y cancelar reservas de ambiente (`POST/PATCH/DELETE /reservations`) | `CENTER_DIRECTOR`/`COORDINATOR` `TRAINING_CENTER` | Mismos roles que `ENV_MANAGE` y `ENV_MAINTENANCE_MANAGE` |
+| `DOC_TEMPLATE_MANAGE` | document-service | CRUD de plantillas de documento | `ADMIN_STAFF` `GLOBAL` (opcional `CENTER_DIRECTOR`) | Las plantillas son configuracion global, no por centro |
+| `DOC_ARCHIVE` | document-service | Archivar un documento (borrado logico, `status = ARCHIVED`) | `CENTER_DIRECTOR`/`COORDINATOR` `TRAINING_CENTER` | Operacion de gestion; depende de abrir `DOC_VIEW`/`DOC_CREATE` a esos roles |
+| `IDENTITY_SCOPE_MANAGE` | iam-service | Crear y revocar overrides de scope por usuario (excepciones individuales) | Solo `SYSTEM_ADMIN` (`GLOBAL`) | Es una escalada de privilegios; se mantiene en administracion tecnica |
+| `DASH_CENTER_OVERVIEW` | web-bff / shell (sin endpoint backend aun) | Panel general del centro (metricas, alertas) | `CENTER_DIRECTOR`/`COORDINATOR` `TRAINING_CENTER` | Panel de gestion del centro; hoy ningun servicio lo exige |
+| `DASH_PERSONAL` | web-bff / shell (sin endpoint backend aun) | Panel personal (mi horario, mis fichas) | `INSTRUCTOR` `OWN_SCHEDULE`, `LEARNER` `OWN_FICHA_AS_LEARNER` | Panel propio de cada rol operativo; hoy ningun servicio lo exige |
 
 La asignacion de `ACT_LEARNER_MANAGE` sigue HU-11 (gestion de aprendices por ficha) y HU-ACT-007 (inscripcion en ficha): `SYSTEM_ADMIN` con scope `GLOBAL`, y `CENTER_DIRECTOR`/`COORDINATOR` con scope `TRAINING_CENTER`. El seed aditivo vive en `design-software-iam-db`.
+
+---
+
+## AREA_LEADER: decision del dueno y estado de implementacion (2026-11-02)
+
+**Decision del dueno:** `AREA_LEADER` = permisos de **solo lectura** de `COORDINATOR`, limitados a su **area**: ver horarios, fichas, conflictos y reportes de su area. NO puede publicar, archivar, eliminar, crear ni editar horarios (ni resolver conflictos).
+
+**Estado: sin concesiones todavia.** El rol `AREA_LEADER` sigue sin ninguna fila en `rbac.role_feature`. El scope `AREA` existe en el CHECK (`ck_role_feature_scope_type`), pero hoy no se puede aplicar de punta a punta:
+
+1. **El JWT no lleva claim de area.** `JwtAccessTokenIssuer` emite `sid, email, name, actor_type, actor_id, roles, features, training_center_id` (y `ficha_id` para aprendices). `rbac.user_role` solo tiene `training_center_id`; no existe columna ni tabla de area para el usuario en iam-db.
+2. **Ningun servicio backend filtra por `AREA`.** `AuthorizationPolicy` de iam documenta que `AREA` lo aplica el servicio dueno, pero ninguno lo hace. Verificado en `origin/develop`:
+
+| Servicio | Features de lectura candidatas | Scopes que soporta hoy | Comportamiento ante `AREA` |
+|----------|-------------------------------|------------------------|----------------------------|
+| scheduling-service | `SCH_VIEW_ALL`, `SCH_VIEW_OWN`, `SCH_CONFLICT_VIEW`, `SCH_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER`, `OWN_SCHEDULE`, `OWN_FICHA_AS_LEARNER` | fail-closed 403 ("Scope no resoluble") |
+| academic-management-service | `ACADEMIC_FICHA_VIEW`, `ACADEMIC_FICHA_VIEW_OWN` | `GLOBAL`, `TRAINING_CENTER`, `OWN_FICHAS`, `OWN_FICHA_AS_LEARNER` | `AREA` no existe en su enum de scopes; falla con 403 |
+| training-environment-service | `ENV_VIEW`, `ENV_AVAILABILITY_QUERY`, `ENVIRONMENT_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER` (reservas); en el resto `ENV_VIEW` solo valida presencia | 403 en `/reservations` ("unsupported ENV_VIEW scope"); sin filtro de area en el resto |
+| actors-service | `ACT_INSTRUCTOR_VIEW`, `ACT_LEARNER_VIEW`, `ACT_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER`, `OWN_PROFILE`, `OWN_FICHAS` | scope no soportado (`UnsupportedScopeException`) |
+| monitoring-service | `MON_*_VIEW`, `MON_REPORT_VIEW` | presencia del feature | sin filtro por area |
+| reference-data / notification | `REF_*_VIEW`, `MON_NOTIFICATION_VIEW` | aceptan `AREA` como valor valido pero no lo aplican | sin filtro por area |
+
+Conceder `AREA` hoy produciria 403 en los servicios con fail-closed o, peor, vistas sin filtro de area donde no lo hay. Por eso no se concede nada hasta que el dueno decida entre las opciones siguientes.
+
+**Impactos de aprovisionamiento:** `requiresTrainingCenterScope(roleId)` es `true` si el rol tiene al menos un grant `TRAINING_CENTER`; entonces `CreateUser` y `AssignUserRole` exigen `trainingCenterId`. Conceder solo `AREA`/`GLOBAL` no activa esa exigencia. El usuario sintetico `synthetic.area-leader@example.test` tiene `training_center_id` NULL (el seed `hu-iam-024-complete-synthetic-users-003` solo completa `CENTER_DIRECTOR` y `COORDINATOR`); con la opcion A habria que asignarle el centro sintetico.
+
+**Opciones para el dueno:**
+
+- **A (recomendada):** `AREA_LEADER` con scope `TRAINING_CENTER` de solo lectura (las features de lectura de `COORDINATOR`, sin publish/archive/delete/create/edit/resolve) mientras no exista infraestructura de area. Funciona hoy en todos los servicios, pero ve el centro completo, no solo su area. Requiere `training_center_id` al asignar el rol.
+- **B:** construir primero el soporte de area: columna/tabla de area por usuario en iam-db, claim `area_id` en el JWT y filtro `AREA` en scheduling, academic-management y actors (una HU por servicio). Luego conceder `AREA` a las features de lectura.
+- **C:** conceder solo catalogos `GLOBAL` (`REF_CATALOG_VIEW`, `REF_HIERARCHY_VIEW`, `ACADEMIC_PROGRAM_VIEW`) como base minima, sin datos operativos.
+
+Features de lectura candidatas (copia de `COORDINATOR`, solo `READ`): `SCH_VIEW_ALL`, `SCH_VIEW_OWN`, `SCH_CONFLICT_VIEW`, `SCH_REPORT_VIEW`, `ACADEMIC_FICHA_VIEW`, `ACADEMIC_FICHA_VIEW_OWN`, `ACT_INSTRUCTOR_VIEW`, `ACT_LEARNER_VIEW`, `ACT_COMPETENCY_VIEW`, `ACT_REPORT_VIEW`, `ENV_VIEW`, `ENV_AVAILABILITY_QUERY`, `ENVIRONMENT_REPORT_VIEW`, `MON_DASHBOARD_FULL`, `MON_KPI_VIEW`, `MON_ALERT_VIEW`, `MON_REPORT_VIEW`, `MON_NOTIFICATION_VIEW`, mas los catalogos `GLOBAL`.
+
+---
+
 ## Cómo se aplica el scope en cada servicio
 
 El JWT del usuario lleva pre-calculado:
