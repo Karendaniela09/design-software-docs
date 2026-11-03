@@ -226,7 +226,7 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `ACADEMIC_FICHA_VIEW_OWN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ✅ OWN_FICHA_AS_LEARNER | ❌ |
 | `ACADEMIC_FICHA_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ACADEMIC_FICHA_STATUS` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
-| `ENV_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ |
+| `ENV_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHA_AS_LEARNER | ❌ |
 | `ENV_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ENV_MAINTENANCE_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ENV_AVAILABILITY_QUERY` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ |
@@ -273,6 +273,10 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 | `NOTIF_SEND` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `NOTIF_TEMPLATE_MANAGE` | ✅ GLOBAL | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `AUDIT_LOG_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ | ❌ |
+
+> **Aprendiz lee ambientes (2026-11-02):** `LEARNER` recibe `ENV_VIEW` con scope `OWN_FICHA_AS_LEARNER` (solo lectura) para que "Mi horario" muestre el nombre del ambiente. Los endpoints `GET /training-environments` y `/{id}` de training-environment-service validan solo la presencia de la feature (no filtran por scope); `/reservations` exige GLOBAL o TRAINING_CENTER y responde 403 a este scope. No requiere centro de formacion al asignar el rol (`requiresTrainingCenterScope` solo se activa con scope `TRAINING_CENTER`). Seed aditivo en `design-software-iam-db`.
+>
+> **Visibilidad de instructores para el aprendiz: pendiente.** `ACT_INSTRUCTOR_VIEW` sigue en ❌ para `LEARNER` hasta HU-ACT-031 (docs#419, asignacion instructor-ficha en actors-service); entonces se definira el scope `OWN_FICHA_AS_LEARNER` (solo instructores de la ficha propia, vista reducida).
 
 > **M2M / service-to-service:** `ACT_INTERNAL_FICHA_LEARNER_COUNT` no se otorga a roles
 > humanos de operación diaria. Debe emitirse en tokens de cliente de servicio
