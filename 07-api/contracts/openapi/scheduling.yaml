@@ -893,11 +893,16 @@ paths:
     get:
       operationId: reportScheduleConflicts
       tags: [reports]
-      summary: Conflictos de horario detectados en toda la plataforma (paginación por cursor).
+      summary: Conflictos de horario detectados, acotados al scope del llamante (paginación por cursor).
       description: >-
         Reporte propio del dominio scheduling sobre la tabla `scheduling_conflict`.
         Solo lectura. Usa paginación por cursor por ser una colección grande/continua
-        (guidelines §6). Inventario — Usuarios: arquitectura y soporte de plataforma;
+        (guidelines §6). Requires SCH_REPORT_VIEW and applies the token's scope:
+        GLOBAL sees every schedule's conflicts; TRAINING_CENTER sees only conflicts
+        of schedules whose ficha belongs to the token's `training_center_id`
+        (a `schedule_id` filter outside that center returns an empty page); other
+        scopes are rejected with 403 FORBIDDEN.
+        Inventario — Usuarios: arquitectura y soporte de plataforma;
         Frecuencia: on-demand; Formato: JSON; Fuente: `scheduling_conflict`.
       x-required-feature: SCH_REPORT_VIEW
       parameters:
