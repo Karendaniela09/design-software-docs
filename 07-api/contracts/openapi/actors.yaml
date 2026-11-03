@@ -628,7 +628,10 @@ paths:
         `ACT_INSTRUCTOR_VIEW` (or `ACT_INSTRUCTOR_FICHA_ASSIGN`): GLOBAL sees every ficha;
         TRAINING_CENTER only the fichas of its training center (the center of the ficha is read
         from academic-management); OWN_FICHA_AS_LEARNER only the ficha of the learner's active
-        enrollment (any other ficha answers 404). OWN_PROFILE (instructor) answers 403.
+        enrollment (any other ficha answers 404). OWN_PROFILE (instructor) answers 403. An unknown
+        ficha answers 404 for every scope (GLOBAL included, checked against academic-management),
+        never an empty list; a ficha of another training center also answers 404 because
+        academic-management hides it from the caller (no existence leak).
       x-required-feature: ACT_INSTRUCTOR_VIEW
       responses:
         '200':
@@ -652,7 +655,10 @@ paths:
         (instructor, ficha, competency); a repeated request answers 409. Scope of
         `ACT_INSTRUCTOR_FICHA_ASSIGN`: GLOBAL, or TRAINING_CENTER when the ficha belongs to the
         caller's training center and the instructor's current contract is at that center.
-        No domain event is emitted.
+        A ficha of another center or an unknown ficha answers 404 (academic-management does not
+        reveal fichas outside the caller's center); an instructor of another center, without a
+        current contract or unknown answers 404; a duplicate answers 409. 403 is for callers
+        without the feature or with an unsupported scope. No domain event is emitted.
       x-required-feature: ACT_INSTRUCTOR_FICHA_ASSIGN
       requestBody:
         required: true
