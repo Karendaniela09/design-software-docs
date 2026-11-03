@@ -1,6 +1,7 @@
 # ADR-019: Actors Service Security Hardening, Decentralized OAuth2 RS256, Mutual TLS (mTLS), and Granular Scope-Based Access Control
 
 **Status:** PROPOSED  
+**Note:** the internal mTLS section (CN pin, `actors.internal.mtls.trusted-subject`) was amended by HU-ACT-492, see actors `security.md` section 3.5.  
 **Date:** 2026-10-21 (Updated: 2026-10-23)  
 **Authors:** Laura Vanessa Pérez Perdomo (ADSO Ficha 3145555 · `@vanessaperdomo`)  
 **Teams involved:** Architecture, Actors Domain Backend, Security, Quality  

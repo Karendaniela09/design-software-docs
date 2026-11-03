@@ -44,6 +44,8 @@ curl -sf http://actors-service:8006/health/db | jq .
 | `IAM_EVENTS_EXCHANGE` | Exchange de eventos de IAM a consumir | `iam-events` |
 | `ACTORS_IAM_QUEUE` / `ACTORS_IAM_DLX` / `ACTORS_IAM_DLQ` | Cola de entrada, exchange de mensajes fallidos y cola de mensajes fallidos del consumidor de IAM | `actors-service.iam` / `actors-iam-dlx` / `actors-events.dlq` |
 | `JWT_SECRET` | Clave de verificación de tokens JWT | (secreto) |
+| `ACTORS_INTERNAL_IAM_CLIENT_CN` | CN(s) del certificado cliente mTLS autorizados a llamar `GET /internal/learners/by-user/**` (lista separada por comas, `[A-Za-z0-9._-]+`). Se valida al arrancar | `iam-api` (defecto) |
+| `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` | CN(s) autorizados a llamar las rutas internas de fichas (`/internal/{instructors,learners}/{id}/fichas`, `GET /internal/fichas/{id}/active-learners/count`, `POST /internal/fichas/{id}/rap-assessments/coverage`). Se valida al arrancar | `academic-api` (defecto) |
 | `PORT` | Puerto de escucha del servicio | `8006` |
 | `LOG_LEVEL` | Nivel de logging | `info` |
 | `ALERT_WEBHOOK_URL` | Webhook para alertas operativas | `https://hooks.slack.com/...` |
@@ -359,6 +361,18 @@ WHERE ca.competency_id = '<COMPETENCY_UUID>'
 **Causa probable:** El evento `iam.user.created` no fue procesado (fallo transitorio, servicio caído al momento del evento, mensaje expiró en la DLQ).
 
 **Acción:** Crear el registro de actor manualmente a partir de los datos disponibles en `iam-service`, luego registrar el evento en `activity_log` con `event_type = 'MANUAL_SYNC'`. No reinventar el `user_id`; usar exactamente el UUID que proviene de `iam-service`.
+
+---
+
+### Llamadas internas rechazadas por mTLS (401 `MTLS_CERTIFICATE_REQUIRED` / 403 `MTLS_CLIENT_NOT_ALLOWED`)
+
+**Síntoma:** `iam-service` o `academic-management` reciben 401/403 de `actors-api` en `/internal/**` (en academic aparece como `503 ACAD_FICHA_OWNERSHIP_UNAVAILABLE`).
+
+**Causa probable:**
+- `401 MTLS_CERTIFICATE_REQUIRED`: el llamante no presentó certificado (key store sin montar o ruta equivocada en `*_ACTORS_MTLS_KEY_STORE`) o un proxy terminó el TLS antes de `actors-api`.
+- `403 MTLS_CLIENT_NOT_ALLOWED`: el CN del certificado no está en la lista de la familia de la ruta (p. ej. academic usando el certificado de iam, o un CN emitido distinto del defecto), o la ruta `/internal/**` no pertenece a ninguna familia.
+
+**Acción:** comparar el CN del certificado del llamante con `ACTORS_INTERNAL_IAM_CLIENT_CN` / `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` según la familia; si el CN emitido es otro, ajustar la variable (no el certificado) y recrear `actors-api`. Si el certificado venció o se renueva, ver "Certificate rotation" en [security.md §3.5](security.md#35-internal-mtls-design-hu-act-492). No se usan contraseñas sintéticas ni acceso al VPS para diagnosticar: basta con los logs del llamante y el código de error del cuerpo.
 
 ---
 

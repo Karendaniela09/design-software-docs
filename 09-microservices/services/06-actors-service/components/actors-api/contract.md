@@ -28,7 +28,8 @@ autorización se resuelve por **feature + scope** (RBAC), features del módulo `
 
 Excepción interna servicio-a-servicio: los endpoints bajo
 `/internal/learners/**` se protegen exclusivamente con **mTLS** entre servicios y no usan
-Bearer JWT ni features RBAC.
+Bearer JWT ni features RBAC. Diseño del mTLS interno (lista de CN por llamante y familia de
+rutas, códigos de fallo): [security.md §3.5](../../security.md#35-internal-mtls-design-hu-act-492).
 
 ## Base URL
 `/api/v1`
