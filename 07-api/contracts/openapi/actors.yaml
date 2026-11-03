@@ -207,7 +207,7 @@ paths:
                       (OWN_FICHA_AS_LEARNER) receives only `InstructorSummary` of the instructors
                       assigned to the learner's own ficha.
                     items:
-                      oneOf:
+                      anyOf:
                         - $ref: '#/components/schemas/Instructor'
                         - $ref: '#/components/schemas/InstructorSummary'
                   pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
@@ -251,7 +251,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
+                anyOf:
                   - $ref: '#/components/schemas/Instructor'
                   - $ref: '#/components/schemas/InstructorSummary'
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
