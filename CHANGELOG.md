@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed - HU-ACT-033 follow-ups (actors-service)
+
+- `GET /fichas/{id}/instructors`: unknown ficha is 404 for every scope (GLOBAL no longer returns `200 []`)
+- Learner on instructor sub-resources and `/instructors/{id}/fichas`: 403 is decided before the lookup, so an unknown id does not differ from an existing one
+- Ficha of another center on assign/list is 404 (not 403), as academic-management hides it: `actors.yaml`, `user-stories.md` (HU-ACT-033 E2), `security.md` (SEC-ACT-06)
+
 ### Added — Coordinator-managed instructor-to-ficha assignment (HU-ACT-033, docs#498)
 
 - Owner decision 2026-11-03: the instructor-to-ficha assignment lives in actors-service and is managed by the coordinator. It answers the DoR source question of HU-ACT-031 (docs#419, RAP judgments), which stays about judgments.

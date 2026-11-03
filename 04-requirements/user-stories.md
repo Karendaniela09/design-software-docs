@@ -412,7 +412,7 @@ Decisión del dueño (2026-11-02) que cierra el DoR "contenido de Inicio acordad
 | Criterio | Aceptación exigida |
 |---|---|
 | E1 | `POST /fichas/{fichaId}/instructors` con `{instructor_id, competency_id?}` crea la asignación (201) cuando la ficha es del centro del coordinador y el contrato vigente del instructor está en ese centro; `GET /fichas/{fichaId}/instructors` la lista |
-| E2 | Un duplicado activo (mismo instructor, ficha y competencia) responde 409; una ficha de otro centro 403; un instructor de otro centro o inexistente 404; nada se guarda |
+| E2 | Un duplicado activo (mismo instructor, ficha y competencia) responde 409; una ficha de otro centro o inexistente 404 (academic-management no revela fichas ajenas; sin fuga de existencia); un instructor de otro centro o inexistente 404; nada se guarda |
 | E3 | `DELETE /fichas/{fichaId}/instructors/{assignmentId}` es borrado lógico (204; la fila conserva `deleted_at`/`deleted_by`) y permite asignar de nuevo |
 | E4 | `GET /internal/instructors/{id}/fichas` (academic-management, `ACADEMIC_FICHA_VIEW_OWN`) devuelve las fichas de las asignaciones activas, sin repetir; `GET /instructors/{id}/fichas` las devuelve al propio instructor |
 | E5 | El aprendiz (`ACT_INSTRUCTOR_VIEW:OWN_FICHA_AS_LEARNER`) ve solo a los instructores asignados a su ficha, como `InstructorSummary` sin correo, teléfono ni documento; otro instructor responde 404; contratos, áreas, competencias y disponibilidad siguen en 403 |
