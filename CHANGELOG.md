@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed - Role-based Home and "Ambientes" menu label (HU-SHELL-018)
+
+- `12-ux-ui/visual-spec.md` section 4.3 (new): Home "/" is a compact per-role summary (instructor, coordinator, learner, system admin) built only from existing scheduling and iam endpoints, gated by feature; the remote grid remains only in mock-registry development
+- Menu item `availability` is labelled "Ambientes" (was "Disponibilidad"); id and route unchanged: `12-ux-ui/visual-spec.md` section 4.2, `navigation-map.md`, `mockup-ddd/flows/{01-auth,02-coordinador}.md`
+- `04-requirements/user-stories.md`: HU-SHELL-018 criteria updated
+
 ### Changed — Unified visual spec for the Web Shell and the MFEs (HU-SHELL-019)
 
 - `12-ux-ui/visual-spec.md` (new): normative spec for type (Inter with system fallback, 4-size scale), color roles, density, role-filtered sectioned navigation, page anatomy and do/don't, including 44 px touch targets at <=768 px, a sticky row action on mobile and the mobile drawer accessibility contract

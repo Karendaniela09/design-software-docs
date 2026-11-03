@@ -71,7 +71,7 @@ de primera clase").
 PROMPT STITCH
 Pantalla "Inicio" del Coordinador Académico en la plataforma SENA — Gestión de Horarios, en español,
 dentro del app shell (barra superior con marca + campana de notificaciones + menú de usuario que
-muestra nombre y rol; nav lateral: Inicio, Horarios, Disponibilidad, Fichas). Encabezado "Inicio" con
+muestra nombre y rol; nav lateral: Inicio, Horarios, Ambientes, Fichas). Encabezado "Inicio" con
 saludo breve "Hola, María García" y UN solo botón primario arriba a la derecha: "Crear horario".
 
 Orden vertical, con UNA sola representación de cada cosa (no duplicar nada):

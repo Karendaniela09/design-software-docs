@@ -23,7 +23,7 @@ Responsable de crear, validar y publicar horarios. Navegación prevista:
   - Crear / editar horario → agregar sesiones (ficha + instructor + ambiente + franja + fecha).
   - Validar conflictos → panel de conflictos.
   - Publicar / versionar.
-- **Disponibilidad** — consulta de ambientes e instructores disponibles por franja.
+- **Ambientes** (antes "Disponibilidad") — consulta de ambientes e instructores disponibles por franja.
 - **Fichas** — consulta de fichas del centro y su programa.
 
 ### Instructor
@@ -59,7 +59,7 @@ Visibilidad y métricas.
    ───────────      ──────────              ────────          ─────
    Inicio           Mi horario              Mi horario        Indicadores
    Horarios ─┐      Mi disponibilidad       Notificaciones    Administración
-   Disponib. │      Seguimiento
+   Ambientes │      Seguimiento
    Fichas    │
              └─▶ Crear → Sesiones → Validar (conflictos) → Publicar → Versionar
 ```

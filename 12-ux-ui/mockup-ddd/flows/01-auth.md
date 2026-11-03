@@ -142,7 +142,7 @@ el HTML/CSS/JS iterativo y funcional (autocontenido o con assets locales) que ab
   usuario (nombre, rol, cerrar sesión).
 - **Nav lateral (según `features` + `actor_type`):** cada ítem es visible si el usuario tiene alguno de los features requeridos
   y, cuando aplica, el `actor_type` indicado; la tabla de ítems por sección está en [visual-spec §4.2](../../visual-spec.md).
-  Ejemplos: Coordinador: Inicio, Horarios, Disponibilidad, Fichas, Seguimiento, Indicadores, Documentos;
+  Ejemplos: Coordinador: Inicio, Horarios, Ambientes, Fichas, Seguimiento, Indicadores, Documentos;
   Instructor: Mi horario, Mi disponibilidad, Notificaciones, Fichas (propias);
   Aprendiz: Mi horario, Notificaciones;
   Administrador: Usuarios, Datos de referencia, Parametrización, Auditoría, Indicadores (según features concedidos).
@@ -156,7 +156,7 @@ Marco (app shell) de una aplicación web institucional del SENA — Gestión de 
 responsive. Barra superior con la marca "SENA — Gestión de Horarios" a la izquierda, un icono de
 notificaciones con un badge numérico y, a la derecha, un menú de usuario que muestra nombre y rol
 ("María García — Coordinador") con opción "Cerrar sesión". Navegación lateral izquierda colapsable con
-íconos + texto para un Coordinador: "Inicio", "Horarios", "Disponibilidad", "Fichas". Área de contenido
+íconos + texto para un Coordinador: "Inicio", "Horarios", "Ambientes", "Fichas". Área de contenido
 principal a la derecha con un encabezado de página y espacio para tablas/tarjetas. Incluir un banner
 sutil de "Sin conexión — mostrando datos guardados" para el estado offline. Estilo sobrio, verde
 institucional (placeholder), alto contraste WCAG AA, navegable por teclado. Mostrar variante móvil con

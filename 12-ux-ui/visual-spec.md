@@ -153,7 +153,7 @@ Visibility rule: `visible = any(requires) && (actor? == me.actor_type)`. "Fichas
 | none | `instructor-availability` | Mi disponibilidad | `ACT_INSTRUCTOR_VIEW` | INSTRUCTOR | `/actors/mi-disponibilidad` |
 | none | `notifications` | Notificaciones | `MON_NOTIFICATION_VIEW` | | `/monitoring/notificaciones` |
 | Planeación | `schedules` | Horarios | `SCH_VIEW_ALL` | | `/scheduling/horarios` |
-| Planeación | `availability` | Disponibilidad | `ENV_VIEW`, `ENV_AVAILABILITY_QUERY` | | `/training-environment/disponibilidad` |
+| Planeación | `availability` | Ambientes | `ENV_VIEW`, `ENV_AVAILABILITY_QUERY` | | `/training-environment/disponibilidad` |
 | Formación | `fichas` | Fichas | `ACADEMIC_FICHA_VIEW`; or `ACADEMIC_FICHA_VIEW_OWN` + INSTRUCTOR | | `/academic-management/fichas` |
 | Formación | `tracking` | Seguimiento | `MON_TRACKING_SESSION_CREATE`, `MON_TRACKING_SESSION_VIEW` | | `/monitoring/seguimiento` |
 | Formación | `indicators` | Indicadores | `MON_KPI_VIEW`, `MON_DASHBOARD_FULL`, `MON_DASHBOARD_OWN` | | `/monitoring/indicadores` |
@@ -168,8 +168,8 @@ Result with the seeded grants of develop:
 
 | Role | Today (by module) | Proposal (feature + actor_type) | Items |
 |---|---|---|---|
-| INSTRUCTOR | Horarios, Disponibilidad, Fichas, both "Mi horario", Mi disponibilidad, Seguimiento, Notificaciones, Indicadores, Datos de referencia, Parametrización | Inicio, Mi horario, Mi disponibilidad, Notificaciones; Planeación: Disponibilidad; Formación: Fichas, Seguimiento, Indicadores | 11 to 8 |
-| COORDINATOR | The 11 of the instructor (including both foreign "Mi …") | Inicio, Notificaciones; Planeación: Horarios, Disponibilidad; Formación: Fichas, Seguimiento, Indicadores | 11 to 7 |
+| INSTRUCTOR | Horarios, Ambientes, Fichas, both "Mi horario", Mi disponibilidad, Seguimiento, Notificaciones, Indicadores, Datos de referencia, Parametrización | Inicio, Mi horario, Mi disponibilidad, Notificaciones; Planeación: Ambientes; Formación: Fichas, Seguimiento, Indicadores | 11 to 8 |
+| COORDINATOR | The 11 of the instructor (including both foreign "Mi …") | Inicio, Notificaciones; Planeación: Horarios, Ambientes; Formación: Fichas, Seguimiento, Indicadores | 11 to 7 |
 | SYSTEM_ADMIN | 15 | Inicio, Notificaciones; Planeación (2); Formación (3); Documentos (2); Administración (4) | 15 to 13 |
 | LEARNER | Horarios, Fichas, Parametrización, Datos de referencia, Mi horario (instructor), … | Inicio, Mi horario, Notificaciones | 10 to 3 |
 
@@ -179,7 +179,36 @@ Notes:
 - The table lives in `navigation-table.ts` (new fields `section`, `requires`, `actor`). The `module` field may stay as a fallback during the transition.
 - "Mi horario" loses the "(instructor)" suffix: each user sees a single variant.
 - "Inicio" always visible is the only item that *appears* for roles that had none today; the owner confirms it.
-- Open owner decisions (not applied here): (a) COORDINATOR has no `DOC_VIEW`, so Documentos is not shown to it; (b) renaming "Disponibilidad" to "Ambientes" (today it is confused with "Mi disponibilidad"; labels stay "Disponibilidad" until decided); (c) `ScheduleConflictsPage` and `TimeSlotsPage` have no menu entry and this spec adds none.
+- Open owner decisions (not applied here): (a) COORDINATOR has no `DOC_VIEW`, so Documentos is not shown to it; (b) *decided 2026-11-02:* the menu item "Disponibilidad" is renamed "Ambientes" (it was confused with "Mi disponibilidad"); id `availability` and route `/training-environment/disponibilidad` do not change, and the page heading inside training-environment-mfe is out of the shell scope; (c) `ScheduleConflictsPage` and `TimeSlotsPage` have no menu entry and this spec adds none.
+
+### 4.3 Home page by role ("Inicio", route `/`) - HU-SHELL-018
+
+> Decision of 2026-11-02 ([docs#490](https://github.com/code-sena/design-software-docs/issues/490)). Docs first, then code. Supersedes the developer panel "Registro: federation / Remotes del shell" that `/` showed (INC-17).
+
+`/` is a **compact summary of the user's own work**, not a grid of modules. It follows sections 3 and 6: one h1 ("Inicio") plus one greeting sentence, then flat sections separated by whitespace and a 1 px `--color-border` rule. No bordered button per item, no card inside a card, no card wrapping the page; numbers use `tabular-nums`; tokens only. Key figures may use KPI tiles (allowed by section 3, "Cards"), never nested.
+
+The variant comes from `me.actor_type` and, for `USER`, from the role names in `me.roles`. **A section renders only if the user holds the feature that backs its endpoint** (presentation only; the backend keeps authorizing). A section the role cannot read is **omitted**, never shown as a 403 box. A real failure (network, 5xx) shows the inline alert of section 5 with "Reintentar". Names (ficha, environment, competency) come from the shared `entityNames` resolver; an id is never shown.
+
+| Variant | Section | Data (existing endpoints, no contract change) | Feature gate |
+|---|---|---|---|
+| INSTRUCTOR (`actor_type = INSTRUCTOR`) | Today's sessions: time range, environment, competency | `GET /scheduling/api/v1/sessions?from=<monday>&to=<next monday>&status=ACTIVE` (own scope filters server side); today = rows with `session_date` = today | `SCH_VIEW_OWN` |
+| | Hours this week | Sum of `end_time - start_time` of the same rows, plus the session count | `SCH_VIEW_OWN` |
+| COORDINATOR (`USER` without `SYSTEM_ADMIN`) | Schedules by status (Borrador, En revisión, Publicado, Archivado) | `GET /scheduling/api/v1/schedules?status=<s>&page_size=1` read from `pagination.total_items` (list envelope `{data, pagination:{page,page_size,total_items,total_pages}}`) | `SCH_VIEW_ALL` |
+| | Open conflicts | `GET /scheduling/api/v1/reports/schedule-conflicts?is_resolved=false&limit=100` (cursor pagination: the count is `data.length`, shown as "100+" when `has_more`) | `SCH_REPORT_VIEW` |
+| | Fichas without a schedule | **Omitted.** It would need every ficha and every schedule cross-checked; there is no cheap endpoint. Revisit when a report exists | |
+| LEARNER (`actor_type = LEARNER`) | Next session: day, time, environment, competency | `GET /scheduling/api/v1/sessions?from=<today>&to=<today + 14 d>&status=ACTIVE`, first row not yet finished | `SCH_VIEW_OWN` |
+| | Your ficha | `GET /scheduling/api/v1/schedules/{schedule_id}` of that session gives `ficha_id`; the label is `entityNames.text('ficha', ficha_id)` ("Ficha 3145555"). Omitted if it cannot be read | `SCH_VIEW_OWN` |
+| SYSTEM_ADMIN (`USER` with role `SYSTEM_ADMIN`) | Users (total) | `GET /iam/api/v1/users?page_size=1` read from `pagination.total_items` | `IDENTITY_USER_VIEW` |
+| | Services status | **Omitted.** No aggregate status endpoint exists for the shell; quick links to the visible menu entries (Usuarios, Auditoría, Indicadores) replace it | |
+
+Rules:
+
+- Empty data is a sentence ("No tienes sesiones hoy"), not an empty table.
+- SYSTEM_ADMIN always gets the quick links (Usuarios, Auditoría, Indicadores, Datos de referencia, only those the menu shows). A COORDINATOR gets them only when it lacks `SCH_VIEW_ALL`, so `/` is never just a greeting for a `USER` role.
+- Quick links are **text links** (14 / 500 `--color-brand`), the same entries and routes as the menu (section 4.2).
+- Mobile (<= 768 px): single column, 44 px touch targets for links and the retry button.
+- The old remote grid stays reachable **only** when the shell runs with the mock remote registry (`VITE_REMOTE_SOURCE=mock`, development), where it is the chrome check for stubs. A build with federation never shows it.
+- Out of scope: charts, trends, per-ficha dashboards (separate HU, "Dashboard content").
 
 ---
 
