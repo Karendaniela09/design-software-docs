@@ -431,6 +431,36 @@ Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `publish
 
 ---
 
+### `instructor_ficha_assignment`
+
+Asignación administrativa de un instructor a una ficha, que gestiona el coordinador (decisión del dueño
+2026-11-03, HU-ACT-033). Es la fuente de «las fichas que atiende un instructor»: la consume
+`academic-management-service` por `GET /internal/instructors/{id}/fichas` (`ACADEMIC_FICHA_VIEW_OWN`) y
+actors-service la usa para que el aprendiz vea solo a los instructores de su ficha. No hay columna de rol
+(líder/apoyo): la documentación no lo define.
+
+| Campo | Tipo | Nullable | Descripción |
+|-------|------|----------|-------------|
+| `id` | UUID | No | PK, `gen_random_uuid()` |
+| `instructor_id` | UUID | No | FK → `instructor` (`ON DELETE RESTRICT`) |
+| `ficha_id` | UUID | No | Referencia externa → `enrollment_ficha.id` en academic-management-service (sin FK entre BD) |
+| `competency_id` | UUID | Sí | Referencia externa → `competency.id` en academic-management-service (sin FK); `NULL` = toda la ficha |
+| `created_at`, `created_by`, `updated_at`, `updated_by` | TIMESTAMPTZ / UUID | No | Auditoría (ADR-004) |
+| `deleted_at`, `deleted_by` | TIMESTAMPTZ / UUID | Sí | Borrado lógico: quitar la asignación no borra la fila |
+| `is_active` | BOOLEAN | No | Default `true`; `false` al desasignar |
+| `row_version` | INT | No | Default `0` |
+
+**Constraints**:
+- PK `(id)` y FK a `instructor` en `01_ddl/04_alter` (RESTRICT, nunca cascada).
+- UNIQUE parcial `(instructor_id, ficha_id, COALESCE(competency_id, '00000000-0000-0000-0000-000000000000'))` WHERE `is_active = true AND deleted_at IS NULL`: una sola asignación activa por instructor, ficha y competencia; tras desasignar se puede asignar de nuevo.
+- Índices parciales por `ficha_id` y por `instructor_id` (solo filas activas).
+
+**Reglas** (actors-service): `TRAINING_CENTER` solo asigna fichas cuyo centro (leído de academic-management) es el del usuario e instructores cuyo contrato vigente está en ese centro; `GLOBAL` no tiene esa restricción; duplicado activo → 409. No emite evento de dominio.
+
+**Changesets** (`design-software-actors-db`): `hu-act-033-instructor-ficha-assignment-table-001` (`01_ddl/03_tables`), `hu-act-033-instructor-ficha-assignment-constraints-001` (`01_ddl/04_alter`), `hu-act-033-instructor-ficha-assignment-indexes-001` (`01_ddl/10_indexes`) y la semilla sintética `hu-act-033-seed-synthetic-instructor-ficha-assignment-001` (`02_dml/04_patches`, contextos `dev,qa`: el instructor sintético `...00b1` en la ficha sintética `...00c6`), cada uno con rollback espejo.
+
+---
+
 ## Referencias externas
 
 | Campo | Referencia lógica | Servicio propietario |
@@ -439,6 +469,7 @@ Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `publish
 | `user_id` (learner) | `user.id` | `iam-service` |
 | `competency_id` | `competency.id` | `academic-management-service` |
 | `ficha_id` (learner_ficha_enrollment) | `enrollment_ficha.id` | `academic-management-service` |
+| `ficha_id`, `competency_id` (instructor_ficha_assignment) | `enrollment_ficha.id`, `competency.id` | `academic-management-service` |
 | `learning_outcome_id` (learner_rap_assessment) | `learning_outcome.id` | `academic-management-service` |
 | `assessed_by` (learner_rap_assessment) | `user.id` | `iam-service` |
 | `training_center_id` | `training_center.id` | `reference-data-service` |
@@ -466,6 +497,9 @@ Changesets: `r3-company-visit-outbox-001` crea la tabla (columnas hasta `publish
 | `learner_ficha_enrollment` | `(learner_id, enrollment_date)` | B-Tree | Historial cronológico |
 | `learner_rap_assessment` | `(learner_id, ficha_id, learning_outcome_id)` | UNIQUE | Un juicio vigente por aprendiz, ficha y RAP |
 | `learner_rap_assessment` | `(ficha_id, result)` WHERE `is_active = true` AND `deleted_at IS NULL` | Partial | Cobertura de RAP aprobados por ficha |
+| `instructor_ficha_assignment` | `(instructor_id, ficha_id, COALESCE(competency_id, 0-uuid))` WHERE `is_active = true AND deleted_at IS NULL` | UNIQUE parcial | Una asignación activa por instructor, ficha y competencia |
+| `instructor_ficha_assignment` | `ficha_id` WHERE activo | Partial | Instructores de una ficha |
+| `instructor_ficha_assignment` | `instructor_id` WHERE activo | Partial | Fichas de un instructor (`/internal/instructors/{id}/fichas`) |
 | `activity_log` | `(instructor_id, recorded_at)` WHERE `instructor_id IS NOT NULL` | Partial | Bitácora cronológica por instructor |
 | `activity_log` | `(learner_id, recorded_at)` WHERE `learner_id IS NOT NULL` | Partial | Bitácora cronológica por aprendiz |
 | `company` | `nit` | UNIQUE | Identificación tributaria única |

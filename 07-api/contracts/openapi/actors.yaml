@@ -202,7 +202,14 @@ paths:
                 properties:
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/Instructor' }
+                    description: >-
+                      `Instructor` for GLOBAL, TRAINING_CENTER and OWN_PROFILE callers. A learner
+                      (OWN_FICHA_AS_LEARNER) receives only `InstructorSummary` of the instructors
+                      assigned to the learner's own ficha.
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Instructor'
+                        - $ref: '#/components/schemas/InstructorSummary'
                   pagination: { $ref: '_shared.yaml#/components/schemas/Pagination' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
@@ -238,10 +245,15 @@ paths:
       x-required-feature: ACT_INSTRUCTOR_VIEW
       responses:
         '200':
-          description: Instructor.
+          description: >-
+            Instructor. A learner (OWN_FICHA_AS_LEARNER) gets `InstructorSummary` and only for an
+            instructor assigned to the learner's own ficha (any other id answers 404).
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Instructor' }
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Instructor'
+                  - $ref: '#/components/schemas/InstructorSummary'
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -598,6 +610,110 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/ActivityLogEntry' }
                   pagination: { $ref: '_shared.yaml#/components/schemas/CursorPagination' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
+  # ------------------------------------------- instructor <-> ficha assignment
+  /fichas/{fichaId}/instructors:
+    parameters:
+      - $ref: '#/components/parameters/FichaId'
+    get:
+      operationId: listFichaInstructors
+      tags: [instructors]
+      summary: Lists the instructors assigned to a ficha (HU-ACT-033).
+      description: >-
+        Active assignments of the ficha, each with the reduced `InstructorSummary` of the
+        instructor (never email, phone or document). Visibility by scope of
+        `ACT_INSTRUCTOR_VIEW` (or `ACT_INSTRUCTOR_FICHA_ASSIGN`): GLOBAL sees every ficha;
+        TRAINING_CENTER only the fichas of its training center (the center of the ficha is read
+        from academic-management); OWN_FICHA_AS_LEARNER only the ficha of the learner's active
+        enrollment (any other ficha answers 404). OWN_PROFILE (instructor) answers 403.
+      x-required-feature: ACT_INSTRUCTOR_VIEW
+      responses:
+        '200':
+          description: Active assignments of the ficha (empty when none).
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InstructorFichaAssignment' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+    post:
+      operationId: assignInstructorToFicha
+      tags: [instructors]
+      summary: Assigns an instructor to a ficha (coordinator-managed, HU-ACT-033).
+      description: >-
+        Creates the administrative assignment. `competency_id` (academic-management
+        competency, plain uuid with no foreign key) is optional: omitted or null means the
+        instructor is assigned to the ficha as a whole. At most one ACTIVE assignment exists per
+        (instructor, ficha, competency); a repeated request answers 409. Scope of
+        `ACT_INSTRUCTOR_FICHA_ASSIGN`: GLOBAL, or TRAINING_CENTER when the ficha belongs to the
+        caller's training center and the instructor's current contract is at that center.
+        No domain event is emitted.
+      x-required-feature: ACT_INSTRUCTOR_FICHA_ASSIGN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InstructorFichaAssignmentCreate' }
+      responses:
+        '201':
+          description: Assignment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InstructorFichaAssignment' }
+        '400': { $ref: '_shared.yaml#/components/responses/BadRequest' }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+        '409': { $ref: '_shared.yaml#/components/responses/Conflict' }
+
+  /fichas/{fichaId}/instructors/{assignmentId}:
+    parameters:
+      - $ref: '#/components/parameters/FichaId'
+      - name: assignmentId
+        in: path
+        required: true
+        description: UUID of the instructor-ficha assignment.
+        schema: { type: string, format: uuid }
+    delete:
+      operationId: unassignInstructorFromFicha
+      tags: [instructors]
+      summary: Removes an instructor from a ficha (soft delete, HU-ACT-033).
+      description: >-
+        Logical deletion (`deleted_at`, `deleted_by`); the row is kept and the same instructor
+        can be assigned again later. Same scope rules as the assignment.
+      x-required-feature: ACT_INSTRUCTOR_FICHA_ASSIGN
+      responses:
+        '204': { description: Assignment removed. }
+        '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
+        '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
+        '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
+
+  /instructors/{id}/fichas:
+    parameters:
+      - $ref: '#/components/parameters/InstructorId'
+    get:
+      operationId: listInstructorAssignedFichas
+      tags: [instructors]
+      summary: Lists the fichas assigned to an instructor (HU-ACT-033).
+      description: >-
+        Active assignments of the instructor. Scope of `ACT_INSTRUCTOR_VIEW`: GLOBAL; TRAINING_CENTER
+        (instructors whose current contract is at the caller's center); OWN_PROFILE (the
+        instructor's own id only, any other id answers 404). A learner (OWN_FICHA_AS_LEARNER)
+        answers 403.
+      x-required-feature: ACT_INSTRUCTOR_VIEW
+      responses:
+        '200':
+          description: Active assignments of the instructor (empty when none).
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/InstructorFichaAssignment' }
         '401': { $ref: '_shared.yaml#/components/responses/Unauthorized' }
         '403': { $ref: '_shared.yaml#/components/responses/Forbidden' }
         '404': { $ref: '_shared.yaml#/components/responses/NotFound' }
@@ -1474,6 +1590,12 @@ components:
       required: true
       description: UUID del instructor.
       schema: { type: string, format: uuid }
+    FichaId:
+      name: fichaId
+      in: path
+      required: true
+      description: UUID of the ficha (academic-management, referenced by id with no foreign key).
+      schema: { type: string, format: uuid }
     LearnerId:
       name: id
       in: path
@@ -1581,6 +1703,47 @@ components:
         is_active: { type: boolean }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
+
+    InstructorSummary:
+      type: object
+      description: >-
+        Reduced view of an instructor for a learner of the instructor's ficha (HU-ACT-033). It never
+        carries email, phone, document or contract data.
+      required: [id, full_name, first_name, last_name]
+      properties:
+        id: { type: string, format: uuid }
+        full_name: { type: string }
+        first_name: { type: string, maxLength: 100 }
+        last_name: { type: string, maxLength: 100 }
+
+    InstructorFichaAssignment:
+      type: object
+      description: >-
+        Administrative assignment of an instructor to a ficha, managed by the coordinator
+        (HU-ACT-033). No role (lead / support) is defined.
+      required: [id, instructor_id, ficha_id, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        instructor_id: { type: string, format: uuid }
+        ficha_id: { type: string, format: uuid }
+        competency_id:
+          type: [string, 'null']
+          format: uuid
+          description: Optional academic-management competency; null means the whole ficha.
+        instructor:
+          $ref: '#/components/schemas/InstructorSummary'
+        created_at: { type: string, format: date-time }
+
+    InstructorFichaAssignmentCreate:
+      type: object
+      required: [instructor_id]
+      additionalProperties: false
+      properties:
+        instructor_id: { type: string, format: uuid }
+        competency_id:
+          type: [string, 'null']
+          format: uuid
+          description: Optional; omitted or null assigns the instructor to the whole ficha.
 
     InstructorCreate:
       type: object

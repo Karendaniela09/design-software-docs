@@ -57,6 +57,11 @@ Instructores, aprendices, empresas, etapa productiva, asignación de competencia
 | POST | `/api/v1/instructors/{instructorId}/contracts` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorContractController.java` |
 | GET | `/api/v1/instructors/{instructorId}/contracts/{contractId}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorContractController.java` |
 | PUT | `/api/v1/instructors/{instructorId}/contracts/{contractId}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorContractController.java` |
+| GET | `/api/v1/fichas/{fichaId}/instructors` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorFichaAssignmentController.java` |
+| POST | `/api/v1/fichas/{fichaId}/instructors` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorFichaAssignmentController.java` |
+| DELETE | `/api/v1/fichas/{fichaId}/instructors/{assignmentId}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorFichaAssignmentController.java` |
+| GET | `/api/v1/instructors/{instructorId}/fichas` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InstructorFichaAssignmentController.java` |
+| GET | `/internal/instructors/{actorId}/fichas` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\InternalInstructorFichaController.java` |
 | GET | `/api/v1/learners` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\LearnerController.java` |
 | POST | `/api/v1/learners` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\LearnerController.java` |
 | DELETE | `/api/v1/learners/{id}` | `.\design-software-actors-service\actors-adapters\src\main\java\co\sena\actors\adapter\in\rest\LearnerController.java` |

@@ -116,6 +116,7 @@ Fuente: Decreto 249/2004 (estructura interna SENA), Acuerdo 00003/2012 (Estatuto
 |------------------|-------------|----------------|
 | `ACT_INSTRUCTOR_VIEW` | Ver lista y perfil de instructores | READ |
 | `ACT_INSTRUCTOR_MANAGE` | CRUD de instructores | WRITE |
+| `ACT_INSTRUCTOR_FICHA_ASSIGN` | Asignar y retirar instructores de una ficha (asignacion administrativa que gestiona el coordinador, HU-ACT-033) | WRITE |
 | `ACT_LEARNER_VIEW` | Ver lista y perfil de aprendices | READ |
 | `ACT_LEARNER_VIEW_OWN` | Ver solo el propio perfil (aprendiz) | READ |
 | `ACT_LEARNER_MANAGE` | YES GLOBAL | YES TRAINING_CENTER | YES TRAINING_CENTER | NO | NO | NO |
@@ -249,8 +250,9 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 
 | Feature | SYSTEM_ADMIN | CENTER_DIRECTOR | COORDINATOR | INSTRUCTOR | LEARNER | ADMIN_STAFF |
 |---------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `ACT_INSTRUCTOR_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_PROFILE | ❌ | ❌ |
+| `ACT_INSTRUCTOR_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_PROFILE | ✅ OWN_FICHA_AS_LEARNER | ❌ |
 | `ACT_INSTRUCTOR_MANAGE` | ✅ GLOBAL | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ | ❌ |
+| `ACT_INSTRUCTOR_FICHA_ASSIGN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ❌ | ❌ | ❌ |
 | `ACT_LEARNER_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ❌ | ❌ |
 | `ACT_LEARNER_VIEW_OWN` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_FICHAS | ✅ OWN_PROFILE | ❌ |
 | `ACT_COMPETENCY_VIEW` | ✅ GLOBAL | ✅ TRAINING_CENTER | ✅ TRAINING_CENTER | ✅ OWN_PROFILE | ❌ | ❌ |
@@ -276,7 +278,7 @@ Leyenda: ✅ Permitido | ❌ Sin acceso | scope entre paréntesis
 
 > **Aprendiz lee ambientes (2026-11-02):** `LEARNER` recibe `ENV_VIEW` con scope `OWN_FICHA_AS_LEARNER` (solo lectura) para que "Mi horario" muestre el nombre del ambiente. Los endpoints `GET /training-environments` y `/{id}` de training-environment-service validan solo la presencia de la feature (no filtran por scope); `/reservations` exige GLOBAL o TRAINING_CENTER y responde 403 a este scope. No requiere centro de formacion al asignar el rol (`requiresTrainingCenterScope` solo se activa con scope `TRAINING_CENTER`). Seed aditivo en `design-software-iam-db`.
 >
-> **Visibilidad de instructores para el aprendiz: pendiente.** `ACT_INSTRUCTOR_VIEW` sigue en ❌ para `LEARNER` hasta HU-ACT-031 (docs#419, asignacion instructor-ficha en actors-service); entonces se definira el scope `OWN_FICHA_AS_LEARNER` (solo instructores de la ficha propia, vista reducida).
+> **Visibilidad de instructores para el aprendiz (HU-ACT-033, 2026-11-03).** `LEARNER` recibe `ACT_INSTRUCTOR_VIEW` con scope `OWN_FICHA_AS_LEARNER`: solo ve a los instructores con una asignacion activa a su propia ficha (la ficha sale de su inscripcion activa), en vista reducida `InstructorSummary` (`id`, `full_name`, `first_name`, `last_name`; sin correo, telefono ni documento). Cualquier otro instructor responde 404. Contratos, areas, competencias y excepciones de disponibilidad del instructor siguen cerrados al aprendiz (403). El scope `OWN_FICHA_AS_LEARNER` no activa `requiresTrainingCenterScope` (solo `TRAINING_CENTER` lo hace). La asignacion instructor-ficha la administra el coordinador en actors-service; este punto ya no depende de HU-ACT-031 (docs#419), que trata los juicios de RAP. Seed aditivo `016` en `design-software-iam-db`.
 
 > **M2M / service-to-service:** `ACT_INTERNAL_FICHA_LEARNER_COUNT` no se otorga a roles
 > humanos de operación diaria. Debe emitirse en tokens de cliente de servicio
@@ -329,7 +331,7 @@ La asignacion de `ACT_LEARNER_MANAGE` sigue HU-11 (gestion de aprendices por fic
 | scheduling-service | `SCH_VIEW_ALL`, `SCH_VIEW_OWN`, `SCH_CONFLICT_VIEW`, `SCH_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER`, `OWN_SCHEDULE`, `OWN_FICHA_AS_LEARNER` | fail-closed 403 ("Scope no resoluble") |
 | academic-management-service | `ACADEMIC_FICHA_VIEW`, `ACADEMIC_FICHA_VIEW_OWN` | `GLOBAL`, `TRAINING_CENTER`, `OWN_FICHAS`, `OWN_FICHA_AS_LEARNER` | `AREA` no existe en su enum de scopes; falla con 403 |
 | training-environment-service | `ENV_VIEW`, `ENV_AVAILABILITY_QUERY`, `ENVIRONMENT_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER` (reservas); en el resto `ENV_VIEW` solo valida presencia | 403 en `/reservations` ("unsupported ENV_VIEW scope"); sin filtro de area en el resto |
-| actors-service | `ACT_INSTRUCTOR_VIEW`, `ACT_LEARNER_VIEW`, `ACT_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER`, `OWN_PROFILE`, `OWN_FICHAS` | scope no soportado (`UnsupportedScopeException`) |
+| actors-service | `ACT_INSTRUCTOR_VIEW`, `ACT_LEARNER_VIEW`, `ACT_REPORT_VIEW` | `GLOBAL`, `TRAINING_CENTER`, `OWN_PROFILE`, `OWN_FICHAS`; `ACT_INSTRUCTOR_VIEW` tambien `OWN_FICHA_AS_LEARNER` (HU-ACT-033) | scope no soportado (`UnsupportedScopeException`) |
 | monitoring-service | `MON_*_VIEW`, `MON_REPORT_VIEW` | presencia del feature | sin filtro por area |
 | reference-data / notification | `REF_*_VIEW`, `MON_NOTIFICATION_VIEW` | aceptan `AREA` como valor valido pero no lo aplican | sin filtro por area |
 
@@ -443,4 +445,18 @@ this PR; no such feature was ever released. The roles above are the current seed
 (`SYSTEM_ADMIN` global; `CENTER_DIRECTOR` and `COORDINATOR` by training center);
 the owner confirmed them on 2026-10-24. Letting `INSTRUCTOR` record judgments,
 limited to the fichas and RAPs they teach, is the work item HU-ACT-031
-(code-sena/design-software-docs#419).
+(code-sena/design-software-docs#419). Since 2026-11-03 the DoR source of that
+item is decided: "the fichas an instructor teaches" is read from the
+coordinator-managed assignment of HU-ACT-033 (code-sena/design-software-docs#498).
+
+### Instructor-to-ficha assignment
+
+`ACT_INSTRUCTOR_FICHA_ASSIGN` lets a user assign an instructor to a ficha and remove
+the assignment (soft delete). Owner decision of 2026-11-03: the assignment is
+coordinator-managed and lives in actors-service. Seed (`design-software-iam-db`,
+changeset `hu-act-033-instructor-ficha-assignment-016`): `SYSTEM_ADMIN` global;
+`CENTER_DIRECTOR` and `COORDINATOR` by training center. With `TRAINING_CENTER`
+actors-service reads the training center of the ficha from academic-management and
+requires the instructor's current contract to be at that center. The same seed grants
+`LEARNER` the feature `ACT_INSTRUCTOR_VIEW` at `OWN_FICHA_AS_LEARNER`. Users must log
+in again to get the new features in their token.
