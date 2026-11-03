@@ -144,6 +144,8 @@ Esta tabla registra solo historias con issue y evidencia de QA ya publicados en 
 | HU-ACT-010 | Backend de planes de mejoramiento | [#194](https://github.com/code-sena/design-software-docs/issues/194) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
 | HU-ACT-028 | Vista MFE de planes de mejoramiento | [#382](https://github.com/code-sena/design-software-docs/issues/382) | [test-evidence-hu-act-028.md](../11-quality/test-evidence-hu-act-028.md) |
 
+HU-ACT-033 (asignación instructor → ficha gestionada por el coordinador, decisión del dueño 2026-11-03): issue [#498](https://github.com/code-sena/design-software-docs/issues/498), criterios en [user-stories.md](./user-stories.md), modelo en [data-model.md](../09-microservices/services/06-actors-service/data-model.md); aún sin evidencia de QA publicada.
+
 Los IDs anteriores no completan por sí solos HU-ACT-001..028 ni certifican Done·Dev. La lista restante, la asignación HU↔RF y los estados requieren revisión del responsable del board.
 ## Cobertura inversa: HU → RF
 

@@ -402,3 +402,20 @@ Decisión del dueño (2026-11-02) que cierra el DoR "contenido de Inicio acordad
 | E3 | Sin cambio de contrato: solo endpoints existentes de scheduling e iam. "Fichas sin horario" y "estado de servicios" quedan fuera por no haber endpoint barato |
 | E4 | La cuadrícula de remotes solo se alcanza con el registro mock de desarrollo |
 | E5 | El ítem de menú "Disponibilidad" se renombra "Ambientes" (mismo id y ruta) |
+
+## HU-ACT-033 — El coordinador asigna instructores a fichas
+
+> Issue: [docs#498](https://github.com/code-sena/design-software-docs/issues/498) | Dominio: actors | Estado: Backlog (docs-first). Decisión del dueño, 2026-11-03: la asignación instructor → ficha la gestiona el coordinador en actors-service (opción A). Responde la pregunta de fuente del DoR de HU-ACT-031 ([docs#419](https://github.com/code-sena/design-software-docs/issues/419), juicios de RAP).
+
+**Como** coordinador, **quiero** asignar instructores a las fichas de mi centro y retirarlos, **para** que la asignación administrativa exista en el sistema, el instructor vea sus fichas, el aprendiz vea quién dicta su ficha y, más adelante, el horario y los juicios de RAP se apoyen en ella.
+
+| Criterio | Aceptación exigida |
+|---|---|
+| E1 | `POST /fichas/{fichaId}/instructors` con `{instructor_id, competency_id?}` crea la asignación (201) cuando la ficha es del centro del coordinador y el contrato vigente del instructor está en ese centro; `GET /fichas/{fichaId}/instructors` la lista |
+| E2 | Un duplicado activo (mismo instructor, ficha y competencia) responde 409; una ficha de otro centro 403; un instructor de otro centro o inexistente 404; nada se guarda |
+| E3 | `DELETE /fichas/{fichaId}/instructors/{assignmentId}` es borrado lógico (204; la fila conserva `deleted_at`/`deleted_by`) y permite asignar de nuevo |
+| E4 | `GET /internal/instructors/{id}/fichas` (academic-management, `ACADEMIC_FICHA_VIEW_OWN`) devuelve las fichas de las asignaciones activas, sin repetir; `GET /instructors/{id}/fichas` las devuelve al propio instructor |
+| E5 | El aprendiz (`ACT_INSTRUCTOR_VIEW:OWN_FICHA_AS_LEARNER`) ve solo a los instructores asignados a su ficha, como `InstructorSummary` sin correo, teléfono ni documento; otro instructor responde 404; contratos, áreas, competencias y disponibilidad siguen en 403 |
+| E6 | `actors-mfe`: pestaña «Fichas» del instructor y vista «Instructores por ficha» con selectores alimentados por el resolutor compartido; nombres, nunca UUID; acciones de texto |
+
+**Fuera de alcance:** rol de la asignación (líder/apoyo, no definido en los docs), evento de dominio, derivar horario o juicios de RAP de la asignación (HU-ACT-031). **Modelo:** [data-model.md](../09-microservices/services/06-actors-service/data-model.md) (`instructor_ficha_assignment`); **RBAC:** `ACT_INSTRUCTOR_FICHA_ASSIGN` en [rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md).

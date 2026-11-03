@@ -116,6 +116,13 @@ During the security audit and automated test suite creation, the following vulne
 * **Remediation:** Implemented `GlobalExceptionHandler.java` translating runtime exceptions into standardized `ErrorResponse` objects with sanitized messages (`An unexpected error occurred`), completely hiding internal database structures.
 * **Verification:** `SecurityNegativeTests.test15_internalServerError_doesNotLeakStacktraceOrDatabaseSchema`.
 
+### Finding SEC-ACT-06: Learner reads of instructors and the assignment endpoints (HU-ACT-033, 2026-11-03)
+* **Context:** `LEARNER` now holds `ACT_INSTRUCTOR_VIEW` at `OWN_FICHA_AS_LEARNER`. `SecurityConfig` also adds the bare authority `ACT_INSTRUCTOR_VIEW`, so every endpoint guarded only by that bare authority would have opened to learners.
+* **Learner rule:** `GET /api/v1/instructors` and `/{id}` return only the instructors with an ACTIVE `instructor_ficha_assignment` to the learner's ficha (taken from the learner's active enrollment, not from a claim), as `InstructorSummary` (`id`, `full_name`, `first_name`, `last_name`); any other instructor answers 404; the `document_number` filter answers an empty page so a hidden attribute cannot be probed.
+* **Closed to the learner (403):** contracts, areas and competencies (`InstructorViewerAccess.requireVisible` refuses the learner scope) and `GET /instructors/{id}/availability-exceptions` (guard `InstructorAuth.canViewDetails()` instead of the bare authority); `GET /instructors/{id}/fichas` also answers 403.
+* **Assignment writes:** `ACT_INSTRUCTOR_FICHA_ASSIGN` with `GLOBAL`, or `TRAINING_CENTER` when the center of the ficha (academic-management, `FichaExistencePort.findTrainingCenterId`) equals the `training_center_id` claim and the instructor's current contract is at that center. Another center answers 403 (ficha) or 404 (instructor); unknown ficha 404; duplicate 409.
+* **Verification:** `InstructorFichaAssignmentSecurityTest` (real filter chain, 16 cases), `InstructorFichaAssignmentUseCasesTest` (20 cases) and `InstructorFichaAssignmentPersistenceIT`.
+
 ---
 
 ## 4. Traceability

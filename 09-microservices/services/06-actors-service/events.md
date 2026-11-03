@@ -30,6 +30,8 @@ Consumidores declarados: audit-service y monitoring-service.
 
 actors.instructor.assigned y actors.productive_stage.started siguen descritos como eventos de dominio en la documentación funcional. No se encontró un emisor de esos event_type en el código de actors-service develop. Su producción o retiro requiere decisión de dominio; esta entrega no agrega funcionalidad ni los presenta como publicados.
 
+La asignación instructor → ficha (HU-ACT-033, `POST/DELETE /api/v1/fichas/{fichaId}/instructors`) **no emite evento**: academic-management la lee por `GET /internal/instructors/{id}/fichas`. `actors.instructor.assigned` sigue sin productor hasta que un consumidor (horario, juicios de RAP) lo pida.
+
 ## Eventos consumidos
 
 ### `iam.user.created`

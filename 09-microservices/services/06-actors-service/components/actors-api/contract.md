@@ -61,6 +61,11 @@ sentido fuera de su instructor (guidelines §3).
 | `GET/POST` | `/instructors/{id}/availability-exceptions` | Excepciones de disponibilidad (filtros `from`, `to`) / registrar bloqueo | `ACT_INSTRUCTOR_VIEW` / `ACT_INSTRUCTOR_MANAGE` |
 | `DELETE` | `/instructors/{id}/availability-exceptions/{exception_id}` | Eliminar excepción | `ACT_INSTRUCTOR_MANAGE` |
 | `GET` | `/instructors/{id}/activity-log` | Bitácora funcional (solo lectura, paginación por cursor) | `ACT_INSTRUCTOR_VIEW` |
+| `GET` | `/instructors/{id}/fichas` | Fichas asignadas al instructor (HU-ACT-033); el instructor solo la suya; el aprendiz recibe 403 | `ACT_INSTRUCTOR_VIEW` |
+| `GET/POST` | `/fichas/{fichaId}/instructors` | Instructores de una ficha (con `InstructorSummary`; el aprendiz solo la propia) / asignar instructor (`competency_id` opcional) | `ACT_INSTRUCTOR_VIEW` / `ACT_INSTRUCTOR_FICHA_ASSIGN` |
+| `DELETE` | `/fichas/{fichaId}/instructors/{assignmentId}` | Retirar la asignación (borrado lógico) | `ACT_INSTRUCTOR_FICHA_ASSIGN` |
+
+`GET /instructors` y `GET /instructors/{id}` devuelven `InstructorSummary` (sin correo, teléfono ni documento) al aprendiz, y solo para los instructores asignados a su ficha.
 
 Registrar o eliminar una excepción de disponibilidad dispara el evento
 `actors.instructor.availability_changed` (insumo del motor de horarios).

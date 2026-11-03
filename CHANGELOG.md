@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added — Coordinator-managed instructor-to-ficha assignment (HU-ACT-033, docs#498)
+
+- Owner decision 2026-11-03: the instructor-to-ficha assignment lives in actors-service and is managed by the coordinator. It answers the DoR source question of HU-ACT-031 (docs#419, RAP judgments), which stays about judgments.
+- `07-api/contracts/openapi/actors.yaml`: `GET/POST /fichas/{fichaId}/instructors`, `DELETE /fichas/{fichaId}/instructors/{assignmentId}`, `GET /instructors/{id}/fichas`, schemas `InstructorFichaAssignment` and `InstructorSummary` (no email, phone or document); `GET /instructors` and `/{id}` document the learner view
+- `09-microservices/services/01-iam-service/rbac-design.md`: new feature `ACT_INSTRUCTOR_FICHA_ASSIGN` (SYSTEM_ADMIN GLOBAL, CENTER_DIRECTOR and COORDINATOR TRAINING_CENTER); `LEARNER` gets `ACT_INSTRUCTOR_VIEW` at `OWN_FICHA_AS_LEARNER`, replacing the "pending until HU-ACT-031" note
+- `09-microservices/services/06-actors-service/`: `data-model.md` (`instructor_ficha_assignment`), `decisions.md` (14), `security.md` (SEC-ACT-06), `events.md` (no event emitted), `runbook.md`, `README.md`, `components/actors-api/contract.md`
+- `06-data/data-dictionary.md`, `04-requirements/user-stories.md` and `traceability-matrix.md`
+- Implementation PRs: shared-contracts, actors-db, iam-db, actors-service and actors-mfe (see the HU)
+
 ### Changed - Role-based Home and "Ambientes" menu label (HU-SHELL-018)
 
 - `12-ux-ui/visual-spec.md` section 4.3 (new): Home "/" is a compact per-role summary (instructor, coordinator, learner, system admin) built only from existing scheduling and iam endpoints, gated by feature; the remote grid remains only in mock-registry development

@@ -137,6 +137,25 @@ LIMIT 3;
 
 ---
 
+### Asignar o retirar un instructor de una ficha (HU-ACT-033)
+
+Lo hace el coordinador en `actors-mfe` («Instructores por ficha» o pestaña «Fichas» del instructor) o por API
+(`POST /api/v1/fichas/{fichaId}/instructors`, `DELETE /api/v1/fichas/{fichaId}/instructors/{assignmentId}`).
+Retirar es borrado lógico: la fila queda con `is_active = false` y `deleted_at`.
+
+```sql
+-- Asignaciones activas de una ficha
+SELECT id, instructor_id, competency_id, created_at
+FROM actors_instructors.instructor_ficha_assignment
+WHERE ficha_id = '<FICHA_UUID>' AND is_active = true AND deleted_at IS NULL;
+```
+
+Si `academic-management` no muestra fichas a un instructor, revisar primero que tenga una asignación activa y
+que el usuario haya vuelto a iniciar sesión (los features del token cambian con `iam-db` 016). Requiere aplicar
+Liquibase de `actors-db` antes de desplegar el servicio.
+
+---
+
 ### Reactivar un instructor desactivado
 
 Usar cuando un instructor fue marcado inactivo por error o cuando regresa al servicio activo tras una ausencia.

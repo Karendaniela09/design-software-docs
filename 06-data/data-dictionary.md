@@ -48,6 +48,16 @@ Estado: `outbox` ya existe en `develop`; `processed_event` está en el PR citado
 
 Estado: changeset publicado en `design-software-academic-management-db` [PR #135](https://github.com/code-sena/design-software-academic-management-db/pull/135), pendiente de revisión y merge a develop. El índice global no duplica las definiciones: el modelo del servicio contiene el detalle, el SQL y el rollback.
 
+## Actualización HU-ACT-033 de Actors — asignación instructor → ficha — 2026-11-03
+
+| Objeto | Tipo / columnas principales | Changeset | Propósito y fuente canónica |
+|---|---|---|---|
+| `actors_instructors.instructor_ficha_assignment` | `instructor_id`, `ficha_id` (UUID sin FK entre BD), `competency_id` (UUID opcional sin FK) y auditoría ADR-004 con borrado lógico | `hu-act-033-instructor-ficha-assignment-table-001` (03_tables) | Asignación administrativa del instructor a una ficha que gestiona el coordinador; [modelo del servicio](../09-microservices/services/06-actors-service/data-model.md) |
+| `actors_instructors.instructor_ficha_assignment`: constraints | PK; FK `instructor_id` → `instructor` con `ON DELETE RESTRICT` | `hu-act-033-instructor-ficha-assignment-constraints-001` (04_alter) | Borrado lógico, sin cascada; `ficha_id` y `competency_id` no llevan FK (otro servicio) |
+| `actors_instructors.instructor_ficha_assignment`: índices | `uq_instructor_ficha_assignment_active` (único parcial), `ix_instructor_ficha_assignment_ficha`, `ix_instructor_ficha_assignment_instructor` | `hu-act-033-instructor-ficha-assignment-indexes-001` (10_indexes) | Una asignación activa por instructor, ficha y competencia; consultas por ficha y por instructor |
+| Semilla sintética (`dev,qa`) | fila `5e000000-...-0000000000f5`: instructor `...00b1` en ficha `...00c6` | `hu-act-033-seed-synthetic-instructor-ficha-assignment-001` (02_dml/04_patches) | Dato de prueba; no va a staging ni a main |
+| `rbac_catalog.feature` `ACT_INSTRUCTOR_FICHA_ASSIGN` + grants | feature WRITE de `MOD_ACTORS`; SYSTEM_ADMIN GLOBAL, CENTER_DIRECTOR y COORDINATOR TRAINING_CENTER; LEARNER recibe `ACT_INSTRUCTOR_VIEW` `OWN_FICHA_AS_LEARNER` | `hu-act-033-instructor-ficha-assignment-016` (iam-db 02_dml/00_inserts) | [rbac-design.md](../09-microservices/services/01-iam-service/rbac-design.md) |
+
 ## Actualización HU-ACAD-11 de Actors — juicio evaluativo por RAP — 2026-10-24
 
 | Objeto | Tipo / columnas principales | Changeset | Propósito y fuente canónica |
