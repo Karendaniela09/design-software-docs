@@ -45,7 +45,7 @@ curl -sf http://actors-service:8006/health/db | jq .
 | `ACTORS_IAM_QUEUE` / `ACTORS_IAM_DLX` / `ACTORS_IAM_DLQ` | Cola de entrada, exchange de mensajes fallidos y cola de mensajes fallidos del consumidor de IAM | `actors-service.iam` / `actors-iam-dlx` / `actors-events.dlq` |
 | `JWT_SECRET` | Clave de verificación de tokens JWT | (secreto) |
 | `ACTORS_INTERNAL_IAM_CLIENT_CN` | CN(s) del certificado cliente mTLS autorizados a llamar `GET /internal/learners/by-user/**` (lista separada por comas, `[A-Za-z0-9._-]+`). Se valida al arrancar | `iam-api` (defecto) |
-| `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` | CN(s) autorizados a llamar las rutas internas de fichas (`/internal/{instructors,learners}/{id}/fichas`, `/internal/fichas/{id}/active-learners/count`, `/internal/fichas/{id}/rap-assessments/coverage`). Se valida al arrancar | `academic-api` (defecto) |
+| `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` | CN(s) autorizados a llamar las rutas internas de fichas (`/internal/{instructors,learners}/{id}/fichas`, `GET /internal/fichas/{id}/active-learners/count`, `POST /internal/fichas/{id}/rap-assessments/coverage`). Se valida al arrancar | `academic-api` (defecto) |
 | `PORT` | Puerto de escucha del servicio | `8006` |
 | `LOG_LEVEL` | Nivel de logging | `info` |
 | `ALERT_WEBHOOK_URL` | Webhook para alertas operativas | `https://hooks.slack.com/...` |

@@ -91,7 +91,7 @@ contrato de autorización que consumen los servicios downstream): `sid` (session
 `/auth/logout` identifique la sesión a revocar), `email`, `name`.
 
 `ficha_id` es un claim contractual de integración entre IAM y los consumidores autorizados. IAM
-lo obtiene de Actors mediante el endpoint interno protegido por mTLS y lo incluye únicamente en
+lo obtiene de Actors mediante el endpoint interno protegido por mTLS (ver [security.md §3.5](../09-microservices/services/06-actors-service/security.md#35-internal-mtls-design-hu-act-492)) y lo incluye únicamente en
 JWT emitidos para perfiles `LEARNER`. El valor siempre representa el UUID de la ficha activa
 resuelta para el usuario; ante ausencia de ficha, perfil inexistente o fallo controlado de Actors,
 el login puede continuar, pero el JWT no contiene `ficha_id`. Scheduling consume este claim del

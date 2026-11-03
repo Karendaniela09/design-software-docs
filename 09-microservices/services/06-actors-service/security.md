@@ -46,7 +46,7 @@ flowchart TD
     User -->|"1. HTTPS / Bearer JWT"| Gateway
     Gateway -->|"2. Forward with Authorization header"| Filters
     Filters -->|"3. Local cryptographic RS256 verification via JWKS"| IAM
-    IAM -.->|"4. Internal sync call with X.509 client cert (CN=iam-service)"| Filters
+    IAM -.->|"4. Internal sync call with X.509 client cert (CN allow-list per caller: iam-api / academic-api)"| Filters
     Filters -->|"5. Populated SecurityContext (Authorities & Claims)"| Controllers
     Controllers -->|"6. Invokes domain use cases"| Domain
     Domain -->|"7. HTTP Client (ACADEMIC_BASE_URL)"| AcademicService
@@ -134,7 +134,7 @@ During the security audit and automated test suite creation, the following vulne
 3. Path in no family, or certificate subject not in that family's allow-list: `403 MTLS_CLIENT_NOT_ALLOWED` (fail closed).
 4. If the family authenticates, the certificate becomes the authentication and the family authority is granted; the chain then requires that authority. If it does not authenticate, the filter is only an additional gate and the request still needs its own Bearer JWT.
 
-Both errors use the standard envelope `{ error_code, message, trace_id }`. The codes are registered in `design-software-shared-contracts` (`errors/error-codes.yaml`).
+Both errors use the shared `Error` schema of `openapi/_shared.yaml` (`ErrorResponse.of(code, message)`): `{ "error": { "code", "message", "trace_id" } }`. The tests read it with `jsonPath("$.error.code")`. The codes are registered in `design-software-shared-contracts` (`errors/error-codes.yaml`).
 
 **Allow-list per caller and path family.**
 
@@ -142,7 +142,7 @@ Both errors use the standard envelope `{ error_code, message, trace_id }`. The c
 |---|---|---|---|---|
 | `iam` | `GET /internal/learners/by-user/**` | `ACTORS_INTERNAL_IAM_CLIENT_CN` = `iam-api` | yes | `ACTORS_INTERNAL_IAM` |
 | `academic-ownership` | `GET /internal/instructors/{id}/fichas`, `GET /internal/learners/{id}/fichas` | `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` = `academic-api` | yes | `ACTORS_INTERNAL_ACADEMIC` |
-| `academic-fichas` | `GET /internal/fichas/{id}/active-learners/count`, `/internal/fichas/{id}/rap-assessments/coverage` | `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` = `academic-api` | no (keeps the M2M Bearer JWT, ADR-030) | none from the filter |
+| `academic-fichas` | `GET /internal/fichas/{id}/active-learners/count`, `POST /internal/fichas/{id}/rap-assessments/coverage` | `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` = `academic-api` | no (keeps the M2M Bearer JWT, ADR-030) | none from the filter |
 
 Consequence: `iam-api` cannot reach the Academic families and `academic-api` cannot reach the IAM family, even though both hold a valid certificate from the same CA. Any other `/internal/**` path is refused until a family is added.
 
@@ -157,12 +157,12 @@ The lists are validated at startup: an invalid CN or an empty list aborts the bo
 
 **Failure codes.**
 
-| HTTP | `error_code` | Cause | First check |
+| HTTP | `error.code` | Cause | First check |
 |---|---|---|---|
 | 401 | `MTLS_CERTIFICATE_REQUIRED` | No client certificate reached the filter on `/internal/**` | The caller's key store (`*_ACTORS_MTLS_KEY_STORE`) is mounted and loaded; the call goes to `https://actors-api:8080`, not through a proxy that terminates TLS |
 | 403 | `MTLS_CLIENT_NOT_ALLOWED` | The certificate CN is not in the family allow-list, or the path belongs to no family | The CN of the caller's certificate vs the env var of the family; the path spelling |
 
-**Compose and infra.** The names live in `design-software-docker-infra`: `docker-compose.yml` (service `actors-api`) passes `ACTORS_INTERNAL_IAM_CLIENT_CN` and `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` with the defaults above; the callers receive `IAM_ACTORS_MTLS_KEY_STORE[_PASSWORD]` / `ACADEMIC_ACTORS_MTLS_KEY_STORE[_PASSWORD]` (their client identity) and `IAM_ACTORS_MTLS_TRUST_STORE[_PASSWORD]` (CA-only trust store, shared), which compose maps onto `ACTORS_MTLS_*`; the server side uses `ACTORS_TLS_ENABLED`, `ACTORS_TLS_KEY_STORE[_PASSWORD]`, `ACTORS_TLS_TRUST_STORE[_PASSWORD]` and `ACTORS_TLS_CLIENT_AUTH`. Example values are in `.env.example` and `deploy/vps/.env.dev.example`; the per-environment start procedure is `docs/actors-mtls.md` in that repo. The same artifact and the same variable names are used in dev, qa, staging and main; only the secrets and certificates differ.
+**Compose and infra.** The names live in `design-software-docker-infra`: `docker-compose.yml` (service `actors-api`) passes `ACTORS_INTERNAL_IAM_CLIENT_CN` and `ACTORS_INTERNAL_ACADEMIC_CLIENT_CN` with the defaults above; `iam-api` receives `IAM_ACTORS_MTLS_KEY_STORE[_PASSWORD]` and `IAM_ACTORS_MTLS_TRUST_STORE[_PASSWORD]` under those same names, while `academic-api` receives the `ACADEMIC_ACTORS_MTLS_*` values (and the shared CA-only trust store) which compose maps onto `ACTORS_MTLS_*`; the server side uses `ACTORS_TLS_ENABLED`, `ACTORS_TLS_KEY_STORE[_PASSWORD]`, `ACTORS_TLS_TRUST_STORE[_PASSWORD]` and `ACTORS_TLS_CLIENT_AUTH`. Example values are in `.env.example` and `deploy/vps/.env.dev.example`; the per-environment start procedure is `docs/actors-mtls.md` in that repo. The same artifact and the same variable names are used in dev, qa, staging and main; only the secrets and certificates differ.
 
 **Certificate rotation.** Certificates (`actors-server`, `iam-client` with CN `iam-api`, `academic-client` with CN `academic-api`) are issued by `deploy/vps/generate-secrets.sh` from an internal CA, 825 days each, PKCS#12 stores with passwords kept in the secrets file (never printed or committed). The script keeps any store that already exists, so rotation means removing the store to renew and re-running it:
 
