@@ -388,3 +388,17 @@ Los IDs y criterios de estas historias se mantienen en Project #3. Este indice e
 | E5 | "Inicio" siempre visible; ninguna ruta cambia; el ítem activo expone `aria-current="page"`; el drawer móvil cumple el contrato de accesibilidad de visual-spec §4.1 |
 
 **Razón:** con los grants reales y el filtro por módulo, un COORDINATOR veía 11 ítems (incluidos los dos "Mi …" ajenos) y un APRENDIZ veía "Horarios", "Parametrización" y "Datos de referencia". `SCH_VIEW_OWN` lo tienen también los roles de alcance GLOBAL o TRAINING_CENTER, así que el feature solo no basta: los ítems personales usan `actor_type`. `MeResponse` ya trae `features` y `actor_type`; no cambia el contrato. El filtro es solo de presentación: el backend sigue autorizando cada endpoint y cada MFE conserva sus guardas. Refina el Scenario 2 de HU-SHELL-018 (docs#490). Fuera de alcance: ítems o rutas nuevas, renombrar "Disponibilidad" (decisión abierta del dueño), tokens y anatomía de página.
+
+## HU-SHELL-018 — Inicio por rol (actualización 2026-11-02)
+
+> Épica: EP-E2E-DEV | Issue: [docs#490](https://github.com/code-sena/design-software-docs/issues/490) | Dominio: shell | Estado: Backlog (docs primero).
+
+Decisión del dueño (2026-11-02) que cierra el DoR "contenido de Inicio acordado": `/` deja de ser el panel de remotes y pasa a ser un resumen compacto por rol, definido en [visual-spec.md](../12-ux-ui/visual-spec.md) §4.3.
+
+| Criterio | Aceptación exigida |
+|---|---|
+| E1 | INSTRUCTOR ve sus sesiones de hoy y las horas de la semana; COORDINATOR ve horarios por estado y conflictos abiertos; APRENDIZ ve su próxima sesión y su ficha; SYSTEM_ADMIN ve el total de usuarios y accesos rápidos |
+| E2 | Solo se pinta la sección cuyo feature concede el usuario; ninguna sección muestra una caja 403; nombres vía `entityNames`, nunca ids |
+| E3 | Sin cambio de contrato: solo endpoints existentes de scheduling e iam. "Fichas sin horario" y "estado de servicios" quedan fuera por no haber endpoint barato |
+| E4 | La cuadrícula de remotes solo se alcanza con el registro mock de desarrollo |
+| E5 | El ítem de menú "Disponibilidad" se renombra "Ambientes" (mismo id y ruta) |
