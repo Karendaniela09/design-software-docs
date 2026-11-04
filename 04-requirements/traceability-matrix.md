@@ -250,3 +250,11 @@ La trazabilidad se completa con [casos y evidencia](../11-quality/reference-data
 | Entrega | Requisitos | Servicio / repositorios | Tracker | Decisión | Gate actual |
 |---|---|---|---|---|---|
 | HU-SHELL-019, EP-E2E-DEV | RF-IAM-01 (autorización por feature); menú por rol | web-shell, frontend-platform (sin cambio de contrato IAM) | [docs#493](https://github.com/code-sena/design-software-docs/issues/493) | [visual-spec.md](../12-ux-ui/visual-spec.md) §4; reemplaza el criterio E2 de HU-001 | Backlog; docs primero, código después |
+
+
+
+## Trazabilidad HU-SHELL-018
+
+| Entrega | Requisitos | Servicio / repositorios | Tracker | Decisión | Gate actual |
+|---|---|---|---|---|---|
+| HU-SHELL-018, EP-E2E-DEV | WCAG 2.1 AA (4.1.2); Home por rol; menú filtrado por `/auth/me` (INC-12, INC-17, INC-18) | web-shell (#44, #45, #47), docs (#499) | [docs#490](https://github.com/code-sena/design-software-docs/issues/490) | [visual-spec.md](../12-ux-ui/visual-spec.md) §4.3 | Verificado en develop y DEV VPS (5 roles, axe 0 violaciones); pendiente aprobación D1 y Done·Dev |
